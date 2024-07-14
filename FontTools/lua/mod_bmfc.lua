@@ -18,18 +18,22 @@ disableBoxChars=1
 outputInvalidCharGlyph=0
 dontIncludeKerningPairs=1
 useHinting=0
-renderFromOutline=0
-useClearType=1
+renderFromOutline=1
+useClearType=0
+autoFitNumPages=0
+autoFitFontSizeMin=0
+autoFitFontSizeMax=0
 
 # character alignment
-paddingDown=0
-paddingUp=0
-paddingRight=0
-paddingLeft=0
-spacingHoriz=2
-spacingVert=2
+paddingDown=20
+paddingUp=20
+paddingRight=20
+paddingLeft=20
+spacingHoriz=5
+spacingVert=5
 useFixedHeight=1
 forceZero=0
+widthPaddingFactor=0.00
 
 # output file
 outWidth=%d
