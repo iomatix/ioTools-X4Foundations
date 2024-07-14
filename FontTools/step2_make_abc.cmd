@@ -7,7 +7,7 @@ rem clear old results
 if exist fonts_new\*.abc del /q /f fonts_new\*.abc
 
 rem convert font descriptors
-%LUA% lua\generate_abc.lua
+%LUA% lua\generate_abc_x4.lua
 echo.
 echo [LOG OK] font descriptors are ready.
 echo.
