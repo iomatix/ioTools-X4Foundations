@@ -1,0 +1,55 @@
+# AngelCode Bitmap Font Generator configuration file
+fileVersion=1
+
+# font settings
+fontName=Liberation Sans Narrow
+fontFile=
+charSet=0
+fontSize=212
+aa=1
+scaleH=100
+useSmoothing=1
+isBold=0
+isItalic=0
+useUnicode=1
+disableBoxChars=1
+outputInvalidCharGlyph=0
+dontIncludeKerningPairs=1
+useHinting=0
+renderFromOutline=1
+useClearType=0
+
+# character alignment
+paddingDown=20
+paddingUp=20
+paddingRight=20
+paddingLeft=20
+spacingHoriz=5
+spacingVert=5
+useFixedHeight=1
+forceZero=0
+
+# output file
+outWidth=4096
+outHeight=2048
+outBitDepth=8
+fontDescFormat=0
+fourChnlPacked=0
+textureFormat=png
+textureCompression=0
+alphaChnl=1
+redChnl=0
+greenChnl=0
+blueChnl=0
+invA=0
+invR=0
+invG=0
+invB=0
+
+# outline
+outlineThickness=0
+
+# selected chars
+chars=32-126,164,169,174,1025,1040-1103,1105
+
+# imported icon images

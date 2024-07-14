@@ -107,7 +107,6 @@ a.datatype {
 
 .card-container {
     max-width: 60%;
-    /* Adjust the width as desired (50-60%) */
     margin: 0 auto;
     /* Center horizontally */
     padding: 20px;
@@ -119,7 +118,6 @@ a.datatype {
 
 .menu-container {
     max-width: 60%;
-    /* Adjust the width as desired (50-60%) */
     margin: 0 auto;
     /* Center horizontally */
     padding: 20px;
