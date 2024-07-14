@@ -1,0 +1,152 @@
+/* Additional custom styles for form elements */
+#expression,
+#sort,
+#show_md,
+#show_ai {
+    margin-bottom: 10px;
+}
+
+/* Custom styles */
+body {
+    background-color: #000;
+    /* Dark background color */
+    color: #fff;
+    /* Light font color */
+    font-family: "Audiowide", sans-serif;
+    /* Modern sci-fi font */
+}
+
+h1 {
+    font-size: 16pt;
+    font-weight: bold;
+    text-align: left;
+}
+
+h2 {
+    font-size: 13pt;
+    font-weight: bold;
+    text-align: left;
+}
+
+h3 {
+    font-size: 11pt;
+    font-weight: bold;
+    text-align: left;
+}
+
+p {
+    text-align: left;
+}
+
+table.base {
+    width: 95%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    border-style: solid;
+    border-width: 2px;
+    background-color: #2b2b3f;
+    text-align: left;
+    font-size: 11pt;
+}
+
+table.properties {
+    width: 95%;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    margin-left: auto;
+    margin-right: auto;
+    border-style: solid;
+    border-width: 1px;
+    background-color: #2e2e48;
+    text-align: left;
+    font-family: Verdana, arial, sans-serif;
+    font-size: 9pt;
+}
+
+td {
+    vertical-align: top;
+    color: rgb(238, 228, 228);
+}
+
+/* Apply background color to even rows */
+tr:nth-child(even) {
+    background-color: #343452;
+}
+
+/* Apply background color to odd rows */
+tr:nth-child(odd) {
+    background-color: #26263e;
+}
+
+.propertyname {
+    color: rgb(200, 173, 64);
+}
+
+.comment {
+    font-style: italic;
+    font-weight: normal;
+}
+
+a.datatype {
+    color: rgb(81, 158, 225);
+}
+
+.importfailure {
+    color: rgb(145, 47, 82);
+}
+
+.scriptspecific {
+    color: rgb(145, 47, 82);
+}
+
+.pseudodatatype {
+    color: rgb(145, 47, 82);
+}
+
+.card-container {
+    max-width: 60%;
+    /* Adjust the width as desired (50-60%) */
+    margin: 0 auto;
+    /* Center horizontally */
+    padding: 20px;
+    background-color: #111;
+    /* Dark card background color */
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.menu-container {
+    max-width: 60%;
+    /* Adjust the width as desired (50-60%) */
+    margin: 0 auto;
+    /* Center horizontally */
+    padding: 20px;
+    background-color: #111;
+    /* Dark card background color */
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.menu-button {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    text-align: center;
+    background-color: #17a2b8;
+    /* Dark button background color */
+    color: #fff;
+    /* Light button font color */
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+    /* Remove underline */
+}
+
+.menu-button:hover {
+    background-color: #0f7a87;
+    /* Darker shade on hover */
+}

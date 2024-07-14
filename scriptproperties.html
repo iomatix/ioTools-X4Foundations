@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Include Bootstrap CSS -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="styles.css">
+
+	<title>Script Property Documentation</title>
+
+	<title>Script Property Documentation</title>
+	<!-- <link rel="stylesheet" type="text/css" href="libraries/scriptproperties.css"/> The Egosoft CSS -->
+	<!-- jQuery UI for Autocomplete -->
+	<!--
+		<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/smoothness/jquery-ui.css" />
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+		-->
+
+	<script type="text/javascript">
+		var xmlDoc = null;
+		var xslDoc = null;
+		var textdbDoc = null;
+		var updateGeneration = 0; 			// Current number of update() calls, used to invalidate delayed updates
+		var lastTriggeredGeneration = 0;	// Generation of last successful update() trigger
+		var expressionempty = true;			// Store whether expression input is empty
+		var expressiondot = false; 			// Store whether expression input ends with dot
+
+		function initAutoComplete() {
+			if (window.$) {
+				$("#expression").autocomplete({ source: [] });
+			}
+		}
+
+		function setAutoCompleteSource(source) {
+			if (window.$) {
+				$("#expression").autocomplete("option", "source", source);
+			}
+		}
+
+		function loadXMLFile(filename) {
+			var fullpath = "libraries/" + filename;
+			if (!window.ActiveXObject) {
+				// Normal browser
+				var xhttp = new XMLHttpRequest();
+				xhttp.open("GET", fullpath, false);
+				try {
+					xhttp.send();
+				} catch (e) {
+					//alert(e);
+					return null;
+				}
+				return xhttp.responseXML;
+			}
+			else {
+				// Internet Explorer
+				var xml = new ActiveXObject("MSXML2.FreeThreadedDOMDocument.6.0");
+				// Add namespace prefix, in case the file is a schema
+				xml.setProperty("SelectionNamespaces", "xmlns:xs='http://www.w3.org/2001/XMLSchema'");
+				xml.setProperty("SelectionLanguage", "XPath");
+				xml.async = false;
+				try {
+					xml.load(fullpath);
+				} catch (e) {
+					return null;
+				}
+				if (!xml.documentElement) {
+					return null;
+				}
+				return xml;
+			}
+		}
+
+		function evaluateXPath(node, expression) {
+			if (window.ActiveXObject) {
+				// Internet Explorer
+				return node.selectNodes(expression);
+			}
+			else if (window.XPathEvaluator) {
+				// Mozilla
+				var xpe = new XPathEvaluator();
+				var nsresolver = xpe.createNSResolver((node.ownerDocument == null ? node : node.ownerDocument).documentElement);
+				var iterator = xpe.evaluate(expression, node, nsresolver, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+				var result = [];
+				var cur;
+				while ((cur = iterator.iterateNext()) != null) {
+					result.push(cur);
+				}
+				return result;
+			}
+			else {
+				// Unsupported
+			}
+		}
+
+		function convertFormatString(str) {
+			if (textdbDoc) {
+				var re = /\{([0-9]+)\,([0-9]+)\}/;
+				while (true) {
+					var result = re.exec(str);
+					if (!result || result.length < 3) {
+						return str;
+					}
+					var pageid = result[1];
+					var textid = result[2];
+					var textnodes = evaluateXPath(textdbDoc.documentElement, "/language/page[@id=" + pageid + "]/t[@id=" + textid + "]/text()");
+					var subststr = ((textnodes && textnodes.length) ? textnodes[0].data : ("ReadText" + pageid + "-" + textid));
+					str = str.replace(re, subststr);
+				}
+			}
+			return str;
+		}
+
+		function importExternalProperties() {
+			var loadedfiles = new Object(); // Store loaded files here, so we don't import the same file twice
+			var textdbdef = evaluateXPath(xmlDoc.documentElement, "/*/textdb");
+			if (textdbdef && textdbdef.length) {
+				var textdbfilename = textdbdef[0].getAttribute("source");
+				if (textdbfilename) {
+					textdbDoc = loadXMLFile(textdbfilename);
+				}
+			}
+			var foundnodes = evaluateXPath(xmlDoc.documentElement, "/*/keyword/import/property");
+			for (var i = 0; i < foundnodes.length; ++i) {
+				var propertynode = foundnodes[i];
+				var importnode = propertynode.parentNode;
+				var keywordnode = importnode.parentNode;
+				var sourcefile = importnode.getAttribute("source");
+				var selectexp = importnode.getAttribute("select");
+				var nameexp = propertynode.getAttribute("name");
+				var resultexp = propertynode.getAttribute("result");
+				var type = propertynode.getAttribute("type");
+				var ignoreprefix = propertynode.getAttribute("ignoreprefix");
+				if (sourcefile && selectexp && nameexp) {
+					var importedxml = loadedfiles[sourcefile];
+					if (!importedxml) {
+						importedxml = loadXMLFile(sourcefile);
+						loadedfiles[sourcefile] = importedxml;
+					}
+					if (importedxml) {
+						var importedtypes = evaluateXPath(importedxml.documentElement, selectexp);
+						for (var j = 0; j < importedtypes.length; ++j) {
+							var curtype = importedtypes[j];
+							var namenodes = evaluateXPath(curtype, nameexp);
+							if (namenodes && namenodes.length > 0 && (namenodes[0].data || namenodes[0].nodeValue)) {
+								var newproperty = xmlDoc.createElement("property");
+								// Set property name
+								var name = String(namenodes[0].data || namenodes[0].nodeValue);
+								if (ignoreprefix && (ignoreprefix == "1" || ignoreprefix == "true") && name.lastIndexOf(".") >= 0) {
+									name = name.substr(name.lastIndexOf(".") + 1);
+								}
+								newproperty.setAttribute("name", name);
+								// Set property result (either from text node or attribute value)
+								if (resultexp) {
+									var resultnodes = evaluateXPath(curtype, resultexp);
+									if (resultnodes && resultnodes.length > 0) {
+										newproperty.setAttribute("result", convertFormatString(resultnodes[0].data || resultnodes[0].nodeValue));
+									}
+								}
+								// Set property type
+								if (type) {
+									newproperty.setAttribute("type", type);
+								}
+								keywordnode.appendChild(newproperty);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		function init() {
+			initAutoComplete();
+			xmlDoc = loadXMLFile("scriptproperties.xml");
+			xslDoc = loadXMLFile("scriptproperties.xsl");
+			importExternalProperties();
+			forceUpdate();
+			document.getElementById("expression").focus();
+		}
+
+		function forceUpdate() {
+			var divnode = document.getElementById("divXMLDisplay");
+			var expression = document.getElementById("expression").value;
+			var show_md = document.getElementById("show_md").checked ? 1 : 0;
+			var show_ai = document.getElementById("show_ai").checked ? 2 : 0;
+			var scripttype = ["", "md", "ai", "any"][show_md + show_ai];
+			var sort = document.getElementById("sort").checked;
+			var xsltProcessor;
+
+			if (document.implementation && document.implementation.createDocument) {
+				// Normal browsers
+				xsltProcessor = new XSLTProcessor();
+				xsltProcessor.importStylesheet(xslDoc);
+				xsltProcessor.setParameter(null, "expression", expression);
+				xsltProcessor.setParameter(null, "scripttype", scripttype);
+				xsltProcessor.setParameter(null, "sort", sort);
+				var resultDoc = xsltProcessor.transformToFragment(xmlDoc, document);
+				if (divnode.hasChildNodes()) {
+					divnode.removeChild(divnode.firstChild)
+				}
+				divnode.appendChild(resultDoc);
+			}
+			else if (window.ActiveXObject) {
+				// Internet Explorer
+				var template = new ActiveXObject("MSXML2.XSLTemplate.6.0");
+				template.stylesheet = xslDoc;
+				xsltProcessor = template.createProcessor();
+				xsltProcessor.input = xmlDoc;
+				xsltProcessor.addParameter("expression", expression);
+				xsltProcessor.addParameter("scripttype", scripttype);
+				xsltProcessor.addParameter("sort", sort);
+				xsltProcessor.transform();
+				divnode.innerHTML = xsltProcessor.output;
+			}
+		}
+
+		function update(delay) {
+			if (!xmlDoc) return;
+			// Check if expression is empty or ends with dot
+			var expression = document.getElementById("expression").value;
+			var expressionempty2 = (expression.length == 0);
+			var expressiondot2 = (expression.length > 0 && expression.substr(expression.length - 1) == '.');
+			if ((!expressionempty && expressionempty2) || (!expressiondot && expressiondot2)) {
+				delay = 0;		// Update immediately if expression was cleared or dot was entered
+			}
+			expressiondot = expressiondot2;
+			expressionempty = expressionempty2;
+			// Invalidate all pending delayed updates
+			++updateGeneration;
+			if (delay) {
+				window.setTimeout("if (lastTriggeredGeneration < " + updateGeneration + ") { update(); }", delay);
+				return;
+			}
+			lastTriggeredGeneration = updateGeneration;
+			forceUpdate();
+		}
+	</script>
+</head>
+
+<body onload="init()">
+	<div class="container p-2 mt-5 mb-10 card-container">
+		<h1 class="text-center">Script Editor</h1>
+		<a href="index.html" class="menu-button">Go Back</a>
+		<noscript>
+			JavaScript required
+		</noscript>
+		<h1 id="h1TableName"></h1>
+		<a id="downloadDummy" href="#" style="display: none"></a>
+		<p id="pButtons"></p>
+		<div id="divSettings"></div>
+		<div id="divFilters"></div>
+		<div id="divTable"></div>
+	</div>
+	<div class="container mt-10 p-2 card-container">
+		<form id="f" action="javascript:update()">
+			<label for="expression">Expression:</label>
+			<input id="expression" class="form-control" size="50" onkeyup="update(500)" onblur="update()" />
+			<div class="form-check">
+				<input id="sort" class="form-check-input" type="checkbox" onclick="update()" />
+				<label class="form-check-label" for="sort">Sort properties</label>
+			</div>
+			<div class="form-check">
+				<input id="show_md" class="form-check-input" type="checkbox" onclick="update()" checked="checked" />
+				<label class="form-check-label" for="show_md">Show keywords specific to MD</label>
+			</div>
+			<div class="form-check">
+				<input id="show_ai" class="form-check-input" type="checkbox" onclick="update()" checked="checked" />
+				<label class="form-check-label" for="show_ai">Show keywords specific to AI</label>
+			</div>
+		</form>
+		<noscript>
+			JavaScript required
+		</noscript>
+			<div id="divXMLDisplay"></div>
+	</div>
+
+</body>
+
+</html>
