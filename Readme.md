@@ -10,3 +10,11 @@ This repository contains tools, scripts, mods and other stuff to make a life eas
 - xrcattool_unpack_01_09.bat: Tool to unpack catalogs 01 - 09 for the game X4 Foundations. Scripts will extract all catalogs into a single folder.
 - xrcattool_unpack_xyz_dlc: Tool to unpack catalogs of DLC for the game X4 Foundations. Scripts will extract all catalogs into a single folder.
 Currently supported: Boron, Pirate, Split, Terran, Timelines Catalogs.
+
+### WebTool - Simple WebApp providing modding essentials.
+
+- WebApp service starts via python script so you need to have Python 3 installed on your system in order for this tool to work properly.
+- Support for scriptproperties.html so you can explore MD documentation.
+- Support for jobeditor.html. (which right now does nothing special).
+- Custom styles.css making WebApp look more modern and user friendly. (and also less acrid for human eyes)
+- More features will be added in the future, according to my or community demands.
