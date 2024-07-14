@@ -1,6 +1,6 @@
 # ioTools - WebTool
 
-This directory contains simple WebApp tool. Right now it's only function is browsing documentation of the MD and AI scripting. More features will be added in the future, according to my or community demands.
+This directory contains simple WebApp tool. Right now its only function is browsing documentation of the MD and AI scripting. More features will be added in the future, according to my or community demands.
 
 ## How to use?
 
