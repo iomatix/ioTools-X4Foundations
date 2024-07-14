@@ -1,10 +1,20 @@
 # ioTools - XRCatTool Scripts
 
-This directory contains automation for unpacking game files.
+This directory contains automation scripts for unpacking game files using XRCatTool.
 
-## How to use?
+## How to Use
 
-Extract scripts to the main X4:Foundations game folder then run xrcattool__setpath.bat with administrator privileges.
-This step is necessary to setup X Tools main executable location to XRCATTOOL_PATH system environment variable. If complited successfully then run desired script from this directory.
+1. **Setup:**
+   - Extract the scripts to the main folder of your X4: Foundations game installation.
 
-By default it is no-brainer. The first script expects that game is installed on same drive as X Tools both via Steam. Script will ask for the path of X Tools but you can leave it empty to use default location ("../X Tools" from the X4:Foundations installation folder).
+2. **Setting up XRCatTool:**
+   - Run `xrcattool__setpath.bat` with administrator privileges.
+   - This step configures the X Tools main executable location to the `XRCATTOOL_PATH` system environment variable.
+   
+3. **Running the Scripts:**
+   - Once the setup is completed successfully, run the desired script from this directory.
+
+### Notes:
+- By default, the setup is straightforward. The initial script assumes that both the game and X Tools are installed on the same drive via Steam.
+- The script will prompt for the X Tools path. You can leave it empty to use the default location (`../X Tools` relative to the X4: Foundations installation folder).
+

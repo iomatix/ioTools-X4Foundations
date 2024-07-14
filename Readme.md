@@ -1,20 +1,44 @@
 # ioTools - Kit
 
-This repository contains tools, scripts, mods and other stuff to make a life easier and improve comfort during modding X4 Foundations. Keep free to use it for your own projects! Enjoy!
+Welcome to ioTools - Kit, a repository designed to enhance the modding experience for X4 Foundations with various tools, scripts, mods, and more. Feel free to use these resources in your own projects!
 
-## Tools:
+## [Nexus Page]()
+## [Releases](./releases)
 
-### XRCatTool - Unpacker for X4 Foundations - Tool to unpack catalogs from the game. Scripts will extract all catalogs into a single folder.
 
-- xrcattool__setpath.bat: Tool to setup XRCATTOOL_PATH system environment variable, which is used by the tool to find executable file of X Tools. You need to run this script before running any other scripts from this category.
-- xrcattool_unpack_01_09.bat: Tool to unpack catalogs 01 - 09 for the game X4 Foundations. Scripts will extract all catalogs into a single folder.
-- xrcattool_unpack_xyz_dlc: Tool to unpack catalogs of DLC for the game X4 Foundations. Scripts will extract all catalogs into a single folder.
-Currently supported: Boron, Pirate, Split, Terran, Timelines Catalogs.
+## Tools Overview:
 
-### WebTool - Simple WebApp providing modding essentials.
+### XRCatTool - Unpacker for X4 Foundations
 
-- WebApp service starts via python script so you need to have Python 3 installed on your system in order for this tool to work properly.
-- Support for scriptproperties.html so you can explore MD documentation.
-- Support for jobeditor.html. (which right now does nothing special).
-- Custom styles.css making WebApp look more modern and user friendly. (and also less acrid for human eyes)
-- More features will be added in the future, according to my or community demands.
+XRCatTool is a tool specifically designed to unpack catalogs from X4 Foundations. It simplifies the process of extracting game data for modding purposes.
+
+- **xrcattool__setpath.bat:**
+  This script sets up the `XRCATTOOL_PATH` system environment variable, essential for locating the X Tools executable required by XRCatTool. Run this script before using any other XRCatTool scripts.
+
+- **xrcattool_unpack_01_09.bat:**
+  Unpacks catalogs 01 - 09 from the base game of X4 Foundations, consolidating all extracted data into a single folder.
+
+- **xrcattool_unpack_xyz_dlc:**
+  Unpacks catalogs from DLCs of X4 Foundations (e.g., Boron, Pirate, Split, Terran, Timelines). This script also consolidates all extracted data into a single folder.
+
+### WebTool - Simple WebApp for Modding Essentials
+
+The WebTool is a straightforward WebApp providing essential tools for modding X4 Foundations.
+
+- **Functionality:**
+  - Requires Python 3 for operation. It supports exploring MD documentation via `scriptproperties.html`.
+  - Includes basic support for `jobeditor.html`.
+  - Custom `styles.css` enhances usability with a modern look.
+
+- **Future Development:**
+  More features will be added based on user and community feedback to further enhance modding capabilities.
+
+## Getting Started
+
+Ensure you have Python 3 installed for the WebTool and follow the setup instructions for XRCatTool to start using these tools effectively.
+
+## Contributions
+
+Contributions and feedback are welcome to improve and expand the capabilities of ioTools - Kit. Feel free to fork the repository and submit pull requests with enhancements or fixes.
+
+Enjoy modding with ioTools - Kit!
