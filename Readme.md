@@ -2,8 +2,8 @@
 
 Welcome to ioTools - Kit, a repository designed to enhance the modding experience for X4 Foundations with various tools, scripts, mods, and more. Feel free to use these resources in your own projects!
 
-## [Nexus Page]()
-## [Releases](./releases)
+- [Nexus Page]()
+- [Releases](./releases)
 
 
 ## Tools Overview:
