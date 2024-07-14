@@ -1,180 +1,150 @@
+-- Lua script to generate .abc file for X4 Foundations from .fnt and config_fonts.lua
 package.path = "./?.lua;./lua/?.lua"
 require("mod_binary_writer")
 require("config_fonts")
 
-local S = arg[1] or 4.0 -- Default scale factor if not provided via command-line argument
-local SF = -164  -- Default fallback character offset
-S = 1.0 / S  -- Scale factor inversion
+-- Function to process character data
+local function process_char_data(fnt_name, S, SF)
+    local r = assert(io.open(fnt_name .. ".fnt", "r"))
 
--- Utility functions for writing binary data
-local function uint16(w, v)
-    w:write(string.char(v % 256, math.floor(v / 256)))
-end
-
-local function sint16(w, v)
-    if v < 0 then v = v + 65536 end
-    w:write(string.char(v % 256, math.floor(v / 256)))
-end
-
-local function uint32(w, v)
-    w:write(string.char(v % 256, math.floor(v / 256) % 256, math.floor(v / 65536) % 256, math.floor(v / 16777216)))
-end
-
-local function float(w, v)
-    local sign = 0
-    if v < 0 then sign = 1; v = -v end
-    local mantissa, exponent = math.frexp(v)
-    if v == 0 then
-        mantissa, exponent = 0, 0
-    else
-        mantissa = (mantissa * 2 - 1) * 2^23
-        exponent = exponent + 126
-    end
-    local b1 = sign * 128 + math.floor(exponent / 2^1)
-    local b2 = (exponent % 2) * 128 + math.floor(mantissa / 2^16)
-    local b3 = math.floor(mantissa / 2^8) % 256
-    local b4 = mantissa % 256
-    w:write(string.char(b4, b3, b2, b1))
-end
-
--- Function to read and parse .fnt file
-local function read_fnt_file(fnt_name)
-    local r = assert(io.open(fnt_name .. ".fnt"))
+    local line = ""
     local t1, t2, t3, t4, t5 = {}, {}, {}, {}, {}
-
-    -- Parses a line of key-value pairs into a table
-    local function parse_line_to_table(line, tbl)
-        for k, v in string.gmatch(line, "(%w+)=(%w+)") do
-            tbl[k] = tonumber(v)
-        end
+    -- Read 1st line
+    line = r:read("*l")
+    for k, v in string.gmatch(line, "(%w+)=(%w+)") do
+        t1[k] = tonumber(v)
     end
 
-    -- Read and parse each of the four header lines
-    parse_line_to_table(r:read("*l"), t1)
-    parse_line_to_table(r:read("*l"), t2)
-    parse_line_to_table(r:read("*l"), t3)
-    parse_line_to_table(r:read("*l"), t4)
+    -- Read 2nd line
+    line = r:read("*l")
+    for k, v in string.gmatch(line, "(%w+)=(%w+)") do
+        t2[k] = tonumber(v)
+    end
 
-    -- Read and parse character data lines
+    -- Read 3rd line
+    line = r:read("*l")
+    for k, v in string.gmatch(line, "(%w+)=(%w+)") do
+        t3[k] = tonumber(v)
+    end
+
+    -- Read 4th line
+    line = r:read("*l")
+    for k, v in string.gmatch(line, "(%w+)=(%w+)") do
+        t4[k] = tonumber(v)
+    end
+
+    -- Read chars
+    local last = 0
     for i = 1, t4.count do
+        line = r:read("*l")
         local t = {}
-        parse_line_to_table(r:read("*l"), t)
+        for k, v in string.gmatch(line, "(%a+)=([-%d]+)") do
+            t[k] = tonumber(v)
+        end
         table.insert(t5, t)
+        last = t.id
+    end
+    r:close()
+
+    print("Total chars:", last)
+    local charIdx = {}
+    for i = 1, last do
+        local s = string.pack("H", 0)
+        table.insert(charIdx, s)
     end
 
-    r:close()
-    return t1, t2, t3, t4, t5
-end
-
--- Function to process character data from the .fnt file
-local function process_char_data(t1, t2, t5, last)
-    local charIdx = {}
     local chars = {}
     local mf = math.floor
-
-    -- Initialize character index table with default values
-    for i = 1, last do
-        table.insert(charIdx, string.char(0, 0))
-    end
-
-    -- Process each character's data
     for k, v in ipairs(t5) do
-        local p = t1.padding or 0
-        local width = (v.width or 0) - p - p
+        local p = t1.padding
+        local w = v.width - p - p
 
-        local x0 = ((v.x or 0) + p) / (t2.scaleW or 1)
-        local y0 = ((v.y or 0) + p) / (t2.scaleH or 1)
+        local x0 = (v.x + p) / t2.scaleW
+        local y0 = (v.y + p) / t2.scaleH
+        local x1 = -1
+        local y1 = -1
 
-        local x1, y1 = -1, -1  -- Placeholder values for x1 and y1
-
-        -- Calculate scaled values for character properties
-        local off = mf(((v.xoffset or 0) + p) * S)
-        local width_scaled = mf(width * S)
-        if width_scaled < 1.0 then width_scaled = 1.0 end
-        local adv = mf((v.xadvance or 0) * S)
+        local off = mf((v.xoffset + p) * S)
+        local width = mf(w * S)
+        if width < 1.0 then width = 1.0 end
+        local adv = mf(v.xadvance * S)
         local id = v.id
 
-        -- Insert processed character data into table
-        table.insert(chars, { x0, y0, x1, y1, off, width_scaled, adv, v.page })
+        table.insert(chars, { x0, y0, x1, y1, off, width, adv, v.page })
 
-        -- Store index of each character by its ID
-        charIdx[id] = string.char(k % 256, math.floor(k / 256))
+        local s = string.pack("H", k)
+        charIdx[id] = s
 
-        -- Find fallback character based on SF value
-        if SF < 0 and id + SF == 0 then
-            SF = k
+        -- find fallback char
+        if SF < 0 then
+            if id + SF == 0 then SF = k end
         end
     end
 
-    return charIdx, chars
-end
-
--- Function to write the .abc file
-local function write_abc_file(fnt_name, t1, t2, last, charIdx, chars)
     local w = io.open(fnt_name .. ".abc", "w+b")
-
-    -- Write header data
-    uint32(w, 9)               -- Version number
-    float(w, (t1.size or 0) * S)      -- Font size (scaled)
-    float(w, 0.0)              -- Outline X (not used)
-    float(w, 0.0)              -- Outline Y (not used)
-    float(w, (t2.lineHeight or 0) * S) -- Line height (scaled)
-    uint32(w, math.floor((t2.base or 0) * S)) -- Base line (scaled)
-    uint32(w, 11)              -- Horizontal spacing
-    uint32(w, 11)              -- Vertical spacing
-    uint32(w, 0)               -- Reserved value
-    uint32(w, (t2.scaleW or 0) * S)   -- Texture width (scaled)
-    uint32(w, (t2.scaleH or 0) * S)   -- Texture height (scaled)
-
-    -- Write character count and indices
-    uint32(w, last)            -- Total number of characters
-    w:write(table.concat(charIdx))
     
-    -- Write character data count
-    uint32(w, #chars + 1)
+    -- Write header
+    w:write(string.pack("I4", 9))               -- version
+    w:write(string.pack("f", t1.size * S))      -- height, not used?
+    w:write(string.pack("f", 0.0))              -- outlineX, not used
+    w:write(string.pack("f", 0.0))              -- outlineY, not used
+    w:write(string.pack("f", t2.lineHeight * S)) -- line height
+    w:write(string.pack("I4", mf(t2.base * S))) -- base
+    w:write(string.pack("I4", 11))              -- spacingX
+    w:write(string.pack("I4", 11))              -- spacingY
+    w:write(string.pack("I4", 0))               -- zero?
+    w:write(string.pack("I4", t2.scaleW * S))   -- texture width
+    w:write(string.pack("I4", t2.scaleH * S))   -- texture height
 
-    -- Write fallback character data first
+    -- Write charCount
+    w:write(string.pack("I4", last))
+    w:write(table.concat(charIdx))
+
+    -- Write charDataCount
+    w:write(string.pack("I4", t4.count + 1))
+
+    -- Write glyphs
     local c = chars[SF]
-    float(w, c[1])
-    float(w, c[2])
-    float(w, c[3])
-    float(w, c[4])
-    sint16(w, c[5])
-    sint16(w, c[6])
-    sint16(w, c[7])
-    sint16(w, c[8])
+    w:write(string.pack("f", c[1]))
+    w:write(string.pack("f", c[2]))
+    w:write(string.pack("f", c[3]))
+    w:write(string.pack("f", c[4]))
+    w:write(string.pack("h", c[5]))
+    w:write(string.pack("h", c[6]))
+    w:write(string.pack("h", c[7]))
+    w:write(string.pack("h", c[8]))
 
-    -- Write data for all other characters
     for i = 1, last do
         local c = chars[i]
         if c then
-            float(w, c[1])
-            float(w, c[2])
-            float(w, c[3])
-            float(w, c[4])
-            sint16(w, c[5])
-            sint16(w, c[6])
-            sint16(w, c[7])
-            sint16(w, c[8])
+            w:write(string.pack("f", c[1]))
+            w:write(string.pack("f", c[2]))
+            w:write(string.pack("f", c[3]))
+            w:write(string.pack("f", c[4]))
+            w:write(string.pack("h", c[5]))
+            w:write(string.pack("h", c[6]))
+            w:write(string.pack("h", c[7]))
+            w:write(string.pack("h", c[8]))
         end
     end
 
-    uint32(w, 0)   -- Terminator or reserved value
+    w:write(string.pack("I4", 0))   -- WTF???
     w:close()
 end
 
--- Iterate over all fonts defined in config_fonts and process each one
+
+-- Main process
 for k, v in pairs(Fonts) do
     for kk, vv in ipairs(v) do
         io.write(k .. vv.suffix .. ": ")
         for _, size in ipairs(vv.size) do
             io.write(size .. " ")
+            -- Read and process .fnt
             local fnt_name = "./fonts_new/" .. k .. vv.suffix .. "_" .. size
-            local t1, t2, t3, t4, t5 = read_fnt_file(fnt_name)
-            local last = #t5
-            local charIdx, chars = process_char_data(t1, t2, t5, last)
-            write_abc_file(fnt_name, t1, t2, last, charIdx, chars)
+            process_char_data(fnt_name, 4.0, -164)
         end
         io.write("\n")
     end
 end
+
+print("[LOG OK] Font descriptors are ready.")
