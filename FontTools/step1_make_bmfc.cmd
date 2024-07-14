@@ -9,9 +9,9 @@ if errorlevel 1 (
 )
 
 rem prepare dirs
-if not exist fonts_new mkdir fonts_new
+if not exist generated_fonts mkdir generated_fonts
 if errorlevel 1 (
-    echo [ERROR] Failed to create directory: fonts_new
+    echo [ERROR] Failed to create directory: generated_fonts
     goto eof
 )
 if not exist mod\assets\fx\gui\fonts\textures mkdir mod\assets\fx\gui\fonts\textures
@@ -24,17 +24,17 @@ echo [LOG OK] Working directories are created.
 echo.
 
 rem clear old results
-if exist fonts_new\*.bmfc del /q /f fonts_new\*.bmfc >nul
-if exist fonts_new\*.fnt del /q /f fonts_new\*.fnt >nul
-if exist fonts_new\*.tga del /q /f fonts_new\*.tga >nul
+if exist generated_fonts\*.bmfc del /q /f generated_fonts\*.bmfc >nul
+if exist generated_fonts\*.fnt del /q /f generated_fonts\*.fnt >nul
+if exist generated_fonts\*.tga del /q /f generated_fonts\*.tga >nul
 echo.
 echo [LOG OK] Old results are cleared.
 echo.
 
 rem generate config for BMFont
-%LUA% lua\generate_bmfc.lua
+%LUA% lua\generate_bmfc_x4.lua
 if errorlevel 1 (
-    echo [ERROR] Failed to generate .bmfc files using generate_bmfc.lua
+    echo [ERROR] Failed to generate .bmfc files using generate_bmfc_x4.lua
     goto eof
 )
 echo.
@@ -42,7 +42,7 @@ echo [LOG OK] .bmfc files are generated.
 echo.
 
 rem run BMFont
-for %%i in (fonts_new\*.bmfc) do (
+for %%i in (generated_fonts\*.bmfc) do (
     echo Processing %%i...
     %BMFONT% -c "%%i" -o "%%~dpni"
     if errorlevel 1 (

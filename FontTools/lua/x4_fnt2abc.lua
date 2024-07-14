@@ -10,6 +10,7 @@ local function uint16(v)
     local res = string.pack("H", v)
     w:write(res)
 end
+
 local function sint16(v)
     local res = string.pack("h", v)
     w:write(res)

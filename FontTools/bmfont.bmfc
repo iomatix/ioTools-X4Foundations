@@ -5,7 +5,7 @@ fileVersion=1
 fontName=Audiowide
 fontFile=
 charSet=0
-fontSize=212
+fontSize=54
 aa=1
 scaleH=100
 useSmoothing=1
@@ -23,10 +23,10 @@ autoFitFontSizeMin=0
 autoFitFontSizeMax=0
 
 # character alignment
-paddingDown=20
-paddingUp=20
-paddingRight=20
-paddingLeft=20
+paddingDown=5
+paddingUp=5
+paddingRight=5
+paddingLeft=5
 spacingHoriz=5
 spacingVert=5
 useFixedHeight=1
@@ -34,17 +34,17 @@ forceZero=0
 widthPaddingFactor=0.00
 
 # output file
-outWidth=4096
-outHeight=2048
+outWidth=2048
+outHeight=1444
 outBitDepth=8
 fontDescFormat=0
 fourChnlPacked=0
 textureFormat=png
 textureCompression=0
-alphaChnl=1
-redChnl=0
-greenChnl=0
-blueChnl=0
+alphaChnl=2
+redChnl=4
+greenChnl=4
+blueChnl=4
 invA=0
 invR=0
 invG=0

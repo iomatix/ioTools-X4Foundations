@@ -15,8 +15,8 @@ for k, v in pairs(Fonts) do
                 vv.width[kkk], 
                 vv.height[kkk]
             )
-            --print("fonts_new/" .. k .. vv.suffix .. "_" .. vvv .. ".bmfc")
-            local w = assert(io.open("fonts_new/" .. k .. vv.suffix .. "_" .. vvv .. ".bmfc", "w+b"))
+            --print("generated_fonts/" .. k .. vv.suffix .. "_" .. vvv .. ".bmfc")
+            local w = assert(io.open("generated_fonts/" .. k .. vv.suffix .. "_" .. vvv .. ".bmfc", "w+b"))
             w:write(content)
             w:close()
         end

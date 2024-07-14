@@ -3,37 +3,60 @@ package.path = "./?.lua;./lua/?.lua"
 require("mod_binary_writer")
 require("config_fonts")
 
--- Function to process character data
-local function process_char_data(fnt_name, S, SF)
-    local r = assert(io.open(fnt_name .. ".fnt", "r"))
+local success, config_fonts = pcall(require, "config_fonts")
+if not success then
+    print("Error loading config_fonts.lua:", config_fonts)
+    return
+end
+
+local fontsDir = "./generated_fonts/"
+
+local function uint16(v)
+    return string.pack("H", v)
+end
+
+local function sint16(v)
+    return string.pack("h", v)
+end
+
+local function uint32(v)
+    return string.pack("I4", v)
+end
+
+local function float(v)
+    return string.pack("f", v)
+end
+
+local function process_fnt_to_abc(fontName, fontSize, scale, fallbackChar)
+    local fntFile = fontsDir .. fontName .. "_" .. fontSize .. ".fnt"
+    local abcFile = fontsDir .. fontName .. "_" .. fontSize .. ".abc"
+
+    local r = assert(io.open(fntFile, "r"))
 
     local line = ""
     local t1, t2, t3, t4, t5 = {}, {}, {}, {}, {}
-    -- Read 1st line
+
+    -- Read chars and parse them
     line = r:read("*l")
     for k, v in string.gmatch(line, "(%w+)=(%w+)") do
         t1[k] = tonumber(v)
     end
 
-    -- Read 2nd line
     line = r:read("*l")
     for k, v in string.gmatch(line, "(%w+)=(%w+)") do
         t2[k] = tonumber(v)
     end
 
-    -- Read 3rd line
     line = r:read("*l")
     for k, v in string.gmatch(line, "(%w+)=(%w+)") do
         t3[k] = tonumber(v)
     end
 
-    -- Read 4th line
     line = r:read("*l")
     for k, v in string.gmatch(line, "(%w+)=(%w+)") do
         t4[k] = tonumber(v)
     end
 
-    -- Read chars
     local last = 0
     for i = 1, t4.count do
         line = r:read("*l")
@@ -44,17 +67,19 @@ local function process_char_data(fnt_name, S, SF)
         table.insert(t5, t)
         last = t.id
     end
+
     r:close()
 
-    print("Total chars:", last)
+    print("Total chars: " .. last)
+
     local charIdx = {}
     for i = 1, last do
-        local s = string.pack("H", 0)
-        table.insert(charIdx, s)
+        charIdx[i] = uint16(0)
     end
 
     local chars = {}
     local mf = math.floor
+
     for k, v in ipairs(t5) do
         local p = t1.padding
         local w = v.width - p - p
@@ -64,87 +89,96 @@ local function process_char_data(fnt_name, S, SF)
         local x1 = -1
         local y1 = -1
 
-        local off = mf((v.xoffset + p) * S)
-        local width = mf(w * S)
-        if width < 1.0 then width = 1.0 end
-        local adv = mf(v.xadvance * S)
+        local off = mf((v.xoffset + p) * scale)
+        local width = mf(w * scale)
+        if width < 1.0 then
+            width = 1.0
+        end
+        local adv = mf(v.xadvance * scale)
         local id = v.id
 
         table.insert(chars, { x0, y0, x1, y1, off, width, adv, v.page })
 
-        local s = string.pack("H", k)
-        charIdx[id] = s
+        charIdx[id] = uint16(k)
 
-        -- find fallback char
-        if SF < 0 then
-            if id + SF == 0 then SF = k end
+        -- Find fallback char
+        if fallbackChar < 0 then
+            if id + fallbackChar == 0 then
+                fallbackChar = k
+            end
         end
     end
 
-    local w = io.open(fnt_name .. ".abc", "w+b")
-    
-    -- Write header
-    w:write(string.pack("I4", 9))               -- version
-    w:write(string.pack("f", t1.size * S))      -- height, not used?
-    w:write(string.pack("f", 0.0))              -- outlineX, not used
-    w:write(string.pack("f", 0.0))              -- outlineY, not used
-    w:write(string.pack("f", t2.lineHeight * S)) -- line height
-    w:write(string.pack("I4", mf(t2.base * S))) -- base
-    w:write(string.pack("I4", 11))              -- spacingX
-    w:write(string.pack("I4", 11))              -- spacingY
-    w:write(string.pack("I4", 0))               -- zero?
-    w:write(string.pack("I4", t2.scaleW * S))   -- texture width
-    w:write(string.pack("I4", t2.scaleH * S))   -- texture height
+    local w = assert(io.open(abcFile, "w+b"))
 
-    -- Write charCount
-    w:write(string.pack("I4", last))
+    -- Write header
+    w:write(uint32(9))                    -- ver
+    w:write(float(t1.size * scale))       -- height, not used?
+    w:write(float(0.0))                   -- outlineX, not used
+    w:write(float(0.0))                   -- outlineY, not used
+    w:write(float(t2.lineHeight * scale)) -- line height
+    w:write(uint32(mf(t2.base * scale)))  -- base
+    w:write(uint32(11))                   -- spacingX
+    w:write(uint32(11))                   -- spacingY
+    w:write(uint32(0))                    -- zero?
+    w:write(uint32(t2.scaleW * scale))    -- texture width
+    w:write(uint32(t2.scaleH * scale))    -- texture height
+
+    -- charCount
+    w:write(uint32(last))
     w:write(table.concat(charIdx))
 
-    -- Write charDataCount
-    w:write(string.pack("I4", t4.count + 1))
+    -- charDataCount
+    w:write(uint32(t4.count + 1))
 
-    -- Write glyphs
-    local c = chars[SF]
-    w:write(string.pack("f", c[1]))
-    w:write(string.pack("f", c[2]))
-    w:write(string.pack("f", c[3]))
-    w:write(string.pack("f", c[4]))
-    w:write(string.pack("h", c[5]))
-    w:write(string.pack("h", c[6]))
-    w:write(string.pack("h", c[7]))
-    w:write(string.pack("h", c[8]))
+    -- glyphs
+    local c = chars[fallbackChar]
+    w:write(float(c[1]))
+    w:write(float(c[2]))
+    w:write(float(c[3]))
+    w:write(float(c[4]))
+    w:write(sint16(c[5]))
+    w:write(sint16(c[6]))
+    w:write(sint16(c[7]))
+    w:write(sint16(c[8]))
 
     for i = 1, last do
         local c = chars[i]
         if c then
-            w:write(string.pack("f", c[1]))
-            w:write(string.pack("f", c[2]))
-            w:write(string.pack("f", c[3]))
-            w:write(string.pack("f", c[4]))
-            w:write(string.pack("h", c[5]))
-            w:write(string.pack("h", c[6]))
-            w:write(string.pack("h", c[7]))
-            w:write(string.pack("h", c[8]))
+            w:write(float(c[1]))
+            w:write(float(c[2]))
+            w:write(float(c[3]))
+            w:write(float(c[4]))
+            w:write(sint16(c[5]))
+            w:write(sint16(c[6]))
+            w:write(sint16(c[7]))
+            w:write(sint16(c[8]))
         end
     end
 
-    w:write(string.pack("I4", 0))   -- WTF???
+    w:write(uint32(0)) -- kernings
     w:close()
+
+    print("Generated ABC file: " .. abcFile)
 end
 
 
+
 -- Main process
-for k, v in pairs(Fonts) do
-    for kk, vv in ipairs(v) do
-        io.write(k .. vv.suffix .. ": ")
-        for _, size in ipairs(vv.size) do
-            io.write(size .. " ")
-            -- Read and process .fnt
-            local fnt_name = "./fonts_new/" .. k .. vv.suffix .. "_" .. size
-            process_char_data(fnt_name, 4.0, -164)
+if type(Fonts) == "table" then
+    for k, v in pairs(Fonts) do
+        for kk, vv in ipairs(v) do
+            for kkk, vvv in pairs(vv.new_size) do
+                
+                -- -164 ¤ - fallback char
+                process_fnt_to_abc(v.fontname .. vv.suffix, vv.new_size[kkk], vv.scale, -164)
+                print("generated_fonts/" .. v.fontname .. vv.suffix .. "_" .. vvv .. ".abc")
+
+            end
         end
-        io.write("\n")
     end
+else
+    print("Error: config_fonts.Fonts is not a table.")
 end
 
 print("[LOG OK] Font descriptors are ready.")

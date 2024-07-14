@@ -8,7 +8,7 @@ for k, v in pairs(Fonts) do
         for _, size in ipairs(vv.size) do
             io.write(size .. " ")
             -- read .fnt
-            local fnt_name = "./fonts_new/" .. k .. vv.suffix .. "_" .. size
+            local fnt_name = "./generated_fonts/" .. k .. vv.suffix .. "_" .. size
             local r = assert(io.open(fnt_name .. ".fnt"))
 
             local line = ""

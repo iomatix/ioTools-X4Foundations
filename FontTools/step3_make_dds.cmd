@@ -9,11 +9,11 @@ if errorlevel 1 (
 )
 
 rem clear old results
-if exist fonts_new\*.dds del /q /f fonts_new\*.dds >nul
-if exist fonts_new\*.gz del /q /f fonts_new\*.gz >nul
+if exist generated_fonts\*.dds del /q /f generated_fonts\*.dds >nul
+if exist generated_fonts\*.gz del /q /f generated_fonts\*.gz >nul
 
 rem convert all tga to dds
-for %%i in (fonts_new\*.bmfc) do (
+for %%i in (generated_fonts\*.bmfc) do (
     %TGA2DDS% "%%~dpni_0.tga"
     if errorlevel 1 (
         echo [ERROR] Failed to convert %%~dpni_0.tga to .dds
@@ -25,17 +25,17 @@ echo [LOG OK] .dds are ready.
 echo.
 
 rem pack dds
-for %%i in (fonts_new\*.dds) do (
+for %%i in (generated_fonts\*.dds) do (
     set q=%%~nxi
     set q=!q:_0.dds=!
-    copy /y "fonts_new\%%~nxi" "fonts_new\!q!" >nul
+    copy /y "generated_fonts\%%~nxi" "generated_fonts\!q!" >nul
     if errorlevel 1 (
-        echo [ERROR] Failed to copy fonts_new\%%~nxi to fonts_new\!q!
+        echo [ERROR] Failed to copy generated_fonts\%%~nxi to generated_fonts\!q!
         goto eof
     )
-    %GZIPEXE% -9 -f -n "fonts_new\!q!"
+    %GZIPEXE% -9 -f -n "generated_fonts\!q!"
     if errorlevel 1 (
-        echo [ERROR] Failed to gzip fonts_new\!q!
+        echo [ERROR] Failed to gzip generated_fonts\!q!
         goto eof
     )
 )
@@ -44,12 +44,12 @@ echo [LOG OK] all textures are gzipped.
 echo.
 
 rem copy fonts to mod dir
-copy /y fonts_new\*.abc mod\assets\fx\gui\fonts\textures >nul
+copy /y generated_fonts\*.abc mod\assets\fx\gui\fonts\textures >nul
 if errorlevel 1 (
     echo [ERROR] Failed to copy .abc files to mod\assets\fx\gui\fonts\textures
     goto eof
 )
-copy /y fonts_new\*.gz mod\assets\fx\gui\fonts\textures >nul
+copy /y generated_fonts\*.gz mod\assets\fx\gui\fonts\textures >nul
 if errorlevel 1 (
     echo [ERROR] Failed to copy .gz files to mod\assets\fx\gui\fonts\textures
     goto eof
