@@ -15,7 +15,7 @@ setlocal
 set "input_files=extensions\ego_dlc_boron\ext_01.cat extensions\ego_dlc_boron\ext_02.cat extensions\ego_dlc_boron\ext_03.cat"
 
 :: Set the output directory to the current working directory
-set "output_dir=%~dp0_unpacked\extensions\ego_dlc_boron"
+set "output_dir=%~dp0_unpacked\_extensions\ego_dlc_boron"
 
 :: Create the output directory if it doesn't exist
 if not exist "%output_dir%" mkdir "%output_dir%"
