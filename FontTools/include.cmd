@@ -40,8 +40,10 @@ set NVTT="%D%tools\nvtt_export.exe"
 echo [LOG] NVTT set to %NVTT% 
 :: X:Rebirth
 set TGA2DDS=%NVTT% --format 18
-:: X4:Foundations
-set PNG2DDS=%NVTT% --format 0 --no-mips
+:: X4:Foundations TODO: --format ??? 0 
+:: --format: 0 -> a8, 18 -> bc3, 20 -> bc4, 21 -> bc5, 23 -> bc7
+::  When converting to DDS, the DXGI format to convert to (default: bc7). For most RGBA images, try using BC7. For three-channel HDR images, try using BC6U if all values are positive or BC6S otherwise. BC4 and BC5 are good for one-channel (red) and two-channel (red, green) images, respectively. ASTC images will be stored uncompressed on many desktop GPUs, but are good for non-HDR RGBA images on Tegra GPUs.
+set PNG2DDS=%NVTT% --format 23 --no-mips
 
 echo.
 set GZIPEXE="%D%tools\gzip.exe"
