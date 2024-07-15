@@ -101,4 +101,4 @@ Original author of the scripts is [Dmitry 'hhrhhr' Zaitsev](https://github.com/h
 
 ### Notes:
 
-   - step4_pack.cmd is not used to replace the default X4 font but instead it packs the files to a catalog and adds them to paths in XR Rebirth format. I suppose that it won't work with X4 currently.
+   - step4_pack.cmd is not used to replace the default X4 font but instead it packs the files to a catalog and adds them to paths in X:Rebirth format. I suppose that it won't work with X4 currently.

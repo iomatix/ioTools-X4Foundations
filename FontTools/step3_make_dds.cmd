@@ -20,14 +20,27 @@ if errorlevel 1 (
 )
 
 rem clear old results
+echo.
+echo [LOG] Clearing old texture maps...
+echo.
 if exist generated_fonts\*.dds del /q /f generated_fonts\*.dds >nul
 if exist generated_fonts\*.gz del /q /f generated_fonts\*.gz >nul
 
 rem convert all tga to dds
+echo.
+echo [LOG] Processing all pictures to .dds textures...
+echo.
 for %%i in (generated_fonts\*.bmfc) do (
-    %TGA2DDS% "%%~dpni_0.tga"
+    %NVTT% "%%~dpni_0.tga"
     if errorlevel 1 (
         echo [ERROR] Failed to convert %%~dpni_0.tga to .dds
+        goto eof
+    )
+)
+for %%i in (generated_fonts\*.bmfc) do (
+    %NVTT% "%%~dpni_0.png"
+    if errorlevel 1 (
+        echo [ERROR] Failed to convert %%~dpni_0.png to .dds
         goto eof
     )
 )
@@ -36,6 +49,9 @@ echo [LOG OK] .dds are ready.
 echo.
 
 rem pack dds
+echo.
+echo [LOG] Packing .dds textures to gzip generated_fonts\*.dds...
+echo.
 for %%i in (generated_fonts\*.dds) do (
     set q=%%~nxi
     set q=!q:_0.dds=!
@@ -54,7 +70,11 @@ echo.
 echo [LOG OK] all textures are gzipped.
 echo.
 
+
 rem copy fonts to mod dir
+echo.
+echo [LOG] Copying fonts to the mod dir (generated_fonts\*.abc mod\assets\fx\gui\fonts\textures)...
+echo.
 copy /y generated_fonts\*.abc mod\assets\fx\gui\fonts\textures >nul
 if errorlevel 1 (
     echo [ERROR] Failed to copy .abc files to mod\assets\fx\gui\fonts\textures
@@ -69,5 +89,7 @@ echo.
 echo [LOG OK] all files are copied.
 echo.
 
+echo.
+echo [SUCCESS] Step 3 has been completed successfully!
 :eof
 pause

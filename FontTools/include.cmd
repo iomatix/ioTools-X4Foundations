@@ -8,7 +8,7 @@ set LUAJIT="%D%tools\luajit.exe"
 echo [LOG] LuaJIT set to %LuaJIT%
 set BMFONT="%D%tools\bmfont64.exe"
 echo [LOG] BMFONT set to %BMFONT%
-set TGA2DDS="%D%tools\nvtt_export.exe" -bc3
+set NVTT ="%D%tools\nvtt_export.exe" -bc3
 echo [LOG] TGA2DDS set to %TGA2DDS%
 set GZIPEXE="%D%tools\gzip.exe"
 echo [LOG] GZIPEXE set to %GZIPEXE%
@@ -18,8 +18,14 @@ echo [LOG] IMGMAGICK set to %IMGMAGICK%
 set MD5DEEP="%D%tools\md5deep"
 echo [LOG] MD5DEEP set to %MD5DEEP%
 
-set CATDAT=08
-set OUTDIR="."
 
-echo [LOG] CATDAT set to %OUTDIR%%CATDAT%
+set CATDAT=ext_01
+echo [LOG] CATDAT set to %CATDAT%
+set CATDATSUBST=subst_01
+echo [LOG] CATDATSUBST set to %CATDATSUBST%
+set OUTDIR="."
+echo [LOG] OUTDIR set to %OUTDIR%
+
+
+
 

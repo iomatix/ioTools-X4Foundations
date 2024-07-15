@@ -19,6 +19,9 @@ if errorlevel 1 (
 )
 
 rem prepare dirs
+echo.
+echo [LOG] Preparing directories...
+echo.
 if not exist generated_fonts mkdir generated_fonts
 if errorlevel 1 (
     echo [ERROR] Failed to create directory: generated_fonts
@@ -44,6 +47,9 @@ echo [LOG OK] Old results are cleared.
 echo.
 
 rem generate config for BMFont
+echo.
+echo [LOG] Generating BMFont config files...
+echo.
 %LUA% lua\generate_bmfc_x4.lua
 if errorlevel 1 (
     echo [ERROR] Failed to generate .bmfc files using generate_bmfc_x4.lua
@@ -54,20 +60,27 @@ echo [LOG OK] .bmfc files are generated.
 echo.
 
 rem run BMFont
+echo.
+echo [LOG] Processing .bmfc files using BMFont...
+echo.
 for %%i in (generated_fonts\*.bmfc) do (
     echo Processing %%i...
     %BMFONT% -c "%%i" -o "%%~dpni"
     if errorlevel 1 (
-        echo [ERROR] Failed to process %%i with BMFont
+        echo [ERROR] Failed to process "%%i" with BMFont
         goto eof
     )
     echo.
 )
 echo.
 echo [LOG OK] .fnt and .png files are created.
-echo [!!!!!!] If any *_01.png exists, then
-echo [!!!!!!] tune up config_fonts.lua and rerun this script.
+echo [WARNING] If any *_01.png exists, then tune up config_fonts.lua and rerun this script.
+echo [WARNING] There should be only one page of texture per each font file.
+echo [WARNING] If any other problems occure, please check .bmfc manually using BMFont software.
 echo.
 
+echo.
+echo [SUCCESS] Step 1 has been completed successfully!
+echo [WARNING] Please, check the WARNING messages.
 :eof
 pause
