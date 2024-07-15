@@ -9,9 +9,9 @@ Fonts = {
             italic = 0,
             outline = 0,
             scale = 4,
-            size =     { 54 },
-            new_size = { 54 },
-            width =    { 2048 },
+            size =     { 32 },
+            new_size = { 32 },
+            width =    { 1024 },
             height =   { 512 }
         },
         {
@@ -20,9 +20,9 @@ Fonts = {
             italic = 0,
             outline = 0,
             scale = 4,
-            size =     { 54 },
-            new_size = { 54 },
-            width =    { 2048 },
+            size =     { 32 },
+            new_size = { 32 },
+            width =    { 1024 },
             height =   { 512 }
         }
     }
