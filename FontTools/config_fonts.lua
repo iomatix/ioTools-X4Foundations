@@ -12,7 +12,7 @@ Fonts = {
             size =     { 54 },
             new_size = { 54 },
             width =    { 2048 },
-            height =   { 1444 }
+            height =   { 512 }
         },
         {
             suffix = " Bold",
@@ -23,7 +23,7 @@ Fonts = {
             size =     { 54 },
             new_size = { 54 },
             width =    { 2048 },
-            height =   { 1444 }
+            height =   { 512 }
         }
     }
     --[[

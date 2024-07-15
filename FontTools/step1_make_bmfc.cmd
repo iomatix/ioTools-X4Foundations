@@ -1,6 +1,16 @@
 @echo off
 setlocal enabledelayedexpansion
 
+echo.
+echo "|   __   ______ _ ___ _____   ____   __   _  __  __ __  __ _____ ___   __ |"
+echo "| /' _/ / _/ _ \ | _,\_   _| |  \ `v' /  | |/__\|  V  |/  \_   _| \ \_/ / |"
+echo "| `._`.| \_| v / | v_/ | |   | -<`. .'   | | \/ | \_/ | /\ || | | |> , <  |"
+echo "| |___/ \__/_|_\_|_|   |_|   |__/ !_!    |_|\__/|_| |_|_||_||_| |_/_/ \_\ |"
+echo "|  _________________________________________________________________________ |"
+echo "| )___)___)___)___)___)___)___)___)___)___)___)___)___)___)___)____)___/___/ |"
+echo "| /___(___(___(___(___(___(___(___(___(___(___(___(___(___(___(___(___(___(  |"
+echo.
+
 rem tools path
 call include.cmd
 if errorlevel 1 (
@@ -27,6 +37,8 @@ rem clear old results
 if exist generated_fonts\*.bmfc del /q /f generated_fonts\*.bmfc >nul
 if exist generated_fonts\*.fnt del /q /f generated_fonts\*.fnt >nul
 if exist generated_fonts\*.tga del /q /f generated_fonts\*.tga >nul
+if exist generated_fonts\*.png del /q /f generated_fonts\*.png >nul
+if exist generated_fonts\*.abc del /q /f generated_fonts\*.abc >nul
 echo.
 echo [LOG OK] Old results are cleared.
 echo.
@@ -52,8 +64,8 @@ for %%i in (generated_fonts\*.bmfc) do (
     echo.
 )
 echo.
-echo [LOG OK] .fnt and .tga files are created.
-echo [!!!!!!] If any *_01.tga exists, then
+echo [LOG OK] .fnt and .png files are created.
+echo [!!!!!!] If any *_01.png exists, then
 echo [!!!!!!] tune up config_fonts.lua and rerun this script.
 echo.
 

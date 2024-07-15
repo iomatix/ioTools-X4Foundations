@@ -4,14 +4,16 @@
 This directory contains tools and scripts for converting installed fonts to a X4 recognized formats as `.dds` and `.abc`.
 Original author of the scripts is [Dmitry 'hhrhhr' Zaitsev](https://github.com/hhrhhr/Lua-utils-for-X-Rebirth/commits?author=hhrhhr).
 
-### FontTools use and depends on some third party software:
+### FontTools use and depends on some third party software with their own licensnes:
 
-- [Nvidia Texture Tools](https://developer.nvidia.com/texture-tools-exporter)
+- [Nvidia Texture Tools](https://developer.nvidia.com/texture-tools-exporter *Licensed under the Nvidia License*
 - [ImageMagick](https://imagemagick.org/script/develop.php)
-- [BMFont](https://www.angelcode.com/products/bmfont/)
-- Lua Tools ([LuaJIT](https://luajit.org/), [Lua53, Lua](https://www.lua.org/download.html))
-- [GZip](https://www.gnu.org/software/gzip/)
-- [md5deep](https://md5deep.sourceforge.net/)
+ [*Licensed under the ImageMagick License*](https://imagemagick.org/script/license.php)
+- [BMFont](https://www.angelcode.com/products/bmfont/)[*Licensed under the zlib License*](https://www.zlib.net/zlib_license.html)
+- Lua Tools ([LuaJIT](https://luajit.org/), [Lua53, Lua](https://www.lua.org/download.html))[*Licensed under GPL*](https://www.lua.org/license.html)
+- [GZip](https://www.gnu.org/software/gzip/) [*Licensed under GPL-3.0*](https://www.gnu.org/licenses/gpl-3.0.html)
+- [md5deep](https://md5deep.sourceforge.net/) [*Licensed under GPL*](https://github.com/jessek/hashdeep/blob/master/COPYING)
+
 ***These are not distributed under license of the FontTools but instead of each of them is using its third party license file accessible on their official websites.***
 
 ## Latin Characters Support
