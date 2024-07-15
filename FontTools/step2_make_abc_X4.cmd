@@ -1,5 +1,5 @@
 @echo off
-setlocal enabledelayedexpansion
+setlocal
 
 echo.
 echo "|   __   ______ _ ___ _____   ____   __   _  __  __ __  __ _____ ___   __ |"
@@ -12,21 +12,20 @@ echo "| /___(___(___(___(___(___(___(___(___(___(___(___(___(___(___(___(___(___
 echo.
 
 
-rem tools path
+:: Set tools path
 call include.cmd
 if errorlevel 1 (
     echo [ERROR] Failed to include tools path from include.cmd
     goto eof
 )
 
-rem clear old results
+:: Clear old results
 echo.
 echo [LOG] Clearing old .abc files...
-echo.
-if exist generated_fonts\*.abc del /q /f generated_fonts\*.abc 
+if exist %FOLDER%\*.abc del /q /f %FOLDER%\*.abc 
 
 
-rem convert font descriptors
+:: Convert font descriptors
 echo.
 echo [LOG] Converting font descriptors...
 echo.
@@ -36,12 +35,10 @@ echo [LOG OK] font descriptors are ready.
 echo [LOG OK] .abc files are created.
 echo.
 
-
-rem use ImageMagick to generate signed distance fields and scale it
+:: Run ImageMagick to generate signed distance fields and scale it
 echo.
 echo [LOG] Calling ImageMagick script to generate signed distance fields and scale it...
-echo.
-call magick_image.bat "%%i"
+call magick_image_convert.bat
 if errorlevel 1 (
         echo [ERROR] Failed to generate signed distance fields.
         echo [WARNING] The font won't work in X4 without signed distance fields. 
@@ -59,5 +56,6 @@ echo.
 echo.
 echo [SUCCESS] Step 2 has been completed successfully!
 echo [WARNING] Please, check the WARNING messages.
+
 :eof
-pause
+endlocal

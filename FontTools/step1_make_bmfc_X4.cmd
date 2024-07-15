@@ -1,5 +1,5 @@
 @echo off
-setlocal enabledelayedexpansion
+setlocal
 
 echo.
 echo "|   __   ______ _ ___ _____   ____   __   _  __  __ __  __ _____ ___   __ |"
@@ -11,45 +11,50 @@ echo "| )___)___)___)___)___)___)___)___)___)___)___)___)___)___)___)____)___/__
 echo "| /___(___(___(___(___(___(___(___(___(___(___(___(___(___(___(___(___(___(  |"
 echo.
 
-rem tools path
+:: Set tools path
 call include.cmd
 if errorlevel 1 (
     echo [ERROR] Failed to include tools path from include.cmd
     goto eof
 )
 
-rem prepare dirs
+:: Prepare dirs
 echo.
 echo [LOG] Preparing directories...
-echo.
-if not exist generated_fonts mkdir generated_fonts
+if not exist %FOLDER% mkdir %FOLDER%
 if errorlevel 1 (
-    echo [ERROR] Failed to create directory: generated_fonts
+    echo [ERROR] Failed to create directory: %FOLDER%
     goto eof
 )
-if not exist mod\assets\fx\gui\fonts\textures mkdir mod\assets\fx\gui\fonts\textures
+if not exist %FOLDER%\mods\%TARGET% mkdir %FOLDER%\mods\%TARGET%
 if errorlevel 1 (
-    echo [ERROR] Failed to create directory: mod\assets\fx\gui\fonts\textures
+    echo [ERROR] Failed to create directory: %TARGET% within the mods directory.
     goto eof
 )
 echo.
-echo [LOG OK] Working directories are created.
-echo.
+echo [LOG OK] Working directories exist.
 
-rem clear old results
-if exist generated_fonts\*.bmfc del /q /f generated_fonts\*.bmfc >nul
-if exist generated_fonts\*.fnt del /q /f generated_fonts\*.fnt >nul
-if exist generated_fonts\*.tga del /q /f generated_fonts\*.tga >nul
-if exist generated_fonts\*.png del /q /f generated_fonts\*.png >nul
-if exist generated_fonts\*.abc del /q /f generated_fonts\*.abc >nul
-echo.
-echo [LOG OK] Old results are cleared.
-echo.
 
-rem generate config for BMFont
+:: Clean old results
+echo.
+echo [LOG] Clearing directories...
+for /r %FOLDER% %%R in (*.bmfc *.fnt *.tga *.png *.abc *.dds *.cat *.dat) do (
+    if exist "%%R" (
+        echo [LOG] Removing %%R...
+        del /q /f "%%R" >nul
+        echo [LOG OK] %%R is removed.
+    )
+    if errorlevel 1 (
+        echo [ERROR] Failed to prepare directory: %FOLDER%.
+        goto eof
+    )
+)
+echo.
+echo [LOG OK] Old results are cleared from %FOLDER%.
+
+:: Generate config for BMFont
 echo.
 echo [LOG] Generating BMFont config files...
-echo.
 %LUA% lua\generate_bmfc_x4.lua
 if errorlevel 1 (
     echo [ERROR] Failed to generate .bmfc files using generate_bmfc_x4.lua
@@ -57,14 +62,12 @@ if errorlevel 1 (
 )
 echo.
 echo [LOG OK] .bmfc files are generated.
-echo.
 
-rem run BMFont
+:: Run BMFont
 echo.
 echo [LOG] Processing .bmfc files using BMFont...
-echo.
-for %%i in (generated_fonts\*.bmfc) do (
-    echo Processing %%i...
+for %%i in (%FOLDER%\*.bmfc) do (
+    echo [LOG] Processing "%%~dpni"
     %BMFONT% -c "%%i" -o "%%~dpni"
     if errorlevel 1 (
         echo [ERROR] Failed to process "%%i" with BMFont
@@ -82,5 +85,6 @@ echo.
 echo.
 echo [SUCCESS] Step 1 has been completed successfully!
 echo [WARNING] Please, check the WARNING messages.
+
 :eof
-pause
+endlocal

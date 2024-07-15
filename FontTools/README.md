@@ -6,7 +6,8 @@ Original author of the scripts is [Dmitry 'hhrhhr' Zaitsev](https://github.com/h
 
 ### FontTools use and depends on some third party software with their own licensnes:
 
-- [Nvidia Texture Tools](https://developer.nvidia.com/texture-tools-exporter *Licensed under the Nvidia License*
+- [X Tools](https://www.egosoft.com/download/x4/bonus_en.php) *Licensed under the Egosoft License*
+- [Nvidia Texture Tools](https://developer.nvidia.com/texture-tools-exporter) *Licensed under the Nvidia License*
 - [ImageMagick](https://imagemagick.org/script/develop.php)
  [*Licensed under the ImageMagick License*](https://imagemagick.org/script/license.php)
 - [BMFont](https://www.angelcode.com/products/bmfont/)[*Licensed under the zlib License*](https://www.zlib.net/zlib_license.html)
@@ -19,9 +20,6 @@ Original author of the scripts is [Dmitry 'hhrhhr' Zaitsev](https://github.com/h
 ## Latin Characters Support
 
 **Configuration files has been edited to support conversion of Latin fonts with support for the  special characters.**
-
-
-
 
 ## How to Use
 
@@ -87,18 +85,6 @@ Original author of the scripts is [Dmitry 'hhrhhr' Zaitsev](https://github.com/h
 3. **Running the Scripts:**
    - Once the setup is completed successfully, run scripts in following order.
    - Run include.cmd to setup necessary variables.
-   - Run step1_make_bmfc.cmd to generate `.png`, `.bmfc`, `.fnt` files.
-   - Check manually generated `.bmfc` config files by running `bmfont64.exe` and loading these via `Options > Load Configuration` then visualize output by pressing `V` button on the keyboard. The output should not exceed the width or height and all of it should be on only one page, so not two or more atlas pages, only one singular map. 
-
-
-
-   - Check if only `.bmfc`, `.fnt`, `*_0.tga` files exists within a `generated_fonts\` directory. If `*_1.tga` or with any higher value exists, that means that only characters from the first page (`*_0.tga`) will be converted so the output files, the `.dds`, and the `.abc` will be corrupted.
-   - Run step2_make_abc.cmd to generate `.abc` files that X4 will understand our font maps.
-   - Run step3_make_dds.cmd to generate texture maps in `.dds` files.
-   - Within `generated_fonts\` directory find desired `.dds` and `.abc` files. Default size is 32 pixels.
-   - To replace default X4 font, please rename desired files to `Zekton_32.dds`, `Zekton_32.abc` and `Zekton Bold_32.dds`, `Zekton Bold_32.abc`. Create a new directories structure `assets\fx\gui\fonts` and place the `.abc` and `.dds` files there.
-
+  
 
 ### Notes:
-
-   - step4_pack.cmd is not used to replace the default X4 font but instead it packs the files to a catalog and adds them to paths in X:Rebirth format. I suppose that it won't work with X4 currently.
