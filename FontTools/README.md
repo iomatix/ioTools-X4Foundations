@@ -80,8 +80,6 @@ Configuration files are set up to support the conversion of Latin fonts with spe
             }
         }
 
-   ```
-
 2. **Running the Scripts:**
    - Once the setup is completed, run the scripts in the following order:
      - **Step 1:** Run `step1_make_bmfc_X4.cmd` to generate the configuration file for the `BMFont` software based on the settings in `config_fonts.lua`. This will also generate the necessary files: binary `.fnt` and graphical `.png` maps.
