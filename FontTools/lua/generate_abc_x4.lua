@@ -28,6 +28,8 @@ local function float(v)
 end
 
 local function process_fnt_to_abc(fontName, fontSize, scale, fallbackChar)
+    local scale = 1.0 / scale
+
     local fntFile = fontsDir .. fontName .. "_" .. fontSize .. ".fnt"
     local abcFile = fontsDir .. fontName .. "_" .. fontSize .. ".abc"
 
