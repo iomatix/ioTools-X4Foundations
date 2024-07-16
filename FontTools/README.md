@@ -1,6 +1,6 @@
 # FontTools
 
-This directory contains tools and scripts for converting installed fonts into X4-recognized formats such as `.dds` and `.abc`. The original author of the scripts is [Dmitry 'hhrhhr' Zaitsev](https://github.com/hhrhhr/Lua-utils-for-X-Rebirth/commits?author=hhrhhr). Every necessary script for this tool has been completely rewritten in both `LUA` and `.cmd` files to be compliant with X4:Foundations.
+This directory contains tools and scripts for converting installed fonts into X4-recognized formats such as `.dds` and `.abc`. The original author of the scripts is [Dmitry 'hhrhhr' Zaitsev](https://github.com/hhrhhr/Lua-utils-for-X-Rebirth/commits?author=hhrhhr). Every necessary script for this tool has been completely rewritten in both `LUA` and `.cmd` files to be compliant with X4:Foundations. For legacy scripts check the [hhrhhr's repo](https://github.com/hhrhhr/Lua-utils-for-X-Rebirth).
 
 ## Dependencies
 
