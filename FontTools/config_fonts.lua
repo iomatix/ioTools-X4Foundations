@@ -10,8 +10,8 @@ Fonts = {
             scale = 16,
             size =     { 55 },
             new_size = { 55 },
-            width =    { 10240 },
-            height =   { 5120 }
+            width =    { 27648 },
+            height =   { 10240 }
         },
         {
             suffix = " Bold",
@@ -21,8 +21,8 @@ Fonts = {
             scale = 16,
             size =     { 55 },
             new_size = { 55 },
-            width =    { 10240 },
-            height =   { 5120 }
+            width =    { 27648 },
+            height =   { 10240 }
         }
     }
     --[[

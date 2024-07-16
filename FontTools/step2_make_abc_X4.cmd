@@ -30,6 +30,11 @@ echo.
 echo [LOG] Converting font descriptors...
 echo.
 %LUA% lua\generate_abc_x4.lua
+if errorlevel 1 (
+        echo [ERROR] Failed to convert descriptors.
+        goto eof
+    )
+
 echo.
 echo [LOG OK] font descriptors are ready.
 echo [LOG OK] .abc files are created.
