@@ -5,7 +5,7 @@ require("config_fonts")
 local success, config_fonts = pcall(require, "config_fonts")
 if not success then
     print("Error loading config_fonts.lua:", config_fonts)
-    return nil, "config_fonts.lua is missing"
+    os.exit(1)
 end
 
 for k, v in pairs(Fonts) do
