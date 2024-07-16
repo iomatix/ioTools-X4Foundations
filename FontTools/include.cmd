@@ -51,6 +51,11 @@ echo [LOG] GZIPEXE set to %GZIPEXE%
 set MD5DEEP="%D%tools\md5deep"
 echo [LOG] MD5DEEP set to %MD5DEEP%
 
+echo.
+set VERBOSE="Y"
+set LOGFILE="%D%logs.txt"
+echo [LOG] Logs file set to %LOGFILE%
+
 
 
 
