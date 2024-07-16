@@ -6,7 +6,7 @@ require("config_fonts")
 local success, config_fonts = pcall(require, "config_fonts")
 if not success then
     print("Error loading config_fonts.lua:", config_fonts)
-    return
+    os.exit(1)
 end
 
 local fontsDir = "./generated_fonts/"
