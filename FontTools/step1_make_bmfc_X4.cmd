@@ -66,6 +66,7 @@ echo [LOG OK] .bmfc files are generated.
 :: Run BMFont
 echo.
 echo [LOG] Processing .bmfc files using BMFont...
+echo [INFO] Please be patient, it will take a few minutes to process all files.
 for %%i in (%FOLDER%\*.bmfc) do (
     echo [LOG] Processing "%%~dpni"
     %BMFONT% -c "%%i" -o "%%~dpni"
