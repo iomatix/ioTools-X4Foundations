@@ -26,57 +26,59 @@ Configuration files are set up to support the conversion of Latin fonts with spe
    - Extract FontTools to the desired location.
    - Install the fonts you want to convert (e.g., `.ttf` files from [Google Fonts](https://fonts.google.com/)).
    - Open the `config_fonts.lua` file in this directory and edit its settings as desired.
-      ```-- Configuration file settings example for Latin fonts support.
 
-Fonts = {
-    playwriteCuba = { -- Unique identifier for the font configuration. Must be unique.
-        fontname = "Playwrite Cuba", -- The OS case-sensitive name of the font (e.g., "Times New Roman", "Verdana"). Ensure the font is installed on the computer running the scripts.
-        {
-            suffix = "", -- Suffix for the regular font
-            bold = 0, -- Bold setting (0 for false)
-            italic = 0, -- Italic setting (0 for false)
-            outline = 0, -- Outline setting (0 for false)
-            scale = 4, -- Parameter for scaling the font (use values like 4, 8, 16, etc. Higher values require higher width x height resolution but result in better quality. Optimal values are around `scale=16` with `27648x10240` resolution).
-            size = { 6, 7, 8, 9, 11, 14, 16, 18, 21, 24, 26 }, -- Native font sizes. (For best quality, keep it equal to new_size)
-            new_size = { 7, 8, 9, 10, 12, 16, 18, 20, 24, 32, 36 }, -- Desired font sizes. (For X4, keep it around 32-55. 32 is native for X4; higher values result in a bigger UI but also clearer text. Values around 50-55 are recommended).
-            width = { 256, 256, 256, 256, 256, 256, 256, 512, 512, 512, 512 }, -- Texture map width (Keep it wider than the height value).
-            height = { 128, 128, 128, 128, 256, 256, 256, 256, 256, 512, 512 } -- Texture map height (Ensure enough space for all characters on one image page).
-        },
-        {
-            suffix = " Bold", -- Suffix for the bold font
-            bold = 1, -- Bold setting (1 for true)
-            italic = 0,
-            outline = 0,
-            scale = 4,
-            size = { 7, 8, 9, 11, 14, 18, 21, 22, 24, 26, 28, 30, 72 },
-            new_size = { 8, 9, 10, 12, 16, 20, 24, 28, 32, 36, 42, 48, 81 },
-            width = { 256, 256, 256, 256, 256, 512, 512, 512, 512, 512, 512, 512, 1024 },
-            height = { 128, 128, 128, 256, 256, 256, 256, 512, 512, 512, 512, 512, 1024 }
-        },
-        {
-            suffix = " Italic", -- Suffix for the italic font
-            bold = 0,
-            italic = 1, -- Italic setting (1 for true)
-            outline = 0,
-            size = { 7, 8, 9, 11, 14, 18, 21, 22, 24, 26, 28, 30, 72 },
-            new_size = { 8, 9, 10, 12, 16, 20, 24, 28, 32, 36, 42, 48, 81 },
-            scale = 4,
-            width = { 256, 256, 256, 256, 256, 512, 512, 512, 512, 512, 512, 512, 1024 },
-            height = { 128, 128, 128, 256, 256, 256, 256, 512, 512, 512, 512, 512, 1024 }
-        },
-        {
-            suffix = " outlined", -- Suffix for the outlined font
-            bold = 0,
-            italic = 0,
-            outline = 1, -- Outline setting (1 for true)
-            size = { 6, 7, 8, 9, 11, 14, 16, 18, 21, 24, 26 },
-            new_size = { 7, 8, 9, 10, 12, 16, 18, 20, 24, 32, 36 },
-            scale = 4,
-            width = { 256, 256, 256, 256, 256, 512, 512, 512, 512, 512, 1024 },
-            height = { 128, 256, 256, 256, 256, 256, 256, 512, 512, 512, 512 }
+      ```
+      -- Configuration file settings example for Latin fonts support.
+
+        Fonts = {
+            playwriteCuba = { -- Unique identifier for the font configuration. Must be unique.
+                fontname = "Playwrite Cuba", -- The OS case-sensitive name of the font (e.g., "Times New Roman", "Verdana"). Ensure the font is installed on the computer running the scripts.
+                {
+                    suffix = "", -- Suffix for the regular font
+                    bold = 0, -- Bold setting (0 for false)
+                    italic = 0, -- Italic setting (0 for false)
+                    outline = 0, -- Outline setting (0 for false)
+                    scale = 4, -- Parameter for scaling the font (use values like 4, 8, 16, etc. Higher values require higher width x height resolution but result in better quality. Optimal values are around `scale=16` with `27648x10240` resolution).
+                    size = { 6, 7, 8, 9, 11, 14, 16, 18, 21, 24, 26 }, -- Native font sizes. (For best quality, keep it equal to new_size)
+                    new_size = { 7, 8, 9, 10, 12, 16, 18, 20, 24, 32, 36 }, -- Desired font sizes. (For X4, keep it around 32-55. 32 is native for X4; higher values result in a bigger UI but also clearer text. Values around 50-55 are recommended).
+                    width = { 256, 256, 256, 256, 256, 256, 256, 512, 512, 512, 512 }, -- Texture map width (Keep it wider than the height value).
+                    height = { 128, 128, 128, 128, 256, 256, 256, 256, 256, 512, 512 } -- Texture map height (Ensure enough space for all characters on one image page).
+                },
+                {
+                    suffix = " Bold", -- Suffix for the bold font
+                    bold = 1, -- Bold setting (1 for true)
+                    italic = 0,
+                    outline = 0,
+                    scale = 4,
+                    size = { 7, 8, 9, 11, 14, 18, 21, 22, 24, 26, 28, 30, 72 },
+                    new_size = { 8, 9, 10, 12, 16, 20, 24, 28, 32, 36, 42, 48, 81 },
+                    width = { 256, 256, 256, 256, 256, 512, 512, 512, 512, 512, 512, 512, 1024 },
+                    height = { 128, 128, 128, 256, 256, 256, 256, 512, 512, 512, 512, 512, 1024 }
+                },
+                {
+                    suffix = " Italic", -- Suffix for the italic font
+                    bold = 0,
+                    italic = 1, -- Italic setting (1 for true)
+                    outline = 0,
+                    size = { 7, 8, 9, 11, 14, 18, 21, 22, 24, 26, 28, 30, 72 },
+                    new_size = { 8, 9, 10, 12, 16, 20, 24, 28, 32, 36, 42, 48, 81 },
+                    scale = 4,
+                    width = { 256, 256, 256, 256, 256, 512, 512, 512, 512, 512, 512, 512, 1024 },
+                    height = { 128, 128, 128, 256, 256, 256, 256, 512, 512, 512, 512, 512, 1024 }
+                },
+                {
+                    suffix = " outlined", -- Suffix for the outlined font
+                    bold = 0,
+                    italic = 0,
+                    outline = 1, -- Outline setting (1 for true)
+                    size = { 6, 7, 8, 9, 11, 14, 16, 18, 21, 24, 26 },
+                    new_size = { 7, 8, 9, 10, 12, 16, 18, 20, 24, 32, 36 },
+                    scale = 4,
+                    width = { 256, 256, 256, 256, 256, 512, 512, 512, 512, 512, 1024 },
+                    height = { 128, 256, 256, 256, 256, 256, 256, 512, 512, 512, 512 }
+                }
+            }
         }
-    }
-}
 
    ```
 
