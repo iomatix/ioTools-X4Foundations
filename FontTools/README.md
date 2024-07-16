@@ -28,7 +28,7 @@ Configuration files are set up to support the conversion of Latin fonts with spe
    - Open the `config_fonts.lua` file in this directory and edit its settings as desired.
 
       ```
-      -- Configuration file settings example for Latin fonts support.
+      -- Configuration config_fonts.lua Example.
 
         Fonts = {
             playwriteCuba = { -- Unique identifier for the font configuration. Must be unique.
