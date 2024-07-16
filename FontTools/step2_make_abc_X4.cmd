@@ -43,6 +43,7 @@ echo.
 :: Run ImageMagick to generate signed distance fields and scale it
 echo.
 echo [LOG] Calling ImageMagick script to generate signed distance fields and scale it...
+echo [INFO] Please be patient, it will take a few minutes to process all files.
 call magick_image_convert.bat
 if errorlevel 1 (
         echo [ERROR] Failed to generate signed distance fields.
