@@ -7,6 +7,11 @@ Welcome to ioTools - Modding Kit, a repository designed to enhance the modding e
 
 ## Tools Overview:
 
+### FontTools - Generating font files for X4 Foundations never been easier
+
+FontTools is package of tools designed to automate generating dictionaries files for X4 Foundations with its texture maps, the `.dds` files.
+Everything is automated right now, and only requirements are to have the desired font installed on the PC running the scripts, configuring the `config_fonts.lua` file and running `start.bat` - if you know what are you doing. If not, just stick to the tool manual - only one additional manual action is necessary to be sure that the scripts will work.
+
 ### XRCatTool - Unpacker for X4 Foundations
 
 XRCatTool is a tool specifically designed to unpack catalogs from X4 Foundations. It simplifies the process of extracting game data for modding purposes.
@@ -41,3 +46,5 @@ Ensure you have Python 3 installed for the WebTool and follow the setup instruct
 Contributions and feedback are welcome to improve and expand the capabilities of ioTools - Kit. Feel free to fork the repository and submit pull requests with enhancements or fixes.
 
 Enjoy modding with ioTools - Kit!
+
+### By downloading mods from Nexus you will support their authors.
