@@ -181,6 +181,7 @@ if type(Fonts) == "table" then
     end
 else
     print("Error: config_fonts.Fonts is not a table.")
+    os.exit(1)
 end
 
 print("[LOG OK] Font descriptors are ready.")

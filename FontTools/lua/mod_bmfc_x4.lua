@@ -25,12 +25,12 @@ autoFitFontSizeMin=0
 autoFitFontSizeMax=0
 
 # character alignment
-paddingDown=5
-paddingUp=5
-paddingRight=5
-paddingLeft=5
-spacingHoriz=5
-spacingVert=5
+paddingDown=%d
+paddingUp=%d
+paddingRight=%d
+paddingLeft=%d
+spacingHoriz=%d
+spacingVert=%d
 useFixedHeight=1
 forceZero=0
 widthPaddingFactor=0.00
@@ -64,11 +64,29 @@ chars=32-126,160-382,402,508-511,567
 # imported icon images
 ]]
 
-function generate(fontname, size, bold, italic, outline, width, height)
+function generate(fontname, size, scale, bold, italic, outline, width, height)
+    -- Default values
     local a, r, g, b = 2, 4, 4, 4
-    if outline > 0 then
+    local padding = 5
+    local spacing = 5
+    
+    -- Adjust values based on outline
+    if outline and type(outline) == "number" and outline > 0 then
         a, r, g, b = 1, 0, 0, 0
     end
-    local txt = string.format(content, fontname, size, bold, italic, width, height, a, r, g, b, outline)
+    
+    -- Check if any argument is nil before calling string.format
+    if not (fontname and size and scale and bold and italic and outline and width and height) then
+        print("Missing or nil argument")
+        os.exit(1)
+    end
+    
+    -- Generate the formatted string
+    local success, txt = pcall(string.format, content, fontname, size*scale, bold, italic, padding*scale, padding*scale, padding*scale, padding*scale, spacing*scale, spacing*scale, width, height, a, r, g, b, outline)
+    if not success then
+        print("Error formatting string: " .. txt)
+        os.exit(1)
+    end
+    
     return txt
 end

@@ -7,22 +7,22 @@ Fonts = {
             bold = 0,
             italic = 0,
             outline = 0,
-            scale = 4,
-            size =     { 216 },
-            new_size = { 216 },
-            width =    { 5120 },
-            height =   { 2048 }
+            scale = 16,
+            size =     { 55 },
+            new_size = { 55 },
+            width =    { 10240 },
+            height =   { 5120 }
         },
         {
             suffix = " Bold",
             bold = 1,
             italic = 0,
             outline = 0,
-            scale = 4,
-            size =     { 216 },
-            new_size = { 216 },
-            width =    { 5120 },
-            height =   { 2048 }
+            scale = 16,
+            size =     { 55 },
+            new_size = { 55 },
+            width =    { 10240 },
+            height =   { 5120 }
         }
     }
     --[[
