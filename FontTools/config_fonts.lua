@@ -1,5 +1,4 @@
 package.path = "./?.lua;./lua/?.lua"
-
 Fonts = {
     audiowide = {
         fontname = "Audiowide",
@@ -9,10 +8,10 @@ Fonts = {
             italic = 0,
             outline = 0,
             scale = 4,
-            size =     { 32 },
-            new_size = { 32 },
-            width =    { 1024 },
-            height =   { 512 }
+            size =     { 216 },
+            new_size = { 216 },
+            width =    { 5120 },
+            height =   { 2048 }
         },
         {
             suffix = " Bold",
@@ -20,10 +19,10 @@ Fonts = {
             italic = 0,
             outline = 0,
             scale = 4,
-            size =     { 32 },
-            new_size = { 32 },
-            width =    { 1024 },
-            height =   { 512 }
+            size =     { 216 },
+            new_size = { 216 },
+            width =    { 5120 },
+            height =   { 2048 }
         }
     }
     --[[
