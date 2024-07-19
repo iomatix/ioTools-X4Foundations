@@ -16,3 +16,8 @@ This repository contains a simple WebApp tool designed initially for browsing do
 3. **Accessing the WebApp:**
    - Navigate to the provided URL in your web browser to use the tool.
 
+
+### TODO
+
+- common.xsd aiscripts.xsd and md.xsd as HTML files with embedded CSS stylesheets for better cross-browser compatibility.
+
