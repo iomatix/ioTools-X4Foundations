@@ -13,7 +13,7 @@ setlocal
 
 
 :: Set the input files (adjust as needed)
-set "input_files=ext_01.cat ext_02.cat ext_03.cat ext_04.cat ext_05.cat ext_06.cat ext_07.cat ext_08.cat ext_09.cat"
+set "input_files=01.cat 02.cat 03.cat 04.cat 05.cat 06.cat 07.cat 08.cat 09.cat"
 
 :: Set the output directory to the current working directory
 set "output_dir=%~dp0_unpacked"
