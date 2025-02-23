@@ -40,6 +40,5 @@ if defined CHOSEN_PATH (
 )
 
 echo.
-pause
 
 endlocal
