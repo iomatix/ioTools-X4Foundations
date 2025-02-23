@@ -42,6 +42,10 @@
             margin-bottom: 20px;
             font-style: italic;
         }
+        .external-link { margin-left: 10px; font-size: 0.9em; color: #0069af; }
+        .external-link a:hover{
+            color: #9ef;
+        }
     </style>
 </head>
 
@@ -67,7 +71,7 @@
 
         // Fetch the list of items (directories and files) for the given folder
         function fetchItemList(folder) {
-            document.getElementById('folderInfo').textContent = `Browsing folder: ${folder}`;
+            document.getElementById('folderInfo').textContent = `Browsing folder: ${folder === '.' ? 'root' : folder}`;
             fetch(`/api?folder=${encodeURIComponent(folder)}`)
                 .then(response => {
                     if (!response.ok) {
@@ -114,7 +118,7 @@
                     // Remove leading slash from the file path before sending it as a parameter
                     const fileParam = item.path.startsWith('/') ? item.path.substring(1) : item.path;
                     extLink.href = `/launch?file=${encodeURIComponent(fileParam)}`;
-                    extLink.textContent = '[Open externally]';
+                    extLink.textContent = ' ..open in external app';
                     extLink.className = 'external-link';
                     extLink.target = '_blank';
                     div.appendChild(extLink);

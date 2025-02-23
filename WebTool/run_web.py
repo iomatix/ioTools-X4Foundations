@@ -5,6 +5,7 @@ import os
 import json
 import urllib.parse
 import subprocess  # used to launch the external program
+import platform
 
 def get_local_ip():
     try:
@@ -18,6 +19,9 @@ def get_local_ip():
         return None
 
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
+    # This will be set in main() to the chosen external editor command
+    external_editor = None
+
     def do_GET(self):
         parsed_path = urllib.parse.urlparse(self.path)
         
@@ -41,9 +45,8 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_error(400, "Invalid file type for external launch.")
                 return
             try:
-                # Launch external program. Adjust the command below as needed.
-                # For example, Notepad++ is free and widely used.
-                subprocess.Popen(["notepad++.exe", file_path])
+                # Launch external program using the command provided at startup.
+                subprocess.Popen([CustomHandler.external_editor, file_path])
                 self.send_response(200)
                 self.send_header('Content-type', 'text/plain')
                 self.end_headers()
@@ -103,6 +106,18 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
 
 def main():
     try:
+        # Determine a default external editor based on OS.
+        if platform.system() == "Windows":
+            default_editor = "XmlNotepad.exe"  # You can change to "notepad++.exe" if preferred.
+        else:
+            default_editor = "gedit"  # Or any other preferred Linux editor.
+
+        # Ask user for external editor command, with a default.
+        external_editor = input(f"Enter external editor command (default: {default_editor}): ") or default_editor
+
+        # Set the external editor command in the CustomHandler.
+        CustomHandler.external_editor = external_editor
+
         port = int(input("Enter port (default 8080): ") or 8080)
         local_ip = get_local_ip()
         if local_ip:
