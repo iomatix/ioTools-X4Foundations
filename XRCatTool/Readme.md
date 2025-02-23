@@ -8,7 +8,7 @@ This directory contains automation scripts for unpacking game files using XRCatT
    - Extract the scripts to the main folder of your X4: Foundations game installation.
 
 2. **Setting up XRCatTool:**
-   - Run `xrcattool__setpath.bat` with administrator privileges.
+   - Run `_xrcattool__setpath.bat` with administrator privileges.
    - This step configures the X Tools main executable location to the `XRCATTOOL_PATH` system environment variable.
 
 3. **Running the Scripts:**
@@ -27,6 +27,8 @@ This directory contains automation scripts for unpacking game files using XRCatT
 
 > **Warning:**
 > Make sure that Python is installed on your machine. New features utilizes Python.
+
+- **Notable Change**: Renamed `xrcattool__setpath` to `_xrcattool__setpath`.
 
 ##### New Ultimate Unpacking Script
 
