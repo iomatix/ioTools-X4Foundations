@@ -117,7 +117,11 @@ a.datatype {
 }
 
 .menu-container {
-    max-width: 60%;
+    display: flex;
+    justify-content: center;
+    box-sizing: content-box;
+    flex-direction: column;
+    max-width: 65%;
     margin: 0 auto;
     /* Center horizontally */
     padding: 20px;
@@ -125,13 +129,16 @@ a.datatype {
     /* Dark card background color */
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    align-items: center;
 }
 
 .menu-button {
     display: block;
+    box-sizing: content-box;
+    flex-grow: 1;
     width: 100%;
-    margin-bottom: 10px;
-    padding: 10px;
+    margin-bottom: 5px;
+    padding: 12px;
     text-align: center;
     background-color: #17a2b8;
     /* Dark button background color */
@@ -142,6 +149,11 @@ a.datatype {
     transition: background-color 0.3s ease;
     text-decoration: none;
     /* Remove underline */
+}
+
+.menu-button.menu-button-small {
+    width: 75%;
+    padding: 3px;
 }
 
 .menu-button:hover {

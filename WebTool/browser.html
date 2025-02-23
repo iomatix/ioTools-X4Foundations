@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>XML/XSL/XSD File Browser</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        h1 {
+            text-align: center;
+        }
+
+        .file-list {
+            margin-top: 20px;
+        }
+
+        .item {
+            padding: 10px;
+            border-bottom: 1px solid #669;
+            display: flex;
+            align-items: center;
+        }
+
+        .item a {
+            text-decoration: none;
+            color: #BEF;
+            font-size: 1.1em;
+        }
+
+        .item a:hover {
+            color: #007acc;
+        }
+
+        .folder-info {
+            text-align: center;
+            color: #EFB;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container p-2 mt-5 mb-10 menu-container">
+        <h1>X4 Catalog Explorer - XML/XSL/XSD</h1>
+        <a class="menu-button" href="index.html">Go to Home Page</a>
+        <div id="folderInfo" class="folder-info"></div>
+    </div>
+    <div class="container mt-10 p-2 card-container">
+        <div id="itemList" class="file-list">
+            Loading items...
+        </div>
+    </div>
+
+    <script>
+        // Function to read URL parameters
+        function getQueryParam(param) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(param);
+        }
+
+        // Fetch the list of items (directories and files) for the given folder
+        function fetchItemList(folder) {
+            document.getElementById('folderInfo').textContent = `Browsing folder: ${folder === '.' ? 'root' : folder}`;
+            fetch(`/api?folder=${encodeURIComponent(folder)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network error');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayItems(data);
+                })
+                .catch(error => {
+                    document.getElementById('itemList').innerHTML = 'Error loading items: ' + error;
+                });
+        }
+
+        // Display items on the page
+        function displayItems(items) {
+            const itemListDiv = document.getElementById('itemList');
+            itemListDiv.innerHTML = '';
+            if (items.length === 0) {
+                itemListDiv.innerHTML = 'No items found.';
+                return;
+            }
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'item';
+                const link = document.createElement('a');
+                if (item.type === 'directory') {
+                    // For directories, navigate to browser.html with folder parameter set to the directory's relative path.
+                    // Remove the leading slash from the item path.
+                    const folderPath = item.path.startsWith('/') ? item.path.substring(1) : item.path;
+                    link.href = `browser.html?folder=${encodeURIComponent(folderPath)}`;
+                    link.textContent = item.name + '/';
+                } else {
+                    // For files, link directly for raw access.
+                    link.href = item.path;
+                    link.target = '_blank';
+                    link.textContent = item.name;
+                }
+                div.appendChild(link);
+                itemListDiv.appendChild(div);
+            });
+        }
+
+        // Initialization – read the 'folder' parameter (default is current directory, ".")
+        window.addEventListener('DOMContentLoaded', () => {
+            const folder = getQueryParam('folder') || '.';
+            fetchItemList(folder);
+        });
+    </script>
+</body>
+
+</html>
