@@ -4,6 +4,9 @@ This repository contains a simple WebApp tool designed initially for browsing do
 
 ## How to Use
 
+> **Warning:**
+> Make sure that [Python](https://www.python.org/downloads/) is installed on your machine. The webserver runs on Python.
+
 1. **Setup:**
    - Extract the WebTool into the main folder of your unpacked game files.
 
@@ -19,4 +22,6 @@ This repository contains a simple WebApp tool designed initially for browsing do
 
 ### News
 
-- Introduced browsing module to explore files unpacked with XRCatTool scripts. The browser can browse through catalogues, open them in the browser or via external app. Windows default app is [XmlNotepad](https://microsoft.github.io/XmlNotepad/#install/), while other OS tries to use gedit. User can set up the command during script initialization.
+#### 2025-02
+
+- Introduced browsing module to explore files unpacked with XRCatTool scripts. The browser can browse through catalogues, open them in the browser or via external app. Windows default app is [XmlNotepad](https://microsoft.github.io/XmlNotepad/#install/) via [ClickOnce Installer](https://lovettsoftwarestorage.blob.core.windows.net/downloads/XmlNotepad/XmlNotepad.application), while other OS tries to use gedit. User can set up the command during script initialization.
