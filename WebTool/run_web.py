@@ -50,7 +50,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header('Content-type', 'text/plain')
                 self.end_headers()
-                self.wfile.write(f"Launched external program for {file_param}".encode('utf-8'))
+                self.wfile.write(f"Launching external program for {file_param}.\n\nPlease wait...".encode('utf-8'))
             except Exception as e:
                 self.send_error(500, f"Error launching external program: {e}")
             return
@@ -108,7 +108,7 @@ def main():
     try:
         # Determine a default external editor based on OS.
         if platform.system() == "Windows":
-            default_editor = "XmlNotepad.exe"  # You can change to "notepad++.exe" if preferred.
+            default_editor = "_run_XmlNotepad.bat"  # You can change to e.g. "notepad++.exe" or "notepad.exe".
         else:
             default_editor = "gedit"  # Or any other preferred Linux editor.
 

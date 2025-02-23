@@ -42,9 +42,15 @@
             margin-bottom: 20px;
             font-style: italic;
         }
-        .external-link { margin-left: 10px; font-size: 0.9em; color: #0069af; }
-        .external-link a:hover{
-            color: #9ef;
+
+        .external-link {
+            margin-left: 10px !important;
+            font-size: 0.69em !important;
+            color: #0069af !important;
+        }
+
+        .external-link:hover {
+            color: #9ef !important;
         }
     </style>
 </head>
@@ -53,7 +59,7 @@
     <div class="container p-2 mt-5 mb-10 menu-container">
         <h1>X4 Catalog Explorer - XML/XSL/XSD</h1>
         <a class="menu-button" href="index.html">Go to Home Page</a>
-        <a href="libraries" class="menu-button">Go to Raw Library Browser</a>
+        <a href="#" id="rawbrowserlink" class="menu-button">Raw Browsing</a>
         <div id="folderInfo" class="folder-info"></div>
     </div>
     <div class="container mt-10 p-2 card-container">
@@ -68,6 +74,15 @@
             const params = new URLSearchParams(window.location.search);
             return params.get(param);
         }
+
+        // Function to dynamically update the link's href attribute
+        function updateRawBrowserLink() {
+            const folder = getQueryParam('folder') || '.';
+            const link = document.getElementById('rawbrowserlink');
+            link.href = `${folder}`;
+        }
+        // Call the function when the page loads to update the link
+        document.addEventListener('DOMContentLoaded', updateRawBrowserLink);
 
         // Fetch the list of items (directories and files) for the given folder
         function fetchItemList(folder) {
@@ -118,7 +133,7 @@
                     // Remove leading slash from the file path before sending it as a parameter
                     const fileParam = item.path.startsWith('/') ? item.path.substring(1) : item.path;
                     extLink.href = `/launch?file=${encodeURIComponent(fileParam)}`;
-                    extLink.textContent = ' ..open in external app';
+                    extLink.textContent = '..open in external app';
                     extLink.className = 'external-link';
                     extLink.target = '_blank';
                     div.appendChild(extLink);

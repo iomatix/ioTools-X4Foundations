@@ -12,12 +12,11 @@ This repository contains a simple WebApp tool designed initially for browsing do
 2. **Running the WebApp:**
    - Execute `_run_web.bat` and provide the desired port number (default is 8080).
    - The WebApp will start on the specified port. You can open a browser window by holding down the CTRL key and left-clicking on the generated addresses in the console output.
+   - User can provide command to execute installed app. It allows to use the `...open in external app` feature.
 
 3. **Accessing the WebApp:**
    - Navigate to the provided URL in your web browser to use the tool.
 
+### News
 
-### TODO
-
-- common.xsd aiscripts.xsd and md.xsd as HTML files with embedded CSS stylesheets for better cross-browser compatibility.
-
+- Introduced browsing module to explore files unpacked with XRCatTool scripts. The browser can browse through catalogues, open them in the browser or via external app. Windows default app is [XmlNotepad](https://microsoft.github.io/XmlNotepad/#install/), while other OS tries to use gedit. User can set up the command during script initialization.

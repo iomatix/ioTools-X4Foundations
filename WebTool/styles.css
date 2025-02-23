@@ -108,12 +108,17 @@ a.datatype {
 .card-container {
     max-width: 60%;
     margin: 0 auto;
-    /* Center horizontally */
     padding: 20px;
     background-color: #111;
-    /* Dark card background color */
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Adjust max-width for smaller screens */
+@media (max-width: 800px) {
+    .card-container {
+        max-width: 100%;
+    }
 }
 
 .menu-container {
@@ -123,13 +128,18 @@ a.datatype {
     flex-direction: column;
     max-width: 65%;
     margin: 0 auto;
-    /* Center horizontally */
     padding: 20px;
     background-color: #111;
-    /* Dark card background color */
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     align-items: center;
+}
+
+/* Adjust max-width for smaller screens */
+@media (max-width: 800px) {
+    .menu-container {
+        max-width: 100%;
+    }
 }
 
 .menu-button {
