@@ -108,7 +108,10 @@ if "%input_files%"=="" (
 
 :: Check if any files were found
 if not defined file_list (
+    echo.
     echo No valid files found. Please check your input and try again.
+    echo. Revisit your input files or file_list.txt and try again.
+    echo.
     goto :start
 )
 

@@ -1,5 +1,6 @@
-1
-2
-3
-4
-5 6 7
+ex\ex_01.cat
+ex_02.cat
+those\are an\examples\test.cat
+Adjust the `file_list.txt` entries manually or
+remove the `file_list.txt` file if prefer to unpack everything at once
+Make sure to check the Quick Guide above
