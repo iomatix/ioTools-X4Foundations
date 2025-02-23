@@ -1,5 +1,5 @@
-ex\ex_01.cat
-ex_02.cat
+test_ex\ex_01.cat
+test_ex_02.cat
 those\are an\examples\test.cat
 Adjust the `file_list.txt` entries manually or
 remove the `file_list.txt` file if prefer to unpack everything at once
