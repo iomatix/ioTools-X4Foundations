@@ -4,6 +4,7 @@ import socket
 import os
 import json
 import urllib.parse
+import subprocess  # used to launch the external program
 
 def get_local_ip():
     try:
@@ -19,6 +20,38 @@ def get_local_ip():
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         parsed_path = urllib.parse.urlparse(self.path)
+        
+        # Endpoint to launch external program: /launch?file=relative/path/to/file
+        if parsed_path.path == '/launch':
+            query = urllib.parse.parse_qs(parsed_path.query)
+            file_param = query.get("file", [None])[0]
+            if not file_param:
+                self.send_error(400, "No file specified.")
+                return
+            # Prevent directory traversal by rejecting '..'
+            if ".." in file_param:
+                self.send_error(400, "Invalid file parameter.")
+                return
+            file_path = os.path.join(os.getcwd(), file_param.lstrip("/"))
+            if not os.path.isfile(file_path):
+                self.send_error(404, "File not found.")
+                return
+            # Allow only certain file types
+            if not file_path.lower().endswith(('.xml', '.xsl', '.xsd')):
+                self.send_error(400, "Invalid file type for external launch.")
+                return
+            try:
+                # Launch external program. Adjust the command below as needed.
+                # For example, Notepad++ is free and widely used.
+                subprocess.Popen(["notepad++.exe", file_path])
+                self.send_response(200)
+                self.send_header('Content-type', 'text/plain')
+                self.end_headers()
+                self.wfile.write(f"Launched external program for {file_param}".encode('utf-8'))
+            except Exception as e:
+                self.send_error(500, f"Error launching external program: {e}")
+            return
+
         # API endpoint: /api?folder=folder_path
         if parsed_path.path == '/api':
             query = urllib.parse.parse_qs(parsed_path.query)
