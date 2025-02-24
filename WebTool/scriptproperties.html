@@ -15,6 +15,7 @@
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <script type="module" src="scripts/main.js"></script>
 </head>
+
 <body>
     <div class="container p-2 mt-5 mb-10 menu-container">
         <h1 class="text-center">Script Property Documentation</h1>
@@ -25,18 +26,18 @@
             <form id="filterForm" class="base">
                 <div class="mb-3">
                     <label for="expression" class="label">Filter Expression:</label>
-                    <input id="expression" class="form-control" autocomplete="off" oninput="debouncedUpdate()">
+                    <input id="expression" class="form-control" autocomplete="off">
                 </div>
                 <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" id="sort" onchange="debouncedUpdate()">
+                    <input class="form-check-input" type="checkbox" id="sort">
                     <label class="form-check-label" for="sort">Sort properties</label>
                 </div>
                 <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" id="show_md" checked onchange="debouncedUpdate()">
+                    <input class="form-check-input" type="checkbox" id="show_md" checked>
                     <label class="form-check-label" for="show_md">Show MD-specific keywords</label>
                 </div>
                 <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" id="show_ai" checked onchange="debouncedUpdate()">
+                    <input class="form-check-input" type="checkbox" id="show_ai" checked>
                     <label class="form-check-label" for="show_ai">Show AI-specific keywords</label>
                 </div>
             </form>
