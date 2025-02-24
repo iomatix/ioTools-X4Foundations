@@ -7,10 +7,10 @@ Welcome to ioTools - Modding Kit, a repository designed to enhance the modding e
 
 ## Tools Overview:
 
-### FontTools - Generating font files for X4 Foundations never been easier
+### FontTools - Generating font files for X4 Foundations has never been easier
 
-FontTools is package of tools designed to automate generating dictionaries files for X4 Foundations with its texture maps, the `.dds` files.
-Everything is automated right now, and only requirements are to have the desired font installed on the PC running the scripts, configuring the `config_fonts.lua` file and running `start.bat` - if you know what are you doing. If not, just stick to the tool manual - only one additional manual action is necessary to be sure that the scripts will work.
+FontTools is a package of tools designed to automate generating dictionary files for X4 Foundations with its texture maps, the `.dds` files.
+Everything is automated right now, and the only requirements are to have the desired font installed on the PC running the scripts, configuring the `config_fonts.lua` file, and running `start.bat` - if you know what are you doing. If not, just stick to the tool manual - only one additional manual action is necessary to be sure that the scripts will work.
 
 ### XRCatTool - Unpacker for X4 Foundations
 
@@ -25,7 +25,7 @@ XRCatTool is a tool specifically designed to unpack catalogs from X4 Foundations
 - **xrcattool_unpack_xyz_dlc:**
   Unpacks catalogs from DLCs of X4 Foundations (e.g., Boron, Pirate, Split, Terran, Timelines). This script also consolidates all extracted data into a single folder.
 
-- **New** Ultimate Unpacking Script - the script _xrcattool_unpack_custom.bat supports unpacking .cat files with greater flexibility and user control. It provides features like Automatic File Discovery, Automatic File Discovery, Preserved Directory Structure, Relative Paths, Advanced Usage, and a User-Friendly Guide on how to use it.
+- **New** **Ultimate Unpacking Script** - the script `_xrcattool_unpack_custom.bat` supports unpacking `.cat` files with greater flexibility and user control. It provides features like **Automatic File Discovery, Automatic File Discovery, Preserved Directory Structure, Relative Paths, Advanced Usage, and a User-Friendly Guide** on how to use it.
 
 ### WebTool - Simple WebApp for Modding Essentials
 
@@ -33,8 +33,8 @@ The WebTool is a straightforward WebApp providing essential tools for modding X4
 
 - **Functionality:**
   - Requires Python 3 for operation. It supports exploring MD documentation via `scriptproperties.html`.
-  - Supports exploring XML files and opens them in browser or external tools.
-  - Provides hosting of raw libraries available to import within your scripts.
+  - **Supports exploring XML files and opens them in browser or external tools.**
+  - **Provides hosting of raw libraries available to import within your scripts.**
   - Includes basic support for `jobeditor.html`.
   - Custom `styles.css` enhances usability with a modern look.
 
