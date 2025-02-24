@@ -13,7 +13,7 @@ This directory contains automation scripts for unpacking game files using XRCatT
 
 3. **Running the Scripts:**
    - Once the setup is completed successfully, run the desired script from this directory.
-   - `__xrcattool_unpack_custom.bat` simplifies the process of unpacking.
+   - `_xrcattool_unpack_custom.bat` simplifies the process of unpacking.
 
 ### Notes:
 
