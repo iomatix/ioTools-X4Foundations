@@ -27,4 +27,14 @@ This repository contains a simple WebApp tool designed initially for browsing do
 
 #### 2025-02
 
+- TODO:scriptproperties - Replaced synchronous XMLHttpRequests with asynchronouse to prevent freezes of UI.
+- TODO:scriptproperties - Fixed content replacement in forceUpdate.
+- TODO:scriptproperties - Optimized XSLT processing by caching results if possible and debouncing the update function to prevent excessive transformations.
+- TODO:scriptproperties - Improved sorting ensuring it's using efficient XPath expressions or indexes.
+- TODO:scriptproperties - Since ActiveXObject if for old IE versions, removed the code, targeting only modern browsers and closing support for old-dated ones. (If some kind of a mad man still uses old IE, **please stop and get some help**)
+- TODO: scriptproperties - Added autocomplete functionality.
+- TODO: scriptproperties - Fixed memory leaks by wraping in a module pattern and avoided pollution within the global namespace.
+- TODO: scriptproperties - Debouncing the input to improve experience to people who are typing faster than one char per 500ms.
+- TODO: scriptproperties - Added error handling.
+- TODO: scriptproperties - Removed redundant code.
 - Introduced browsing module to explore files unpacked with XRCatTool scripts. The browser can browse through catalogs, open them in the browser, or via an external app. Windows default app is [XmlNotepad](https://microsoft.github.io/XmlNotepad/#install/) installed via [ClickOnce Installer](https://lovettsoftwarestorage.blob.core.windows.net/downloads/XmlNotepad/XmlNotepad.application), while other OS tries to use gedit. Users can set up the command during script initialization.
