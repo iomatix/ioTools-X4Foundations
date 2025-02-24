@@ -169,5 +169,7 @@ if %errorlevel% equ 0 (
     echo Repacking didn't go well. Check for errors.
 )
 
+echo.
 pause
+:: Exit the script
 endlocal
