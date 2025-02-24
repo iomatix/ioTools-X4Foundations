@@ -35,7 +35,7 @@ This repository contains a simple WebApp tool designed initially for browsing do
 - [1.1.0] scriptproperties - Fixed content replacement in forceUpdate.
 - [1.1.0] scriptproperties - Optimized XSLT processing by caching results if possible and debouncing the update function to prevent excessive transformations.
 - [1.1.0] scriptproperties - Improved sorting ensuring it's using efficient XPath expressions or indexes.
-- [1.1.0] scriptproperties - Since ActiveXObject if for old IE versions, removed the code, targeting only modern browsers and closing support for old-dated ones. (If some kind of a mad man still uses old IE, **please stop and get some help**)
+- [1.1.0] scriptproperties - Since ActiveXObject if for old IE versions, removed the code, targeting only modern browsers and closing support for old-dated ones. <small>(If some kind of a mad man still uses old IE, **please stop and get some help**)</small>
 - [1.1.0] scriptproperties - Added autocomplete functionality.
 - [1.1.0] scriptproperties - Fixed memory leaks by wraping in a module pattern and avoided pollution within the global namespace.
 - [1.1.0] scriptproperties - Debouncing the input to improve experience to people who are typing faster than one char per 500ms.
