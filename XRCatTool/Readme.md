@@ -35,7 +35,7 @@ This directory contains automation scripts for unpacking game files using XRCatT
 
 - **Enhanced Unpacking Script**: The script `_xrcattool_unpack_custom.bat` supports unpacking .cat files with greater flexibility and user control.
 - **Automatic File Discovery**: If no input files are specified, the script will automatically search for and unpack ALL .cat files in the current directory and its subdirectories, preserving the folder structure.
-- **Relative Paths**: Users can now provide relative paths to .cat files (e.g., extensions\mod1\01.cat or ..\extensions\02.cat) with input or by using the **file_list.txt**. The user is able to specify relative paths to .cat files within **file_list.txt**. One file per line, but do not use quotes.
+- **Relative Paths**: Users can now provide relative paths to .cat files (e.g., extensions\mod1\01.cat or ..\extensions\02.cat) with input or by using the **file_list.txt**. The user can specify relative paths to .cat files within **file_list.txt**. One file per line, but do not use quotes.
 - **Advanced Usage**: Users can unpack entire mod folders or the entire extensions directory at once by leaving the input blank.
-- **Preserved Directory Structure**: Unpacked files are saved in the _unpacked folder, maintaining the original directory structure for better organization and usability.
+- **Preserved Directory Structure**: Unpacked files are saved in the `_unpacked` folder, **maintaining the original directory structure** for better organization and usability.
 - **User-Friendly Guide**: The script includes a detailed guide on usage, troubleshooting, and advanced features, making it easier for users to understand and adapt the script to their needs.
