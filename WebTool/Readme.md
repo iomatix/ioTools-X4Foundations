@@ -29,15 +29,15 @@ This repository contains a simple WebApp tool designed initially for browsing do
 
 >1.1.0 is WIP
 
-- [1.1.0] WebApp - Improved Path Validating, Error Handling, Performance Optimization, Securtity, Code Organization, Validation and Outputs Handling at python's backend.
+- [1.1.0] WebApp - Improved Path Validating, Error Handling, Performance Optimization, Security, Code Organization, Validation and Outputs Handling at python's backend.
 - [1.1.0] xmlbrowser - Removed `Raw Browsing` button from the root folder.
-- [1.1.0] scriptproperties - Replaced synchronous XMLHttpRequests with asynchronouse to prevent freezes of UI.
+- [1.1.0] scriptproperties - Replaced synchronous XMLHttpRequests with asynchronous to prevent freezes of UI.
 - [1.1.0] scriptproperties - Fixed content replacement in forceUpdate.
 - [1.1.0] scriptproperties - Optimized XSLT processing by caching results if possible and debouncing the update function to prevent excessive transformations.
 - [1.1.0] scriptproperties - Improved sorting ensuring it's using efficient XPath expressions or indexes.
 - [1.1.0] scriptproperties - Since ActiveXObject if for old IE versions, removed the code, targeting only modern browsers and closing support for old-dated ones. <sup><sub>(If some kind of a mad man still uses old IE, **please stop and get some help**)</sub></sup>
 - [1.1.0] scriptproperties - Added autocomplete functionality.
-- [1.1.0] scriptproperties - Fixed memory leaks by wraping in a module pattern and avoided pollution within the global namespace.
+- [1.1.0] scriptproperties - Fixed memory leaks by wrapping in a module pattern and avoided pollution within the global namespace.
 - [1.1.0] scriptproperties - Debouncing the input to improve experience to people who are typing faster than one char per 500ms.
 - [1.1.0] scriptproperties - Added error handling.
 - [1.1.0] scriptproperties - Removed redundant code.
