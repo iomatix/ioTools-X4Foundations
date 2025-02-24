@@ -1,0 +1,81 @@
+/* general */
+body {
+    font-size: 12pt;
+    font-weight: normal;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    margin: 0;
+}
+
+
+.importfailure {
+    color: rgb(208, 37, 97);  
+}
+
+.scriptspecific {
+    color: rgb(208, 37, 97); 
+}
+
+.pseudodatatype {
+    color: rgb(208, 37, 97); 
+}
+
+table.properties {
+    width: 95%; 
+    margin-top: 1px;
+    margin-bottom: 1px;
+    margin-left: auto;
+    margin-right: auto;
+    border-style: solid;
+    border-width: 1px;
+    background-color: #2e2e48;
+    text-align: left;
+    font-size: 9pt;
+    flex: 1 1 auto; /* Allow table to grow and shrink */
+}
+
+td.property {
+    background-color: #36373e; 
+}
+
+.propertyname {
+    color: rgb(200, 173, 64);
+}
+
+.comment {
+    font-style: italic;
+    font-weight: normal;
+}
+
+a.datatype {
+    color: rgb(81, 158, 225);
+}
+.propertyname {
+    color: rgb(200, 173, 64);
+}
+
+.comment {
+    font-style: italic;
+    font-weight: normal;
+}
+
+a.datatype {
+    color: rgb(81, 158, 225);
+}
+
+.importfailure {
+    color: rgb(208, 37, 37); 
+}
+
+.scriptspecific {
+    color: rgb(208, 37, 97); 
+}
+
+.pseudodatatype {
+    color: rgb(208, 37, 97); 
+}
+
+
+

@@ -1,11 +1,3 @@
-/* Additional custom styles for form elements */
-#expression,
-#sort,
-#show_md,
-#show_ai {
-    margin-bottom: 10px;
-}
-
 /* Custom styles */
 body {
     background-color: #000;
@@ -20,23 +12,47 @@ h1 {
     font-size: 16pt;
     font-weight: bold;
     text-align: left;
+    margin: 6px;
 }
 
 h2 {
     font-size: 13pt;
     font-weight: bold;
     text-align: left;
+    margin: 6px;
 }
 
 h3 {
     font-size: 11pt;
     font-weight: bold;
     text-align: left;
+    margin: 6px;
 }
 
 p {
     text-align: left;
+    margin: 10px;
 }
+
+/* Flexbox container for the main content */
+.container {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+/* Flexbox container for the table */
+.table-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    justify-content: center;
+    align-items: center;
+    padding: 5px;
+}
+
 
 table.base {
     width: 95%;
@@ -49,25 +65,16 @@ table.base {
     background-color: #2b2b3f;
     text-align: left;
     font-size: 11pt;
-}
-
-table.properties {
-    width: 95%;
-    margin-top: 1px;
-    margin-bottom: 1px;
-    margin-left: auto;
-    margin-right: auto;
-    border-style: solid;
-    border-width: 1px;
-    background-color: #2e2e48;
-    text-align: left;
-    font-family: Verdana, arial, sans-serif;
-    font-size: 9pt;
+    padding: 8px;
 }
 
 td {
+    padding: 4px;
     vertical-align: top;
-    color: rgb(238, 228, 228);
+}
+
+tr {
+    margin: 3px;
 }
 
 /* Apply background color to even rows */
@@ -80,42 +87,48 @@ tr:nth-child(odd) {
     background-color: #26263e;
 }
 
-.propertyname {
-    color: rgb(200, 173, 64);
+.form-container {
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    justify-content: left;
+    align-items: left;
 }
-
-.comment {
-    font-style: italic;
-    font-weight: normal;
+form.label{
+    font-size: larger;
+    font-weight: bold;
 }
-
-a.datatype {
-    color: rgb(81, 158, 225);
-}
-
-.importfailure {
-    color: rgb(145, 47, 82);
-}
-
-.scriptspecific {
-    color: rgb(145, 47, 82);
-}
-
-.pseudodatatype {
-    color: rgb(145, 47, 82);
+form.base{
+    width: 95%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    border-style: solid;
+    border-width: 2px;
+    background-color: #2b2b3f;
+    text-align: left;
+    font-size: smaller;
+    padding: 6px;
 }
 
 .card-container {
-    max-width: 60%;
+    display: flex;
+    justify-content: center;
+    box-sizing: content-box;
+    flex-direction: column;
+    max-width: 65%;
     margin: 0 auto;
-    padding: 20px;
+    margin-top: 15px;
+    padding: 10px;
     background-color: #111;
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Adjust max-width for smaller screens */
-@media (max-width: 800px) {
+@media (max-width: 1000px) {
     .card-container {
         max-width: 100%;
     }
@@ -126,9 +139,10 @@ a.datatype {
     justify-content: center;
     box-sizing: content-box;
     flex-direction: column;
-    max-width: 65%;
+    max-width: 75%;
     margin: 0 auto;
-    padding: 20px;
+    margin-top: 15px;
+    padding: 15px;
     background-color: #111;
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -136,7 +150,7 @@ a.datatype {
 }
 
 /* Adjust max-width for smaller screens */
-@media (max-width: 800px) {
+@media (max-width: 1000px) {
     .menu-container {
         max-width: 100%;
     }
@@ -145,9 +159,8 @@ a.datatype {
 .menu-button {
     display: block;
     box-sizing: content-box;
-    flex-grow: 1;
-    width: 100%;
-    margin-bottom: 5px;
+    width: 90%;
+    margin: 5px;
     padding: 12px;
     text-align: center;
     background-color: #17a2b8;
@@ -162,11 +175,17 @@ a.datatype {
 }
 
 .menu-button.menu-button-small {
-    width: 75%;
+    width: 65%;
     padding: 3px;
 }
 
 .menu-button:hover {
     background-color: #0f7a87;
     /* Darker shade on hover */
+}
+
+.status-indicator {
+    display: none;
+    margin-bottom: 10px;
+    color: #007bff;
 }

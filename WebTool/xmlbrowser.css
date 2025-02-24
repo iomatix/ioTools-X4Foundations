@@ -1,0 +1,44 @@
+h1 {
+    text-align: center;
+}
+
+.file-list {
+    margin-top: 20px;
+}
+
+.item {
+    padding: 10px;
+    margin: 1px;
+    border-bottom: 1px solid #669;
+    display: flex;
+    align-items: center;
+}
+
+.item a {
+    text-decoration: none;
+    color: #BEF;
+    font-size: 1.1em;
+}
+
+.item a:hover {
+    color: #007acc;
+}
+
+.folder-info {
+    padding: 5px;
+    margin: 5px;
+    text-align: center;
+    color: #EFB;
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
+.external-link {
+    margin-left: 10px !important;
+    font-size: 0.69em !important;
+    color: #0069af !important;
+}
+
+.external-link:hover {
+    color: #9ef !important;
+}
