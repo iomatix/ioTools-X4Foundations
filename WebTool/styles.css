@@ -87,6 +87,23 @@ tr:nth-child(odd) {
     background-color: #26263e;
 }
 
+ui-menu{
+    border-style: solid;
+    border-width: 2px;
+}
+
+ui-widget{
+    background-color: rgba(65, 35, 65, 0.85);
+}
+
+ui-widget-content {
+    color: #fff;
+}
+
+ui-autocomplete{
+    font-size: 9px;
+}
+
 .form-container {
     width: auto;
     display: flex;
@@ -118,9 +135,9 @@ form.base{
     justify-content: center;
     box-sizing: content-box;
     flex-direction: column;
-    max-width: 65%;
+    max-width: 60%;
     margin: 0 auto;
-    margin-top: 15px;
+    margin-top: 5px;
     padding: 10px;
     background-color: #111;
     border-radius: 10px;
@@ -128,7 +145,7 @@ form.base{
 }
 
 /* Adjust max-width for smaller screens */
-@media (max-width: 1000px) {
+@media (max-width: 1600px) {
     .card-container {
         max-width: 100%;
     }
@@ -139,9 +156,9 @@ form.base{
     justify-content: center;
     box-sizing: content-box;
     flex-direction: column;
-    max-width: 75%;
+    max-width: 65%;
     margin: 0 auto;
-    margin-top: 15px;
+    margin-top: 5px;
     padding: 15px;
     background-color: #111;
     border-radius: 10px;
@@ -150,7 +167,7 @@ form.base{
 }
 
 /* Adjust max-width for smaller screens */
-@media (max-width: 1000px) {
+@media (max-width: 1600px) {
     .menu-container {
         max-width: 100%;
     }
