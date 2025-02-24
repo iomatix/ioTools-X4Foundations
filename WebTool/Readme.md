@@ -27,6 +27,8 @@ This repository contains a simple WebApp tool designed initially for browsing do
 
 #### 2025-02
 
+>1.1.0 is WIP
+
 - [1.1.0] WebApp - Improved Path Validating, Error Handling, Performance Optimization, Securtity, Code Organization, Validation and Outputs Handling at python's backend.
 - [1.1.0] xmlbrowser - Removed `Raw Browsing` button from the root folder.
 - [1.1.0] scriptproperties - Replaced synchronous XMLHttpRequests with asynchronouse to prevent freezes of UI.
