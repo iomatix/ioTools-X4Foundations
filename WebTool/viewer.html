@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>File Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Bootstrap CSS (for basic styling) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="viewer.css">
+</head>
+<body>
+    <div class="container p-2 menu-container">    
+        <h1>File Viewer</h1>
+        <a class="menu-button" href="index.html">Go to Home Page</a>
+    </div>
+    <div class="container p-2 menu-container">    
+        <div id="viewerOptions" class="container viewerOptions form-container">
+        <!-- Options specific to file type will be injected here -->
+        </div>
+    </div>
+    <div class="container card-container">
+        <div id="viewerContent" class="container p-2 viewer-content" >
+      <!-- File content will be rendered here -->
+        </div>
+    </div>
+  <!-- Include viewer logic -->
+  <script src="scripts/viewer.js"></script>
+  <!-- For XLS/XLSX support, include SheetJS here if needed -->
+  <script lang="javascript" src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+</body>
+</html>

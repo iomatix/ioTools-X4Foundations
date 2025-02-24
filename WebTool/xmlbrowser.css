@@ -2,6 +2,15 @@ h1 {
     text-align: center;
 }
 
+.folder-info {
+    padding: 5px;
+    margin: 5px;
+    text-align: center;
+    color: #EFB;
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
 .file-list {
     margin-top: 20px;
 }
@@ -16,29 +25,28 @@ h1 {
 
 .item a {
     text-decoration: none;
-    color: #BEF;
-    font-size: 1.1em;
+    color: #9BF;
 }
 
 .item a:hover {
-    color: #007acc;
+    color: #BEF;
 }
 
-.folder-info {
-    padding: 5px;
-    margin: 5px;
-    text-align: center;
-    color: #EFB;
-    margin-bottom: 20px;
-    font-style: italic;
+.raw-file-link {
+    color: #BEF;
 }
+
+.raw-file-link:hover {
+    color: #9FC;
+}
+
 
 .external-link {
-    margin-left: 10px !important;
-    font-size: 0.69em !important;
-    color: #0069af !important;
+    margin-left: 10px;
+    font-size: 0.69em;
+    color: #BEF;
 }
 
 .external-link:hover {
-    color: #9ef !important;
+    color: #EF8;
 }

@@ -1,0 +1,72 @@
+.tree {
+    list-style-type: none;
+    padding-left: 20px;
+}
+
+.tree-node {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.tree-node::before {
+    content: "▶";
+    margin-right: 5px;
+    color: #007bff;
+}
+
+.tree-node.collapsed::before {
+    content: "▼";
+}
+
+.tree ul {
+    padding-left: 15px;
+}
+
+.tree ul.collapsed {
+    display: none;
+}
+
+.tree-leaf {
+    color: #555;
+    font-style: italic;
+}
+
+.tree-attributes {
+    color: rgba(193, 193, 193, 0.794);
+    font-size: 0.75em;
+}
+
+.tree-value {
+    color: darkblue;
+    font-weight: bold;
+}
+
+/* Tooltip Styling */
+.tree-tooltip {
+    position: fixed;
+    background-color: rgba(25, 9, 37, 0.635);
+    color: white;
+    padding: 8px 12px; /* Increased padding for better spacing */
+    border-radius: 6px; /* Slightly rounded corners */
+    font-size: 14px;
+    display: none;
+    white-space: pre-wrap; /* Ensures long text wraps */
+    z-index: 9999;
+    pointer-events: none;
+    max-width: 300px; /* Adjusted max width to allow more content */
+    word-wrap: break-word; /* Ensures text breaks properly */
+    box-sizing: border-box; /* Ensures padding is considered in width */
+  }
+
+
+.tree-node:hover {
+    cursor: pointer;
+}
+
+.viewer-content {
+    padding: 6px;
+    background-color: rgba(48, 36, 66, 0.272);
+    border-style: solid;
+    border-width: 2px;
+    border-color: #423c1e79;
+}

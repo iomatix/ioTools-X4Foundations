@@ -87,12 +87,12 @@ tr:nth-child(odd) {
     background-color: #26263e;
 }
 
-ui-menu{
+ui-menu {
     border-style: solid;
     border-width: 2px;
 }
 
-ui-widget{
+ui-widget {
     background-color: rgba(65, 35, 65, 0.85);
 }
 
@@ -100,7 +100,7 @@ ui-widget-content {
     color: #fff;
 }
 
-ui-autocomplete{
+ui-autocomplete {
     font-size: 9px;
 }
 
@@ -111,11 +111,13 @@ ui-autocomplete{
     flex: 1 1 auto;
     justify-content: left;
 }
-form.label{
+
+form.label {
     font-size: larger;
     font-weight: bold;
 }
-form.base{
+
+form.base {
     width: 95%;
     margin-left: auto;
     margin-right: auto;
@@ -196,8 +198,8 @@ form.base{
 }
 
 .menu-button:hover {
-    background-color: #0f7a87;
-    /* Darker shade on hover */
+    background-color: #70e2e4;
+    color: #1884c8;
 }
 
 .status-indicator {

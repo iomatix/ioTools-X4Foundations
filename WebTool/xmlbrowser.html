@@ -1,113 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X4 File Browser</title>
-    <!-- Include Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="xmlbrowser.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>X4 File Browser</title>
+  <!-- Include Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="xmlbrowser.css">
 </head>
-
 <body>
-    <div class="container p-2 mt-5 mb-10 menu-container">
-        <h1>X4 Catalog Explorer - XML/XSL/XSD</h1>
-        <a class="menu-button" href="index.html">Go to Home Page</a>
-        <a href="#" id="rawbrowserlink" class="menu-button">Raw Browsing</a>
-        <div id="folderInfo" class="folder-info"></div>
+  <div class="container p-2 menu-container">
+    <h1>X4 Catalog Explorer - XML/XSL/XSD</h1>
+    <a class="menu-button" href="index.html">Go to Home Page</a>
+    <a href="#" id="rawbrowserlink" class="menu-button">Raw Browsing</a>
+    <div id="folderInfo" class="folder-info"></div>
+  </div>
+  <div class="container mt-10 p-2 card-container">
+    <div id="itemList" class="file-list">
+      Loading items...
     </div>
-    <div class="container mt-10 p-2 card-container">
-        <div id="itemList" class="file-list">
-            Loading items...
-        </div>
-    </div>
+  </div>
 
-    <script>
-        // Function to read URL parameters
-        function getQueryParam(param) {
-            const params = new URLSearchParams(window.location.search);
-            return params.get(param);
-        }
-
-        // Function to dynamically update the link's href attribute
-        function updateRawBrowserLink() {
-            const folder = getQueryParam('folder') || '.';
-            const link = document.getElementById('rawbrowserlink');
-            link.href = `${folder}`;
-        }
-        // Call the function when the page loads to update the link
-        document.addEventListener('DOMContentLoaded', updateRawBrowserLink);
-
-        // Fetch the list of items (directories and files) for the given folder
-        function fetchItemList(folder) {
-            document.getElementById('folderInfo').textContent = `Browsing folder: ${folder === '.' ? 'root' : folder}`;
-            fetch(`/api?folder=${encodeURIComponent(folder)}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network error');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    displayItems(data);
-                })
-                .catch(error => {
-                    document.getElementById('itemList').innerHTML = 'Error loading items: ' + error;
-                });
-        }
-
-        // Display items on the page
-        function displayItems(items) {
-            const itemListDiv = document.getElementById('itemList');
-            itemListDiv.innerHTML = '';
-            if (items.length === 0) {
-                itemListDiv.innerHTML = 'No items found.';
-                return;
-            }
-            items.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'item';
-                const link = document.createElement('a');
-                if (item.type === 'directory') {
-                    // For directories, navigate to browser.html with folder parameter set to the directory's relative path.
-                    const folderPath = item.path.startsWith('/') ? item.path.substring(1) : item.path;
-                    link.href = `xmlbrowser.html?folder=${encodeURIComponent(folderPath)}`;
-                    link.textContent = item.name + '/';
-                } else {
-                    // For files, create two links:
-                    // 1. A link for raw access (opens in a new tab)
-                    const rawLink = document.createElement('a');
-                    rawLink.href = item.path;
-                    rawLink.target = '_blank';
-                    rawLink.textContent = item.name;
-                    div.appendChild(rawLink);
-
-                    // 2. A link to launch the file externally via the /launch endpoint.
-                    const extLink = document.createElement('a');
-                    // Remove leading slash from the file path before sending it as a parameter
-                    const fileParam = item.path.startsWith('/') ? item.path.substring(1) : item.path;
-                    extLink.href = `/launch?file=${encodeURIComponent(fileParam)}`;
-                    extLink.textContent = '..open in external app';
-                    extLink.className = 'external-link';
-                    extLink.target = '_blank';
-                    div.appendChild(extLink);
-                }
-                div.appendChild(link);
-                itemListDiv.appendChild(div);
-            });
-        }
-
-        // Initialization – read the 'folder' parameter (default is current directory, ".")
-        window.addEventListener('DOMContentLoaded', () => {
-            const folder = getQueryParam('folder') || '.';
-            fetchItemList(folder);
-        });
-    </script>
+  <!-- External JavaScript file -->
+  <script src="scripts/xml_browser.js"></script>
 </body>
-
 </html>
