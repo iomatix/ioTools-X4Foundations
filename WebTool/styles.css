@@ -105,12 +105,11 @@ ui-autocomplete{
 }
 
 .form-container {
-    width: auto;
+    width: 100%;
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
     justify-content: left;
-    align-items: left;
 }
 form.label{
     font-size: larger;
@@ -127,7 +126,7 @@ form.base{
     background-color: #2b2b3f;
     text-align: left;
     font-size: smaller;
-    padding: 6px;
+    padding: 8px;
 }
 
 .card-container {
