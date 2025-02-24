@@ -25,7 +25,6 @@ echo      or move this script to the folder containing your .cat files.
 echo    - This script is not handling spaces from file paths from user input.
 echo      Please avoid using spaces in file path, or create a file_list.txt
 echo      containing relative path to one .cat file per line.
-echo    - Alternatively, create a file_list.txt containing relative path to one .cat file per line.
 echo.
 echo 2. Run the Script:
 echo    - Double-click the script.
@@ -45,21 +44,24 @@ cd /d "%~dp0"
 
 :: Set paths to be passed to Python script
 set "current_dir=%~dp0"
+
 :: Remove trailing backslash if present
 if "%current_dir:~-1%"=="\" set "current_dir=%current_dir:~0,-1%"
 set "output_dir=%~dp0_unpacked"
+
 :: Create output directory if it doesn't exist
 if not exist "%output_dir%" mkdir "%output_dir%"
+
 :: Set the path to XRCatTool.exe
 set "xrcattool_path=%XRCATTOOL_PATH%"
 
 :start
-
 :: Build list of file paths to pass to Python script
 set "file_list="
 
 :: Prompt for input files
 set /p "input_files=Enter the list of input files (separated by spaces, or leave blank to unpack ALL .cat files or use file_list.txt): "
+
 :: Check if input is empty
 if "%input_files%"=="" (
     :: Check if file_list.txt exists
@@ -82,12 +84,19 @@ if "%input_files%"=="" (
     ) else (
         :: If file_list.txt is not found, search for ALL .cat files
         echo No input files provided and file_list.txt not found. Searching for ALL .cat files...
+        
         for /r %%f in (*.cat) do (
-             if defined file_list (
-                set "file_list=!file_list! "%%~f""
-             ) else (
-                set "file_list="%%~f""
-             )
+            set "filename=%%~nxf"
+            set "last7=!filename:~-7!"
+            if /i not "!last7!"=="sig.cat" (
+                if defined file_list (
+                    set "file_list=!file_list! "%%~f""
+                ) else (
+                    set "file_list="%%~f""
+                )
+            ) else (
+                echo Excluding `sig` file: %%~nxf
+            )
         )
     )
 ) else (
@@ -95,11 +104,11 @@ if "%input_files%"=="" (
     echo Analyzing user input...
     for %%f in (%input_files%) do (
         if exist "%%~f" (
-         if defined file_list (
-            set "file_list=!file_list! "%%~f""
-         ) else (
-            set "file_list="%%~f""
-         )
+            if defined file_list (
+                set "file_list=!file_list! "%%~f""
+            ) else (
+                set "file_list="%%~f""
+            )
         ) else (
             echo File not found: %%~f
         )
@@ -115,7 +124,6 @@ if not defined file_list (
     goto :start
 )
 
-:: Prompt for confirmation
 :list_of_files
 echo.
 echo List of files:
@@ -126,6 +134,7 @@ echo double quotes before proceeding with the unpacking process.
 echo.
 echo Do you want to proceed with the unpacking process? (Y/N)
 set /p "choice="
+
 :: Check the user's choice
 if /i "%choice%" equ "N" (
     cls
@@ -147,10 +156,12 @@ echo.
 echo Calling: python xrcat_unpacker.py "%current_dir%" "%output_dir%" "%xrcattool_path%" !file_list!
 echo.
 
-:: Call the Python script with the current directory, output directory,
-:: XRCatTool path, and the formatted list of files as parameters.
+:: Call the Python script with parameters
 python xrcat_unpacker.py "%current_dir%" "%output_dir%" "%xrcattool_path%" !file_list!
 
+echo.
+echo ====================== SUMMARY ======================
+echo.
 :: Check the exit code of the XRCatTool
 if %errorlevel% equ 0 (
     echo Repacking completed! Output files are in "%output_dir%"
@@ -159,5 +170,4 @@ if %errorlevel% equ 0 (
 )
 
 endlocal
-
 pause
