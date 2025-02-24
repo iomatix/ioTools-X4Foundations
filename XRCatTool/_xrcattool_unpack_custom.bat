@@ -169,5 +169,5 @@ if %errorlevel% equ 0 (
     echo Repacking didn't go well. Check for errors.
 )
 
-endlocal
 pause
+endlocal

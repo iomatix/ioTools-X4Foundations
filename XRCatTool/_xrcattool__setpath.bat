@@ -64,5 +64,6 @@ if exist "%absolute_path%" (
 
 :EndScript
 echo.
+:: Exit the script
 pause
 endlocal
