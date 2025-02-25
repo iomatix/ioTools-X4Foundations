@@ -1,15 +1,23 @@
 "use strict";
 
 import ConsoleStyles from "./console_scripts.js";
+import {
+  ApiClient,
+  SharedEnums,
+  FilePathUtils,
+  QueryTools,
+  SortingUtils,
+  StatusManager,
+} from "./shared_lib.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   // Cache DOM elements for later use
-  const expressionInput = document.getElementById("expression");
-  const divXMLDisplay = document.getElementById("divXMLDisplay");
-  const showMdCheckbox = document.getElementById("show_md");
-  const showAiCheckbox = document.getElementById("show_ai");
-  const sortCheckbox = document.getElementById("sort");
-  const statusIndicator = document.getElementById("statusIndicator");
+  const expressionInput = ApiClient.getElement("#expression");
+  const divXMLDisplay = ApiClient.getElement("#divXMLDisplay");
+  const showMdCheckbox = ApiClient.getElement("#show_md");
+  const showAiCheckbox = ApiClient.getElement("#show_ai");
+  const sortCheckbox = ApiClient.getElement("#sort");
+  const statusIndicator = ApiClient.getElement("#statusIndicator");
   // Use jQuery for hintStatus updates
   const $hintStatus = $("#hintStatus");
 
@@ -80,9 +88,10 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // Process the XML to extract unique property names
-  const processXMLData = (xml) => {
+  const processXMLData = (xml, statusSelector = null) => {
     ConsoleStyles.logInfo("Processing XML data...");
-    setStatus("Processing XML data...");
+    if (statusSelector)
+      StatusManager.set(statusSelector, `Processing XML data...`);
     try {
       const nodes = xml.evaluate(
         "//property/@name",
@@ -101,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ConsoleStyles.logError(`Error processing XML: ${error.message}`);
       return buildPropertyTree([]);
     } finally {
-      clearStatus();
+      if (statusSelector) StatusManager.clear(statusSelector);
     }
   };
 
@@ -117,8 +126,10 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // Initialize jQuery UI autocomplete if available
-  const initAutoComplete = () => {
+  const initAutoComplete = (statusSelector = null) => {
     ConsoleStyles.logInfo("Initializing autocomplete...");
+    if (statusSelector)
+      StatusManager.set(statusSelector, `Initializing autocomplete...`);
     if (window.$ && $.fn.autocomplete) {
       try {
         $("#expression").autocomplete({
@@ -147,6 +158,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       } catch (error) {
         ConsoleStyles.logError(`Error initializing autocomplete: ${error}`);
+      } finally {
+        if (statusSelector) StatusManager.clear(statusSelector);
       }
     } else {
       ConsoleStyles.logWarning(
@@ -221,9 +234,10 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // Perform the XSLT transformation based on user settings
-  const transformXML = async () => {
+  const transformXML = async (statusSelector = null) => {
     ConsoleStyles.logInfo("Starting XML transformation...");
-    await setStatus("Transforming XML...");
+    if (statusSelector)
+      StatusManager.set(statusSelector, "Transforming XML...");
     try {
       if (!xmlDoc || !xslDoc) {
         ConsoleStyles.logError("XML/XSL documents are not loaded.");
@@ -257,7 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
       ConsoleStyles.logError(`Transformation error: ${error.message}`);
     } finally {
-      await clearStatus();
+      if (statusSelector) StatusManager.clear(statusSelector);
     }
   };
 
@@ -273,21 +287,20 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 300);
     } catch (error) {
       ConsoleStyles.logError(`Debounced update error: ${error.message}`);
-    }
-    finally
-    {
+    } finally {
       printPropertyTree();
     }
   };
 
   // Initialize the viewer by loading XML files and setting up autocomplete and event listeners
-  const init = async () => {
+  const init = async (statusSelector) => {
     ConsoleStyles.logInfo("Initializing documentation viewer...");
-    await setStatus("Loading documentation files...");
+    if (statusSelector)
+      StatusManager.set(statusSelector, "Initializing documentation viewer...");
     try {
       [xmlDoc, xslDoc] = await Promise.all([
-        loadXMLFile("scriptproperties.xml"),
-        loadXMLFile("scriptproperties.xsl"),
+        ApiClient.fetchXML("scriptproperties.xml"),
+        ApiClient.fetchXML("scriptproperties.xsl"),
       ]);
 
       if (!xmlDoc || !xslDoc)
@@ -318,7 +331,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "Failed to initialize documentation viewer. Please report this issue."
       );
     } finally {
-      await clearStatus();
+      if (statusSelector) StatusManager.clear(statusSelector);
     }
   };
 

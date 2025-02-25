@@ -116,7 +116,6 @@ function displayItems(items, selector, sortMode) {
 /* Initialize the page */
 document.addEventListener("DOMContentLoaded", () => {
   updateRawBrowsingLink("#rawBrowsingLink");
-
   const currentFolder = QueryTools.getParam("folder") || ".";
   ApiClient.fetchResourceList("/api", { folder: currentFolder, sortMode: SharedEnums.SORT_MODE.ALPHA_WITH_PARENT }, {}, displayItems);
   ConsoleStyles.logDebug(`Current folder: ${currentFolder}`);

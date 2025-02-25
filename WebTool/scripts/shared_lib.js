@@ -74,19 +74,26 @@ export const ApiClient = {
     }
   },
 
-  /**
-   * Fetches XML data from a specified path endpoint with given parameters.
-   *
-   * @param {string} pathEndpoint - The path endpoint URL to fetch XML data from.
-   * @param {Object} params - An object containing query parameters and additional settings.
-   * @param {Object} options - An object containing additional options.
-   * @param {string} [options.statusSelector=".default-fetch-status"] - The CSS selector for the status element to update during the fetch process.
-   * @returns {Promise<Document>} - A promise that resolves to the parsed XML document from the server.
-   * @throws Will throw an error if the fetch fails or the response is not ok.
-   */
-  fetchXML: async (pathEndpoint, params = {}, options = {}) => {
-    const { statusSelector = ".default-fetch-status" } = options;
 
+/**
+ * Fetches an XML document from the specified path and optionally transforms
+ * it using an XSLT stylesheet.
+ *
+ * @param {string} pathEndpoint - The URL path from which to fetch the XML document.
+ * @param {Object} [params={}] - Optional query parameters to include in the request.
+ * @param {Object} [options={}] - Optional configuration options for the request.
+ * @param {string} [options.statusSelector=".default-fetch-status"] - Selector for the status element to update.
+ * @param {string} [options.xsltEndpoint] - The URL path for the XSLT stylesheet used for transforming the XML.
+ *
+ * @returns {Promise<Document>} A promise that resolves to the fetched XML document,
+ * or the transformed XML document if an XSLT endpoint is provided.
+ *
+ * @throws Will throw an error if the fetch fails or the response is not ok.
+ */
+
+  fetchXML: async (pathEndpoint, params = {}, options = {}) => {
+    const { statusSelector = ".default-fetch-status", xsltEndpoint } = options;
+  
     ConsoleStyles.logDebug(`Fetching from path: ${pathEndpoint}...`);
     if (statusSelector)
       StatusManager.set(
@@ -96,9 +103,26 @@ export const ApiClient = {
     try {
       const response = await fetch(pathEndpoint);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const text = await response.text();
+      const xmlText = await response.text();
       ConsoleStyles.logDebug(`XML from ${pathEndpoint} loaded successfully.`);
-      return new DOMParser().parseFromString(text, "text/xml");
+      
+      const xmlDoc = new DOMParser().parseFromString(xmlText, "text/xml");
+  
+      if (xsltEndpoint) {
+        const xsltResponse = await fetch(xsltEndpoint);
+        if (!xsltResponse.ok) throw new Error(`HTTP ${xsltResponse.status}`);
+        const xsltText = await xsltResponse.text();
+        const xsltDoc = new DOMParser().parseFromString(xsltText, "application/xml");
+  
+        const xsltProcessor = new XSLTProcessor();
+        xsltProcessor.importStylesheet(xsltDoc);
+        
+        const resultDocument = xsltProcessor.transformToDocument(xmlDoc);
+        ConsoleStyles.logDebug(`XML transformed successfully using XSLT.`);
+        return resultDocument;
+      } else {
+        return xmlDoc;
+      }
     } catch (error) {
       ConsoleStyles.logError(
         `Failed to load ${pathEndpoint}: ${error.message}`
@@ -108,6 +132,7 @@ export const ApiClient = {
       if (statusSelector) StatusManager.clear(statusSelector);
     }
   },
+  
 
   
   /**
