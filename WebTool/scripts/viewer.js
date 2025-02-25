@@ -1,6 +1,8 @@
 "use strict";
+
 // Global variable to store a XSL file
 let activeXslFile = null;
+
 function updateXslFileName() {
   const xslFileNameEl = document.getElementById("xslFileName");
   if (activeXslFile) {
@@ -72,27 +74,65 @@ function createTreeDOM(node) {
   const span = document.createElement("span");
   span.classList.add("tree-node");
 
-  // Build attribute and text info
-  const attributes = Array.from(node.attributes || [])
-    .map((attr) => `${attr.name}="${attr.value}"`)
-    .join(", ");
-  const attrDisplay = attributes
-    ? ` <span class="tree-attributes">(${attributes})</span>`
+  // Get parent element and its "name" attribute (if it exists)
+  const parent = node.parentElement;
+  const parentNameAttr = parent?.getAttribute("name") || "N/A";
+
+  // Build attributes list with special styling for "name" attribute
+  const attributesList = [];
+  for (const attr of node.attributes) {
+    let attrText = "";
+    if (attr.name && !attr.value) {
+      attrText = `🔺${attr.name}`;
+    } else if (!attr.name && attr.value) {
+      attrText = `🔻${attr.value}`;
+    } else if (attr.name && attr.value) {
+      attrText = `🔸${attr.name}: ${attr.value}`;
+    } else {
+      attrText = "🔺 No Data";
+    }
+
+    // Special handling for "name" attribute
+    if (attr.name === "name") {
+      attrText = `🔹${attr.name}: ${attr.value}`; // mark "name"
+    }
+
+    attributesList.push(attrText);
+  }
+
+  // Format attributes nicely with line breaks
+  const formattedAttributes = attributesList.length
+    ? `\nAttributes:\n${attributesList.join("\n")}`
     : "";
+
+  // Get and format text content (only if it's not empty and has no child elements)
   const textContent = node.textContent.trim();
   const textDisplay =
     textContent && node.children.length === 0
       ? `: <span class="tree-value">${textContent}</span>`
       : "";
-  const tooltipContent =
-    `Element: ${node.nodeName}` +
-    (attributes ? `\nAttributes: ${attributes}` : "") +
-    (textContent ? `\nText: ${textContent}` : "");
 
+  // Construct tooltip content
+  const tooltipContent =
+    `🔵 Element: ${node.nodeName}` +
+    `\n🟠 Parent: ${parent ? parent.nodeName : "None"}` +
+    `\n🟧 Parent Name: ${parentNameAttr}` +
+    `\n` +
+    formattedAttributes +
+    (textContent ? `\n\nText: ${textContent}` : "");
+
+  // Set tree display with attributes
+  const attrDisplay = attributesList.length
+    ? ` <span class="tree-attributes">(${attributesList.join(", ")})</span>`
+    : "";
   span.innerHTML = `${node.nodeName}${attrDisplay}${textDisplay}`;
-  span.setAttribute("data-tooltip", tooltipContent.replace(/"/g, "&quot;"));
+
+  // Set tooltip correctly
+  span.setAttribute("data-tooltip", tooltipContent);
+
   li.appendChild(span);
 
+  // If the node has children, create a nested UL
   if (node.children.length > 0) {
     const ul = document.createElement("ul");
     for (let child of node.children) {
@@ -100,6 +140,9 @@ function createTreeDOM(node) {
       if (childTree) ul.appendChild(childTree);
     }
     li.appendChild(ul);
+  } else {
+    // Add class to hide arrow if there are no children
+    span.classList.add("tree-node-no-children");
   }
   return li;
 }

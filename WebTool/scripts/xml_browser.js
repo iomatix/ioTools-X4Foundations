@@ -1,4 +1,4 @@
-// script.js
+"use strict";
 
 // Utility function to get URL parameters
 function getQueryParam(param) {

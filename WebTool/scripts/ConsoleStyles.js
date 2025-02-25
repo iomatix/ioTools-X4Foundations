@@ -1,3 +1,5 @@
+"use strict";
+
 class ConsoleStyles {
   static get header() {
     return "font-weight: bold; font-size: 1.2em; color: #9c27b0;";
