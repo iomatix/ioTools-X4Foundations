@@ -114,9 +114,8 @@ document.addEventListener("DOMContentLoaded", () => {
         $("#expression").autocomplete({
           source: (request, response) => {
             const term = request.term.trim();
-
-            // If user starts with a dot, handle property lookup
-            if (term.startsWith(".")) {
+            // If the term contains a dot anywhere, use property lookup.
+            if (term.indexOf(".") !== -1) {
               handlePropertyLookup(term, response);
             } else {
               handleKeywordLookup(term, response);
@@ -135,55 +134,57 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  /* Handle property lookup (Properties with a Leading Dot) */
+  // Handles property lookup (for terms like ".autos.act" or "Player.ac")
   const handlePropertyLookup = (term, response) => {
-    const innerTerm = term.slice(1); // Remove the leading dot
-    const parts = innerTerm.split(".").filter(Boolean);
+    // Remove a leading dot if present; if not, leave as is.
+    const normalized = term.startsWith(".") ? term.slice(1) : term;
+    const parts = normalized.split(".").filter(Boolean);
 
-    // If only a dot is typed, show all base keywords with a dot
+    // If no parts, return all base keywords (with a dot)
     if (parts.length === 0) {
       response(baseKeywords.map((k) => "." + k));
       return;
     }
 
-    // If only one part is typed, suggest matching base keywords with a dot
-    if (parts.length === 1) {
-      const query = parts[0].toLowerCase();
-      const suggestions = baseKeywords
-        .filter((k) => k.toLowerCase().startsWith(query))
-        .map((k) => "." + k);
-      response(suggestions);
-      return;
-    }
-
-    // Handle nested property traversal
-    let currentNode = propertyTree;
-    for (let i = 0; i < parts.length - 1; i++) {
-      if (currentNode.children[parts[i]]) {
-        currentNode = currentNode.children[parts[i]];
-      } else {
-        response([]);
-        return;
-      }
-    }
-
-    const currentQuery = parts[parts.length - 1].toLowerCase();
-    const children = Object.keys(currentNode.children);
-
-    const suggestions = children
-      .filter((child) => child.toLowerCase().startsWith(currentQuery))
-      .map((child) => {
-        const fullPath = "." + parts.slice(0, -1).join(".") + "." + child;
-        const hasChildren =
-          Object.keys(currentNode.children[child].children).length > 0;
-        return hasChildren ? fullPath + "." : fullPath;
-      });
-
+    // Use recursive fuzzy search to gather suggestions.
+    const suggestions = searchPaths(propertyTree, parts, ".");
     response(suggestions);
   };
+
+  // Recursively search the property tree for matching paths.
+  const searchPaths = (node, parts, prefix) => {
+    if (parts.length === 0) {
+      // At the end: if node has children, append a trailing dot.
+      return Object.keys(node.children).length > 0 ? [prefix + "."] : [prefix];
+    }
+    const segment = parts[0].toLowerCase();
+    let suggestions = [];
+    for (const key in node.children) {
+      // Fuzzy match: key must start with the typed segment (case-insensitive)
+      if (key.toLowerCase().startsWith(segment)) {
+        const child = node.children[key];
+        if (parts.length === 1) {
+          // Last segment: complete the suggestion.
+          let suggestion = prefix + key;
+          if (Object.keys(child.children).length > 0) {
+            suggestion += ".";
+          }
+          suggestions.push(suggestion);
+        } else {
+          // More segments: search further in this branch.
+          suggestions = suggestions.concat(
+            searchPaths(child, parts.slice(1), prefix + key + ".")
+          );
+        }
+      }
+    }
+    return suggestions;
+  };
+
   /*  Handle Base Keyword Lookup (Without a Dot) */
   const handleKeywordLookup = (term, response) => {
     const query = term.toLowerCase();
+    // Filter base keywords (extracted from the first property part)
     const suggestions = baseKeywords.filter((k) =>
       k.toLowerCase().startsWith(query)
     );
