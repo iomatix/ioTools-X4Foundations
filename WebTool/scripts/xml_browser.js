@@ -1,7 +1,13 @@
 "use strict";
 
 import ConsoleStyles from "./console_scripts.js";
-import { ApiClient, SharedEnums, FilePathUtils, QueryTools } from "./shared_lib.js";
+import {
+  ApiClient,
+  SharedEnums,
+  FilePathUtils,
+  QueryTools,
+  SortingUtils,
+} from "./shared_lib.js";
 
 /**
  * Updates the href attribute of the given link element to point to the
@@ -16,59 +22,41 @@ function updateRawBrowsingLink(selector) {
   link.href = `${folder}`;
 }
 
-
-
 /**
- * Displays a list of items in a specified HTML element, with optional sorting.
+ * Displays a list of items in a folder in the given HTML element.
  *
- * This function populates a DOM element, identified by the given selector,
- * with a list of items. Each item is rendered as a `div` with a class of
- * "item", and includes appropriate links and buttons based on its type.
- * Directories provide navigation links, while files offer options for
- * raw view, enhanced viewer, and external application launch.
- *
- * Sorting is applied based on the specified sort mode, which can be
- * alphabetical or alphabetical with parent directories (`../`) on top.
- *
- * @param {Array<Object>} items - The list of items to display, where each
- *   item is an object with properties like `name`, `type`, and `path`.
- * @param {string} selector - A CSS selector for the target DOM element 
- *   where items will be displayed.
- * @param {string} [sortMode=SharedEnums.SORT_MODE.ALPHA_WITH_PARENT] - The
- *   sorting mode to apply to the items, defaulting to alphabetical with
- *   parent directories prioritized.
+ * @param {array} items - An array of item objects with the following properties:
+ *   - name {string}: The name of the item.
+ *   - type {string}: The type of item (either "directory" or "file").
+ *   - path {string}: The path of the item.
+ * @param {string} selector - A CSS selector for the HTML element to display the items in.
+ * @param {string} [sortMode=SharedEnums.SORT_MODE.ALPHA_WITH_PARENT] - The sort mode to use for the items.
+ *   - `SharedEnums.SORT_MODE.ALPHA`: Sort alphabetically with special characters first.
+ *   - `SharedEnums.SORT_MODE.ALPHA_WITH_PARENT`: Sort alphabetically with special characters first and `../` on top.
+ *   - `SharedEnums.SORT_MODE.DEFAULT`: No sorting, display items in the order they are given.
  */
-function displayItems(items, selector, sortMode = SharedEnums.SORT_MODE.ALPHA_WITH_PARENT) {
+function displayItems(items, selector, sortMode) {
   const itemListDiv = ApiClient.getElement(selector);
   itemListDiv.innerHTML = "";
 
+  ConsoleStyles.logDebug(`Displaying ${items.length} items`);
   if (items.length === 0) {
     itemListDiv.innerHTML = "No items found.";
     return;
   }
 
-  // Apply sorting based on sortMode
-  if (sortMode === SharedEnums.SORT_MODE.ALPHA || sortMode === SharedEnums.SORT_MODE.ALPHA_WITH_PARENT) {
-    let parentDir = items.filter((item) => item.name === "../");
-    let otherItems = items.filter((item) => item.name !== "../");
+  // Apply sorting of items
+  items = SortingUtils.sortItems(items, sortMode);
 
-    // Sort alphabetically (case-insensitive)
-    otherItems.sort((a, b) =>
-      a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
-    );
-
-    // If ALPHA_WITH_PARENT, ensure `../` stays on top
-    if (sortMode === SharedEnums.SORT_MODE.ALPHA_WITH_PARENT) {
-      items = [...parentDir, ...otherItems];
-    } else {
-      items = otherItems; // Pure alphabetical sorting without `../`
-    }
-  }
-
-
+  // Rendering logic
+  let divFolders = [];
+  let divFiles = [];
   items.forEach((item) => {
-    const div = ApiClient.createElement("div", {
-      class: "item",
+    const divFolder = ApiClient.createElement("div", {
+      class: "item folder-item",
+    });
+    const divFile = ApiClient.createElement("div", {
+      class: "item file-item",
     });
 
     if (item.type === "directory") {
@@ -79,7 +67,8 @@ function displayItems(items, selector, sortMode = SharedEnums.SORT_MODE.ALPHA_WI
         class: "raw-file-link",
         textContent: item.name + "/",
       });
-      div.appendChild(link);
+      divFolder.appendChild(link);
+      divFolders.push(divFolder);
     } else {
       /* For files, create multiple elements: */
       // 1. Raw view link (opens in a new tab)
@@ -89,7 +78,7 @@ function displayItems(items, selector, sortMode = SharedEnums.SORT_MODE.ALPHA_WI
         target: "_blank",
         textContent: item.name,
       });
-      div.appendChild(rawLink);
+      divFile.appendChild(rawLink);
 
       // 2. "Enhanced Viewer" button for viewing in-browser.
       const supportedExtensions = ["xml", "xsd", "xls", "xlsx", "xmd"];
@@ -99,7 +88,7 @@ function displayItems(items, selector, sortMode = SharedEnums.SORT_MODE.ALPHA_WI
           "Open in Enhanced Viewer",
           () => ApiClient.openFileInBrowser(item.path, fileExtension)
         );
-        div.appendChild(openButton);
+        divFile.appendChild(openButton);
       }
 
       // 3. External App launch link (appended last)
@@ -110,17 +99,25 @@ function displayItems(items, selector, sortMode = SharedEnums.SORT_MODE.ALPHA_WI
         textContent: "Open in External Application",
         class: "btn btn-secondary btn-sm ms-2 external-link",
       });
-      div.appendChild(extLink);
+      divFile.appendChild(extLink);
+      divFiles.push(divFile);
     }
-    itemListDiv.appendChild(div);
+  });
+
+  // Appending to the itemListDiv, Folders first
+  divFolders.forEach((divFolder) => {
+    itemListDiv.appendChild(divFolder);
+  });
+  divFiles.forEach((divFile) => {
+    itemListDiv.appendChild(divFile);
   });
 }
 
-// Initialization
+/* Initialize the page */
 document.addEventListener("DOMContentLoaded", () => {
   updateRawBrowsingLink("#rawBrowsingLink");
-  
+
   const currentFolder = QueryTools.getParam("folder") || ".";
-  ApiClient.fetchResourceList("/api", { folder: currentFolder }, {}, displayItems);
+  ApiClient.fetchResourceList("/api", { folder: currentFolder, sortMode: SharedEnums.SORT_MODE.ALPHA_WITH_PARENT }, {}, displayItems);
   ConsoleStyles.logDebug(`Current folder: ${currentFolder}`);
 });
