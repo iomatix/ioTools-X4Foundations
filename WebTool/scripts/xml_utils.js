@@ -1,6 +1,6 @@
 "use strict";
 
-import ConsoleStyles from "./ConsoleStyles.js";
+import ConsoleStyles from "./console_scripts.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   // Cache DOM elements for later use
@@ -24,45 +24,31 @@ document.addEventListener("DOMContentLoaded", () => {
   let globalKeywords = [];
   let allPropertyParts = [];
 
-// Utility functions for status indicatorconst setStatus = async (message) => {
-    const setStatus = async (message) => {
-        ConsoleStyles.logDebug("Setting status:", message);
-        statusCount++;
-        if (statusIndicator) {
-          statusIndicator.innerText = message;
-          statusIndicator.style.display = "block";
-        }
-      };
-      
-const clearStatus = async () => {
-    statusCount--;
-    if (statusCount <= 0) {
-      statusCount = 0; // Prevent negative counts
-      if (statusIndicator) {
-        statusIndicator.innerText = "";
-        statusIndicator.style.display = "none";
-      }
-    }
-  };
+  /* Print the property tree */
+  const printPropertyTree = (tree) => {
+    ConsoleStyles.logInfo("📦 Property Tree Structure:");
 
-  // Asynchronously load an XML file and parse it
-const loadXMLFile = async (filename) => {
-  ConsoleStyles.logInfo(`Loading ${filename}...`);
-  setStatus(`Loading XML file ${filename}...`);
-  try {
-    const response = await fetch(`libraries/${filename}`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const text = await response.text();
-    ConsoleStyles.logSuccess(`${filename} loaded successfully.`);
-    return new DOMParser().parseFromString(text, "text/xml");
-  } catch (error) {
-    ConsoleStyles.logError(`Failed to load ${filename}: ${error.message}`);
-    return null;
-  }
-  finally {
-    clearStatus();
-  }
-};
+    const printNode = (node, name, depth = 0, isLast = true) => {
+      const indent = "  ".repeat(depth);
+      const branch = depth === 0 ? "" : isLast ? "└─ " : "├─ ";
+      const styledName = ConsoleStyles.applyStyle(name, "bold");
+
+      ConsoleStyles.log(`${indent}${branch}${styledName}`);
+
+      const children = Object.entries(node.children);
+      children.forEach(([childName, childNode], index) => {
+        const isLastChild = index === children.length - 1;
+        printNode(childNode, childName, depth + 1, isLastChild);
+      });
+    };
+
+    // Start with root node's children
+    const rootChildren = Object.entries(tree.children);
+    rootChildren.forEach(([name, node], index) => {
+      const isLast = index === rootChildren.length - 1;
+      printNode(node, name, 0, isLast);
+    });
+  };
 
   /* Build the property tree */
   const buildPropertyTree = (propertyNames) => {
@@ -114,8 +100,7 @@ const loadXMLFile = async (filename) => {
     } catch (error) {
       ConsoleStyles.logError(`Error processing XML: ${error.message}`);
       return buildPropertyTree([]);
-    }
-    finally {
+    } finally {
       clearStatus();
     }
   };
@@ -272,7 +257,7 @@ const loadXMLFile = async (filename) => {
     } catch (error) {
       ConsoleStyles.logError(`Transformation error: ${error.message}`);
     } finally {
-        await clearStatus();
+      await clearStatus();
     }
   };
 
@@ -289,6 +274,10 @@ const loadXMLFile = async (filename) => {
     } catch (error) {
       ConsoleStyles.logError(`Debounced update error: ${error.message}`);
     }
+    finally
+    {
+      printPropertyTree();
+    }
   };
 
   // Initialize the viewer by loading XML files and setting up autocomplete and event listeners
@@ -304,14 +293,20 @@ const loadXMLFile = async (filename) => {
       if (!xmlDoc || !xslDoc)
         throw new Error("Failed to load required XML files.");
 
-      const { tree, baseKeywords: bk, allPropertyParts: ap } = processXMLData(xmlDoc);
+      const {
+        tree,
+        baseKeywords: bk,
+        allPropertyParts: ap,
+      } = processXMLData(xmlDoc);
       propertyTree = tree;
       baseKeywords = bk.sort();
       allPropertyParts = ap;
 
       // Extract keywords from XML and combine with baseKeywords.
       const extractedKeywords = processKeywordData(xmlDoc);
-      globalKeywords = Array.from(new Set([...baseKeywords, ...extractedKeywords])).sort();
+      globalKeywords = Array.from(
+        new Set([...baseKeywords, ...extractedKeywords])
+      ).sort();
 
       initAutoComplete();
       expressionInput.focus();
@@ -319,7 +314,9 @@ const loadXMLFile = async (filename) => {
       ConsoleStyles.logSuccess("Documentation viewer initialized.");
     } catch (error) {
       ConsoleStyles.logError(`Initialization error: ${error.message}`);
-      alert("Failed to initialize documentation viewer. Please report this issue.");
+      alert(
+        "Failed to initialize documentation viewer. Please report this issue."
+      );
     } finally {
       await clearStatus();
     }

@@ -17,16 +17,17 @@
   <div class="container p-2 menu-container">
     <h1>X4 Catalog Explorer - XML/XSL/XSD</h1>
     <a class="menu-button" href="index.html">Go to Home Page</a>
-    <a href="#" id="rawbrowserlink" class="menu-button">Raw Browsing</a>
-    <div id="folderInfo" class="folder-info"></div>
+    <a href="#" id="rawBrowsingLink" class="menu-button raw-browsing-button" href="#">Raw Browsing</a>
+    <div id="dirInfo" class="folder-info"></div>
   </div>
   <div class="container mt-10 p-2 card-container">
-    <div id="itemList" class="file-list">
+  <div id="fetchStatus" class="container default-fetch-status"></div>
+    <div id="fileItems" class="item-list file-list">
       Loading items...
     </div>
   </div>
 
   <!-- External JavaScript file -->
-  <script src="scripts/xml_browser.js"></script>
+  <script type="module" src="scripts/xml_browser.js"></script>
 </body>
 </html>
