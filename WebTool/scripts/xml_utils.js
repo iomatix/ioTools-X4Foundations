@@ -115,50 +115,11 @@ document.addEventListener("DOMContentLoaded", () => {
           source: (request, response) => {
             const term = request.term.trim();
 
-            // Property Search Mode (starts with .)
+            // If user starts with a dot, handle property lookup
             if (term.startsWith(".")) {
-              const query = term.slice(1).toLowerCase();
-              const suggestions = allPropertyParts.filter((part) =>
-                part.toLowerCase().startsWith(query)
-              );
-              response(suggestions.map((p) => `.${p}`));
-              return;
-            }
-
-            // Base Keyword or Path Traversal Mode
-            const dotIndex = term.lastIndexOf(".");
-            const currentPart = term.slice(dotIndex + 1).toLowerCase();
-            const path =
-              dotIndex === -1 ? [] : term.slice(0, dotIndex).split(".");
-
-            // Base Keyword Suggestion
-            if (dotIndex === -1) {
-              const suggestions = baseKeywords.filter((k) =>
-                k.toLowerCase().startsWith(currentPart)
-              );
-              response(suggestions);
-            }
-            // Path Traversal
-            else {
-              let currentNode = propertyTree;
-              for (const part of path) {
-                if (currentNode.children[part]) {
-                  currentNode = currentNode.children[part];
-                } else {
-                  response([]);
-                  return;
-                }
-              }
-              const children = Object.keys(currentNode.children);
-              const filtered = children
-                .filter((child) => child.toLowerCase().startsWith(currentPart))
-                .map((child) => {
-                  const hasChildren =
-                    Object.keys(currentNode.children[child].children).length >
-                    0;
-                  return hasChildren ? `${child}.` : child;
-                });
-              response(filtered);
+              handlePropertyLookup(term, response);
+            } else {
+              handleKeywordLookup(term, response);
             }
           },
           minLength: 0,
@@ -172,6 +133,61 @@ document.addEventListener("DOMContentLoaded", () => {
         "jQuery UI autocomplete not found. Skipping initialization."
       );
     }
+  };
+
+  /* Handle property lookup (Properties with a Leading Dot) */
+  const handlePropertyLookup = (term, response) => {
+    const innerTerm = term.slice(1); // Remove the leading dot
+    const parts = innerTerm.split(".").filter(Boolean);
+
+    // If only a dot is typed, show all base keywords with a dot
+    if (parts.length === 0) {
+      response(baseKeywords.map((k) => "." + k));
+      return;
+    }
+
+    // If only one part is typed, suggest matching base keywords with a dot
+    if (parts.length === 1) {
+      const query = parts[0].toLowerCase();
+      const suggestions = baseKeywords
+        .filter((k) => k.toLowerCase().startsWith(query))
+        .map((k) => "." + k);
+      response(suggestions);
+      return;
+    }
+
+    // Handle nested property traversal
+    let currentNode = propertyTree;
+    for (let i = 0; i < parts.length - 1; i++) {
+      if (currentNode.children[parts[i]]) {
+        currentNode = currentNode.children[parts[i]];
+      } else {
+        response([]);
+        return;
+      }
+    }
+
+    const currentQuery = parts[parts.length - 1].toLowerCase();
+    const children = Object.keys(currentNode.children);
+
+    const suggestions = children
+      .filter((child) => child.toLowerCase().startsWith(currentQuery))
+      .map((child) => {
+        const fullPath = "." + parts.slice(0, -1).join(".") + "." + child;
+        const hasChildren =
+          Object.keys(currentNode.children[child].children).length > 0;
+        return hasChildren ? fullPath + "." : fullPath;
+      });
+
+    response(suggestions);
+  };
+  /*  Handle Base Keyword Lookup (Without a Dot) */
+  const handleKeywordLookup = (term, response) => {
+    const query = term.toLowerCase();
+    const suggestions = baseKeywords.filter((k) =>
+      k.toLowerCase().startsWith(query)
+    );
+    response(suggestions);
   };
 
   // Perform the XSLT transformation based on user settings
