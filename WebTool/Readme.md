@@ -27,9 +27,10 @@ This repository contains a simple WebApp tool designed initially for browsing do
 
 #### 2025-02
 
->1.1.4 is WIP
+>1.1.5 is WIP
 
-- [1.1.4] scriptproperties - Improvements for autocompletion hints.
+- [1.1.5] scriptproperties - Improvements for autocompletion hints.
+- [1.1.4] First part of major refactoring of the codebase.
 - [1.1.3] scriptproperties - Updated the expression tooltips to work in the scripting logic: BaseKeyword.prop1.prop2.prop3 etc.
 - [1.1.3] WebApp - New internal file viewer has been implemented to enhance xmlbrowser functionality. It handles XSL/XLST files for styling and also allows to explore the tree of files freely.
 - [1.1.1] WebApp - Improved Path Validating, Error Handling, Performance Optimization, Security, Code Organization, Validation and Outputs Handling at python's backend.
