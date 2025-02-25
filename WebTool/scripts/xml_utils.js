@@ -10,62 +10,69 @@ document.addEventListener("DOMContentLoaded", () => {
   const showAiCheckbox = document.getElementById("show_ai");
   const sortCheckbox = document.getElementById("sort");
   const statusIndicator = document.getElementById("statusIndicator");
-  // Create or cache an element to show hint loading status.
-  const hintStatus = document.getElementById("hintStatus");
+  // Use jQuery for hintStatus updates
+  const $hintStatus = $("#hintStatus");
 
   // Module-level variables
   let xmlDoc = null;
   let xslDoc = null;
   let updateTimer = null;
   let currentRequestGeneration = 0;
+  let statusCount = 0;
   let propertyTree = { children: {} };
   let baseKeywords = [];
   let globalKeywords = [];
   let allPropertyParts = [];
 
-  // Utility functions for status indicator
-  const setStatus = (message) => {
-    if (statusIndicator) {
-      statusIndicator.innerText = message;
-      statusIndicator.style.display = "block";
-    }
-  };
-
-  const clearStatus = () => {
-    if (statusIndicator) {
-      statusIndicator.innerText = "";
-      statusIndicator.style.display = "none";
+// Utility functions for status indicatorconst setStatus = async (message) => {
+    const setStatus = async (message) => {
+        ConsoleStyles.logDebug("Setting status:", message);
+        statusCount++;
+        if (statusIndicator) {
+          statusIndicator.innerText = message;
+          statusIndicator.style.display = "block";
+        }
+      };
+      
+const clearStatus = async () => {
+    statusCount--;
+    if (statusCount <= 0) {
+      statusCount = 0; // Prevent negative counts
+      if (statusIndicator) {
+        statusIndicator.innerText = "";
+        statusIndicator.style.display = "none";
+      }
     }
   };
 
   // Asynchronously load an XML file and parse it
-  const loadXMLFile = async (filename) => {
-    ConsoleStyles.logInfo(`Loading ${filename}...`);
-    setStatus(`Loading ${filename}...`);
-    try {
-      const response = await fetch(`libraries/${filename}`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const text = await response.text();
-      ConsoleStyles.logSuccess(`${filename} loaded successfully.`);
-      return new DOMParser().parseFromString(text, "text/xml");
-    } catch (error) {
-      ConsoleStyles.logError(`Failed to load ${filename}: ${error.message}`);
-      return null;
-    } finally {
-      clearStatus();
-    }
-  };
+const loadXMLFile = async (filename) => {
+  ConsoleStyles.logInfo(`Loading ${filename}...`);
+  setStatus(`Loading XML file ${filename}...`);
+  try {
+    const response = await fetch(`libraries/${filename}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const text = await response.text();
+    ConsoleStyles.logSuccess(`${filename} loaded successfully.`);
+    return new DOMParser().parseFromString(text, "text/xml");
+  } catch (error) {
+    ConsoleStyles.logError(`Failed to load ${filename}: ${error.message}`);
+    return null;
+  }
+  finally {
+    clearStatus();
+  }
+};
 
   /* Build the property tree */
   const buildPropertyTree = (propertyNames) => {
     const root = { children: {} };
     const baseKeywordsSet = new Set();
-    const partsSet = new Set(); // Collect all property parts
+    const partsSet = new Set();
 
     for (const name of propertyNames) {
       const parts = name.split(".");
       if (parts.length === 0) continue;
-
       const baseKeyword = parts[0];
       baseKeywordsSet.add(baseKeyword);
       parts.forEach((part) => partsSet.add(part));
@@ -89,6 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Process the XML to extract unique property names
   const processXMLData = (xml) => {
     ConsoleStyles.logInfo("Processing XML data...");
+    setStatus("Processing XML data...");
     try {
       const nodes = xml.evaluate(
         "//property/@name",
@@ -107,9 +115,12 @@ document.addEventListener("DOMContentLoaded", () => {
       ConsoleStyles.logError(`Error processing XML: ${error.message}`);
       return buildPropertyTree([]);
     }
+    finally {
+      clearStatus();
+    }
   };
 
-  // Extracts Keywords from the XML (from <keyword> elements)
+  // Extract keywords from XML (<keyword> elements)
   const processKeywordData = (xml) => {
     const keywordNodes = xml.getElementsByTagName("keyword");
     let keywords = [];
@@ -141,11 +152,12 @@ document.addEventListener("DOMContentLoaded", () => {
             debouncedUpdate();
             return false;
           },
+          // Using jQuery to update hint status
           search: function () {
-            if (hintStatus) hintStatus.innerText = "Loading hints...";
+            $hintStatus.text("Loading hints...");
           },
           response: function () {
-            if (hintStatus) hintStatus.innerText = "";
+            $hintStatus.text("");
           },
         });
       } catch (error) {
@@ -186,9 +198,8 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // Handles property lookup (for terms like ".autos.act" or "Player.ac")
-  // When a dot is present, we attempt a property-tree lookup.
-  // If no property-tree match is found for extra segments, we fallback to returning
-  // the global keyword (without a dot prefix).
+  // When a dot is present, we try the property tree first.
+  // If no property-tree match exists for extra segments, we fallback to global keywords.
   const handlePropertyLookup = (term, response) => {
     const normalized = term.startsWith(".") ? term.slice(1) : term;
     const parts = normalized.split(".").filter(Boolean);
@@ -202,14 +213,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (propertyTree.children[parts[0]]) {
       suggestions = searchPaths(propertyTree, parts, ".");
     }
-    // If no property tree suggestion found and extra segments were typed,
-    // fallback to global keyword matching exactly the first segment.
     if (suggestions.length === 0 && parts.length > 1) {
       suggestions = globalKeywords.filter(
         (k) => k.toLowerCase() === parts[0].toLowerCase()
       );
     }
-    // If still empty, fallback to global keywords matching the first part.
     if (suggestions.length === 0) {
       suggestions = globalKeywords.filter((k) =>
         k.toLowerCase().startsWith(parts[0].toLowerCase())
@@ -218,7 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
     response(suggestions);
   };
 
-  /* Handle Base Keyword Lookup (Without a Dot) */
+  // Handle base keyword lookup (without a dot)
   const handleKeywordLookup = (term, response) => {
     const query = term.toLowerCase();
     const suggestions = globalKeywords.filter((k) =>
@@ -230,7 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Perform the XSLT transformation based on user settings
   const transformXML = async () => {
     ConsoleStyles.logInfo("Starting XML transformation...");
-    setStatus("Transforming XML...");
+    await setStatus("Transforming XML...");
     try {
       if (!xmlDoc || !xslDoc) {
         ConsoleStyles.logError("XML/XSL documents are not loaded.");
@@ -264,7 +272,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
       ConsoleStyles.logError(`Transformation error: ${error.message}`);
     } finally {
-      clearStatus();
+        await clearStatus();
     }
   };
 
@@ -286,7 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize the viewer by loading XML files and setting up autocomplete and event listeners
   const init = async () => {
     ConsoleStyles.logInfo("Initializing documentation viewer...");
-    setStatus("Loading documentation files...");
+    await setStatus("Loading documentation files...");
     try {
       [xmlDoc, xslDoc] = await Promise.all([
         loadXMLFile("scriptproperties.xml"),
@@ -299,7 +307,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const { tree, baseKeywords: bk, allPropertyParts: ap } = processXMLData(xmlDoc);
       propertyTree = tree;
       baseKeywords = bk.sort();
-      allPropertyParts = ap; // Populate property parts
+      allPropertyParts = ap;
 
       // Extract keywords from XML and combine with baseKeywords.
       const extractedKeywords = processKeywordData(xmlDoc);
@@ -313,7 +321,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ConsoleStyles.logError(`Initialization error: ${error.message}`);
       alert("Failed to initialize documentation viewer. Please report this issue.");
     } finally {
-      clearStatus();
+      await clearStatus();
     }
   };
 

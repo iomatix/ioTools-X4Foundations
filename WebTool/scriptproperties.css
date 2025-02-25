@@ -9,6 +9,15 @@ body {
 	margin: 0;
 }
 
+#statusIndicator {
+	background-color: #2130368e;
+	color: rgb(105, 184, 253);
+	padding: 10px;
+	border: 1px solid #ccc;
+	top: 10px;
+	right: 10px;
+	z-index: 1000;
+}
 
 .importfailure {
 	color: rgb(208, 37, 97);
