@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const showAiCheckbox = document.getElementById("show_ai");
   const sortCheckbox = document.getElementById("sort");
   const statusIndicator = document.getElementById("statusIndicator");
+  // Create or cache an element to show hint loading status.
+  const hintStatus = document.getElementById("hintStatus");
 
   // Module-level variables
   let xmlDoc = null;
@@ -18,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentRequestGeneration = 0;
   let propertyTree = { children: {} };
   let baseKeywords = [];
+  let globalKeywords = [];
   let allPropertyParts = [];
 
   // Utility functions for status indicator
@@ -102,8 +105,19 @@ document.addEventListener("DOMContentLoaded", () => {
       return buildPropertyTree(properties);
     } catch (error) {
       ConsoleStyles.logError(`Error processing XML: ${error.message}`);
-      return buildPropertyTree(properties);
+      return buildPropertyTree([]);
     }
+  };
+
+  // Extracts Keywords from the XML (from <keyword> elements)
+  const processKeywordData = (xml) => {
+    const keywordNodes = xml.getElementsByTagName("keyword");
+    let keywords = [];
+    for (let i = 0; i < keywordNodes.length; i++) {
+      const name = keywordNodes[i].getAttribute("name");
+      if (name) keywords.push(name);
+    }
+    return keywords;
   };
 
   // Initialize jQuery UI autocomplete if available
@@ -114,7 +128,6 @@ document.addEventListener("DOMContentLoaded", () => {
         $("#expression").autocomplete({
           source: (request, response) => {
             const term = request.term.trim();
-            // If the term contains a dot anywhere, use property lookup.
             if (term.indexOf(".") !== -1) {
               handlePropertyLookup(term, response);
             } else {
@@ -123,6 +136,17 @@ document.addEventListener("DOMContentLoaded", () => {
           },
           minLength: 0,
           delay: 300,
+          select: function (event, ui) {
+            $(this).val(ui.item.value);
+            debouncedUpdate();
+            return false;
+          },
+          search: function () {
+            if (hintStatus) hintStatus.innerText = "Loading hints...";
+          },
+          response: function () {
+            if (hintStatus) hintStatus.innerText = "";
+          },
         });
       } catch (error) {
         ConsoleStyles.logError(`Error initializing autocomplete: ${error}`);
@@ -134,44 +158,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // Handles property lookup (for terms like ".autos.act" or "Player.ac")
-  const handlePropertyLookup = (term, response) => {
-    // Remove a leading dot if present; if not, leave as is.
-    const normalized = term.startsWith(".") ? term.slice(1) : term;
-    const parts = normalized.split(".").filter(Boolean);
-
-    // If no parts, return all base keywords (with a dot)
-    if (parts.length === 0) {
-      response(baseKeywords.map((k) => "." + k));
-      return;
-    }
-
-    // Use recursive fuzzy search to gather suggestions.
-    const suggestions = searchPaths(propertyTree, parts, ".");
-    response(suggestions);
-  };
-
   // Recursively search the property tree for matching paths.
+  // Returns suggestions with a dot prefix.
   const searchPaths = (node, parts, prefix) => {
     if (parts.length === 0) {
-      // At the end: if node has children, append a trailing dot.
       return Object.keys(node.children).length > 0 ? [prefix + "."] : [prefix];
     }
     const segment = parts[0].toLowerCase();
     let suggestions = [];
     for (const key in node.children) {
-      // Fuzzy match: key must start with the typed segment (case-insensitive)
       if (key.toLowerCase().startsWith(segment)) {
         const child = node.children[key];
         if (parts.length === 1) {
-          // Last segment: complete the suggestion.
           let suggestion = prefix + key;
           if (Object.keys(child.children).length > 0) {
             suggestion += ".";
           }
           suggestions.push(suggestion);
         } else {
-          // More segments: search further in this branch.
           suggestions = suggestions.concat(
             searchPaths(child, parts.slice(1), prefix + key + ".")
           );
@@ -181,11 +185,43 @@ document.addEventListener("DOMContentLoaded", () => {
     return suggestions;
   };
 
-  /*  Handle Base Keyword Lookup (Without a Dot) */
+  // Handles property lookup (for terms like ".autos.act" or "Player.ac")
+  // When a dot is present, we attempt a property-tree lookup.
+  // If no property-tree match is found for extra segments, we fallback to returning
+  // the global keyword (without a dot prefix).
+  const handlePropertyLookup = (term, response) => {
+    const normalized = term.startsWith(".") ? term.slice(1) : term;
+    const parts = normalized.split(".").filter(Boolean);
+
+    if (parts.length === 0) {
+      response(globalKeywords);
+      return;
+    }
+
+    let suggestions = [];
+    if (propertyTree.children[parts[0]]) {
+      suggestions = searchPaths(propertyTree, parts, ".");
+    }
+    // If no property tree suggestion found and extra segments were typed,
+    // fallback to global keyword matching exactly the first segment.
+    if (suggestions.length === 0 && parts.length > 1) {
+      suggestions = globalKeywords.filter(
+        (k) => k.toLowerCase() === parts[0].toLowerCase()
+      );
+    }
+    // If still empty, fallback to global keywords matching the first part.
+    if (suggestions.length === 0) {
+      suggestions = globalKeywords.filter((k) =>
+        k.toLowerCase().startsWith(parts[0].toLowerCase())
+      );
+    }
+    response(suggestions);
+  };
+
+  /* Handle Base Keyword Lookup (Without a Dot) */
   const handleKeywordLookup = (term, response) => {
     const query = term.toLowerCase();
-    // Filter base keywords (extracted from the first property part)
-    const suggestions = baseKeywords.filter((k) =>
+    const suggestions = globalKeywords.filter((k) =>
       k.toLowerCase().startsWith(query)
     );
     response(suggestions);
@@ -260,14 +296,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!xmlDoc || !xslDoc)
         throw new Error("Failed to load required XML files.");
 
-      const {
-        tree,
-        baseKeywords: bk,
-        allPropertyParts: ap,
-      } = processXMLData(xmlDoc);
+      const { tree, baseKeywords: bk, allPropertyParts: ap } = processXMLData(xmlDoc);
       propertyTree = tree;
       baseKeywords = bk.sort();
       allPropertyParts = ap; // Populate property parts
+
+      // Extract keywords from XML and combine with baseKeywords.
+      const extractedKeywords = processKeywordData(xmlDoc);
+      globalKeywords = Array.from(new Set([...baseKeywords, ...extractedKeywords])).sort();
 
       initAutoComplete();
       expressionInput.focus();
@@ -275,9 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ConsoleStyles.logSuccess("Documentation viewer initialized.");
     } catch (error) {
       ConsoleStyles.logError(`Initialization error: ${error.message}`);
-      alert(
-        "Failed to initialize documentation viewer. Please report this issue."
-      );
+      alert("Failed to initialize documentation viewer. Please report this issue.");
     } finally {
       clearStatus();
     }
