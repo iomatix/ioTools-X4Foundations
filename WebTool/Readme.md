@@ -29,6 +29,7 @@ This repository contains a simple WebApp tool designed initially for browsing do
 
 >1.1.3 is WIP
 
+- [1.1.3] scriptproperties - Updated the expression tooltips to work in the scripting logic: BaseKeyword.prop1.prop2.prop3 etc.
 - [1.1.3] WebApp - New internal file viewer has been implemented to enhance xmlbrowser functionality.
 - [1.1.1] WebApp - Improved Path Validating, Error Handling, Performance Optimization, Security, Code Organization, Validation and Outputs Handling at python's backend.
 - [1.1.0] xmlbrowser - Removed `Raw Browsing` button from the root folder.

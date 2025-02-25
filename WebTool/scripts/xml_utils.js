@@ -16,7 +16,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let xslDoc = null;
   let updateTimer = null;
   let currentRequestGeneration = 0;
-  let propertyNames = [];
+  let propertyTree = { children: {} };
+  let baseKeywords = [];
+  let allPropertyParts = [];
 
   // Utility functions for status indicator
   const setStatus = (message) => {
@@ -51,6 +53,36 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  /* Build the property tree */
+  const buildPropertyTree = (propertyNames) => {
+    const root = { children: {} };
+    const baseKeywordsSet = new Set();
+    const partsSet = new Set(); // Collect all property parts
+
+    for (const name of propertyNames) {
+      const parts = name.split(".");
+      if (parts.length === 0) continue;
+
+      const baseKeyword = parts[0];
+      baseKeywordsSet.add(baseKeyword);
+      parts.forEach((part) => partsSet.add(part));
+
+      let currentNode = root;
+      for (const part of parts) {
+        if (!currentNode.children[part]) {
+          currentNode.children[part] = { children: {} };
+        }
+        currentNode = currentNode.children[part];
+      }
+    }
+
+    return {
+      tree: root,
+      baseKeywords: Array.from(baseKeywordsSet),
+      allPropertyParts: Array.from(partsSet),
+    };
+  };
+
   // Process the XML to extract unique property names
   const processXMLData = (xml) => {
     ConsoleStyles.logInfo("Processing XML data...");
@@ -67,10 +99,10 @@ document.addEventListener("DOMContentLoaded", () => {
         properties.push(nodes.snapshotItem(i).value);
       }
       ConsoleStyles.logSuccess(`Extracted ${properties.length} properties.`);
-      return Array.from(new Set(properties)).sort();
+      return buildPropertyTree(properties);
     } catch (error) {
       ConsoleStyles.logError(`Error processing XML: ${error.message}`);
-      return [];
+      return buildPropertyTree(properties);
     }
   };
 
@@ -80,7 +112,55 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.$ && $.fn.autocomplete) {
       try {
         $("#expression").autocomplete({
-          source: propertyNames,
+          source: (request, response) => {
+            const term = request.term.trim();
+
+            // Property Search Mode (starts with .)
+            if (term.startsWith(".")) {
+              const query = term.slice(1).toLowerCase();
+              const suggestions = allPropertyParts.filter((part) =>
+                part.toLowerCase().startsWith(query)
+              );
+              response(suggestions.map((p) => `.${p}`));
+              return;
+            }
+
+            // Base Keyword or Path Traversal Mode
+            const dotIndex = term.lastIndexOf(".");
+            const currentPart = term.slice(dotIndex + 1).toLowerCase();
+            const path =
+              dotIndex === -1 ? [] : term.slice(0, dotIndex).split(".");
+
+            // Base Keyword Suggestion
+            if (dotIndex === -1) {
+              const suggestions = baseKeywords.filter((k) =>
+                k.toLowerCase().startsWith(currentPart)
+              );
+              response(suggestions);
+            }
+            // Path Traversal
+            else {
+              let currentNode = propertyTree;
+              for (const part of path) {
+                if (currentNode.children[part]) {
+                  currentNode = currentNode.children[part];
+                } else {
+                  response([]);
+                  return;
+                }
+              }
+              const children = Object.keys(currentNode.children);
+              const filtered = children
+                .filter((child) => child.toLowerCase().startsWith(currentPart))
+                .map((child) => {
+                  const hasChildren =
+                    Object.keys(currentNode.children[child].children).length >
+                    0;
+                  return hasChildren ? `${child}.` : child;
+                });
+              response(filtered);
+            }
+          },
           minLength: 0,
           delay: 300,
         });
@@ -163,9 +243,16 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!xmlDoc || !xslDoc)
         throw new Error("Failed to load required XML files.");
 
-      propertyNames = processXMLData(xmlDoc);
-      initAutoComplete();
+      const {
+        tree,
+        baseKeywords: bk,
+        allPropertyParts: ap,
+      } = processXMLData(xmlDoc);
+      propertyTree = tree;
+      baseKeywords = bk.sort();
+      allPropertyParts = ap; // Populate property parts
 
+      initAutoComplete();
       expressionInput.focus();
       debouncedUpdate();
       ConsoleStyles.logSuccess("Documentation viewer initialized.");
