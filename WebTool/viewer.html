@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>File Viewer</title>
@@ -9,24 +10,28 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="viewer.css">
 </head>
+
 <body>
-    <div class="container p-2 menu-container">    
-        <h1>File Viewer</h1>
-        <a class="menu-button" href="index.html">Go to Home Page</a>
+  <div class="container p-2 menu-container">
+    <h1>File Viewer</h1>
+    <a class="menu-button" href="index.html">Go to Home Page</a>
+  </div>
+  <div class="container p-2 menu-container">
+    <div id="viewerOptions" class="container viewerOptions form-container">
+      <!-- Options specific to file type will be injected here -->
     </div>
-    <div class="container p-2 menu-container">    
-        <div id="viewerOptions" class="container viewerOptions form-container">
-        <!-- Options specific to file type will be injected here -->
-        </div>
-    </div>
-    <div class="container card-container">
-        <div id="viewerContent" class="container p-2 viewer-content" >
+  </div>
+  <div class="container card-container">
+    <div id="viewerContent" class="container p-2 viewer-content">
       <!-- File content will be rendered here -->
-        </div>
     </div>
+  </div>
+
+  <!-- JavaScript files -->
   <!-- Include viewer logic -->
-  <script src="scripts/viewer.js"></script>
+  <script src="scripts/web/doc_viewer.js"></script>
   <!-- For XLS/XLSX support, include SheetJS here if needed -->
   <script lang="javascript" src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </body>
+
 </html>

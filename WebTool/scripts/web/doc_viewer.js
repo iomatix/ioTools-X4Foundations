@@ -1,5 +1,9 @@
 "use strict";
 
+import XmlUtils from "../xml/xml_utils"
+const XLSX = import('https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js');
+
+
 // Global variable to store a XSL file
 let activeXslFile = null;
 

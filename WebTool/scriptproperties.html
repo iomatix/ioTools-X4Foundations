@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-	<link rel="stylesheet" href="scriptproperties.css">
+    <link rel="stylesheet" href="scriptproperties.css">
 
     <title>Script Property Documentation</title>
 </head>
@@ -17,14 +19,14 @@
     <div class="container p-2 menu-container">
         <h1 class="text-center">Script Property Documentation</h1>
         <a href="index.html" class="menu-button">Go to Home Page</a>
-	</div>
-	<div class="container p-2 menu-container">
+    </div>
+    <div class="container p-2 menu-container">
         <div class="form-container">
             <form id="filterForm" class="base">
                 <div class="mb-3">
                     <label for="expression" class="label">Filter Expression:</label>
                     <input id="expression" class="form-control" autocomplete="off">
-				</div>
+                </div>
                 <div class="form-check mb-3">
                     <input class="form-check-input" type="checkbox" id="sort">
                     <label class="form-check-label" for="sort">Sort properties</label>
@@ -38,19 +40,21 @@
                     <label class="form-check-label" for="show_ai">Show AI-specific keywords</label>
                 </div>
             </form>
-		</div>
+        </div>
         <div id="hintStatus" class="container p-2 card-container" style="display: none;"></div>
         <div id="fetchStatus" class="container p-2 card-container default-fetch-status" style="display: none;"></div>
-		<div id="statusIndicator" class="container p-2 card-container" style="display: none;"></div>
-	</div>
-	<div class="container p-2 card-container">
-		<div class="table-container">
+        <div id="statusIndicator" class="container p-2 card-container" style="display: none;"></div>
+    </div>
+    <div class="container p-2 card-container">
+        <div class="table-container">
             <div id="divXMLDisplay" class="mt-4"></div>
         </div>
-	</div>
+    </div>
 
-	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-	<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-	<script type="module" src="scripts/xml_utils.js"></script>
+    <!-- JavaScript files -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <script type="module" src="scripts/xml/xml_utils.js"></script>
 </body>
+
 </html>
