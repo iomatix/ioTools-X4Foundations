@@ -14,7 +14,9 @@ FontTools relies on several third-party software packages, each with its own lic
 - [GZip](https://www.gnu.org/software/gzip/) - [*Licensed under GPL-3.0*](https://www.gnu.org/licenses/gpl-3.0.html)
 - [md5deep](https://md5deep.sourceforge.net/) - [*Licensed under GPL*](https://github.com/jessek/hashdeep/blob/master/COPYING)
 
-**Note:** These dependencies are not distributed under the FontTools license. Each uses its respective third-party license available on their official websites.
+> [!note]
+>
+> These dependencies are not distributed under the FontTools license. Each uses its respective third-party license available on their official websites.
 
 ## Latin Characters Support
 
