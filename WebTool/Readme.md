@@ -27,9 +27,11 @@ This repository contains a simple WebApp tool designed initially for browsing do
 
 #### 2025-02
 
-> Latest Release available is 1.0.1
+> Latest [**Stable** Release available is 1.0.1](https://github.com/iomatix/ioTools-X4Foundations/releases/tag/1.0.1)
 >
 > 1.2.1 is WIP
+>
+> Latest [Preview Release](https://github.com/iomatix/ioTools-X4Foundations/releases/tag/1.2.0-preview)
 >
 
 - [1.2.1] scriptproperties - Improvements for autocompletion hints.
