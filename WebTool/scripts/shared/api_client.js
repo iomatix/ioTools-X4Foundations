@@ -1,9 +1,9 @@
 "use strict";
 
-import ConsoleUtils from "./console_utils";
-import QueryTools from "./query_tools";
-import StatusManager from "./status_manager";
-import SharedEnums from "./shared_enums";
+import ConsoleUtils from "./console_utils.js";
+import QueryTools from "./query_tools.js";
+import StatusManager from "./status_manager.js";
+import SharedEnums from "./shared_enums.js";
 
 /**
  * Global Client Methods

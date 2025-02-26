@@ -2,12 +2,13 @@
 
 import ConsoleStyles from "../shared/console_utils.js";
 import {
-  ApiClient,
-  SharedEnums,
-  FilePathUtils,
-  QueryTools,
-  SortingUtils,
-} from "../shared/shared_lib.js";
+  SharedLibs,
+} from "../shared/shared_libs.js"
+const apiClient = SharedLibs.ApiClient;
+const sharedEnums = SharedLibs.SharedEnums;
+const filePathUtils = SharedLibs.FilePathUtils;
+const queryTools = SharedLibs.QueryTools;
+const sortUtils = SharedLibs.SortUtils;
 
 /**
  * Updates the href attribute of the given link element to point to the
@@ -17,8 +18,8 @@ import {
  * @returns {void}
  */
 function updateRawBrowsingLink(selector) {
-  const folder = QueryTools.getParam("folder") || ".";
-  const link = ApiClient.getElement(selector);
+  const folder = queryTools.getParam("folder") || ".";
+  const link = apiClient.getElement(selector);
   link.href = `${folder}`;
 }
 
@@ -36,7 +37,7 @@ function updateRawBrowsingLink(selector) {
  *   - `SharedEnums.SORT_MODE.DEFAULT`: No sorting, display items in the order they are given.
  */
 function displayItems(items, selector, sortMode) {
-  const itemListDiv = ApiClient.getElement(selector);
+  const itemListDiv = apiClient.getElement(selector);
   itemListDiv.innerHTML = "";
 
   ConsoleStyles.logDebug(`Displaying ${items.length} items`);
@@ -46,23 +47,23 @@ function displayItems(items, selector, sortMode) {
   }
 
   // Apply sorting of items
-  items = SortingUtils.sortItems(items, sortMode);
+  items = sortUtils.sortItems(items, sortMode);
 
   // Rendering logic
   let divFolders = [];
   let divFiles = [];
   items.forEach((item) => {
-    const divFolder = ApiClient.createElement("div", {
+    const divFolder = apiClient.createElement("div", {
       class: "item folder-item",
     });
-    const divFile = ApiClient.createElement("div", {
+    const divFile = apiClient.createElement("div", {
       class: "item file-item",
     });
 
     if (item.type === "directory") {
       /* For directories, create a link to navigate deeper into the folder structure. */
-      const folderPath = FilePathUtils.normalize(item.path);
-      const link = ApiClient.createElement("a", {
+      const folderPath = filePathUtils.normalize(item.path);
+      const link = apiClient.createElement("a", {
         href: `xmlbrowser.html?folder=${encodeURIComponent(folderPath)}`,
         class: "raw-file-link",
         textContent: item.name + "/",
@@ -72,7 +73,7 @@ function displayItems(items, selector, sortMode) {
     } else {
       /* For files, create multiple elements: */
       // 1. Raw view link (opens in a new tab)
-      const rawLink = ApiClient.createElement("a", {
+      const rawLink = apiClient.createElement("a", {
         href: item.path,
         class: "raw-file-link",
         target: "_blank",
@@ -82,18 +83,18 @@ function displayItems(items, selector, sortMode) {
 
       // 2. "Enhanced Viewer" button for viewing in-browser.
       const supportedExtensions = ["xml", "xsd", "xls", "xlsx", "xmd"];
-      const fileExtension = FilePathUtils.getFileExtension(item.name);
+      const fileExtension = filePathUtils.getFileExtension(item.name);
       if (supportedExtensions.includes(fileExtension)) {
-        const openButton = ApiClient.createPrimaryButton(
+        const openButton = apiClient.createPrimaryButton(
           "Open in Enhanced Viewer",
-          () => ApiClient.openFileInBrowser(item.path, fileExtension)
+          () => apiClient.openFileInBrowser(item.path, fileExtension)
         );
         divFile.appendChild(openButton);
       }
 
       // 3. External App launch link (appended last)
-      const fileParam = FilePathUtils.normalize(item.path);
-      const extLink = ApiClient.createElement("a", {
+      const fileParam = filePathUtils.normalize(item.path);
+      const extLink = apiClient.createElement("a", {
         href: `/launch?file=${encodeURIComponent(fileParam)}`,
         target: "_blank",
         textContent: "Open in External Application",
@@ -116,7 +117,7 @@ function displayItems(items, selector, sortMode) {
 /* Initialize the page */
 document.addEventListener("DOMContentLoaded", () => {
   updateRawBrowsingLink("#rawBrowsingLink");
-  const currentFolder = QueryTools.getParam("folder") || ".";
-  ApiClient.fetchResourceList("/api", { folder: currentFolder, sortMode: SharedEnums.SORT_MODE.ALPHA_WITH_PARENT }, {}, displayItems);
+  const currentFolder = queryTools.getParam("folder") || ".";
+  apiClient.fetchResourceList("/api", { folder: currentFolder, sortMode: sharedEnums.SORT_MODE.ALPHA_WITH_PARENT }, {}, displayItems);
   ConsoleStyles.logDebug(`Current folder: ${currentFolder}`);
 });

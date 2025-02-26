@@ -5,6 +5,6 @@
  *
  * @type {{}}
  */
-export const SharedUtils = {};
+export const MiscUtils = {};
 
-export default SharedUtils;
+export default MiscUtils;
