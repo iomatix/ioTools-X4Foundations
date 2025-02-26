@@ -14,7 +14,7 @@ export const SortUtils = {
    * @param {object} b - Second item to compare.
    * @returns {number} A negative value if "a" comes first, a positive value if "b" comes first, or 0 if both are equal.
    */
-  sortItemsAlpha: (a, b) => {
+  sortItemsAlpha: async (a, b) => {
     const aFirstChar = a.name[0];
     const bFirstChar = b.name[0];
 
@@ -24,7 +24,7 @@ export const SortUtils = {
     if (isASpecial && !isBSpecial) return -1;
     if (!isASpecial && isBSpecial) return 1;
 
-    return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+    return await a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
   },
 
   /**
@@ -35,12 +35,12 @@ export const SortUtils = {
    *   - path {string}: The path of the item.
    * @returns {object[]} The sorted array of items.
    */
-  sortItemsWithParent: (items, parentName = "../") => {
+  sortItemsWithParent: async (items, parentName = "../") => {
     let parentDir = items.filter((item) => item.name === parentName);
     let otherItems = items.filter((item) => item.name !== parentName);
 
     otherItems.sort(SortUtils.sortItemsAlpha);
-    return [...parentDir, ...otherItems];
+    return  [...parentDir, ...otherItems];
   },
 
   /**
@@ -51,7 +51,7 @@ export const SortUtils = {
    *   - path {string}: The path of the item.
    * @returns {object[]} The sorted array of items.
    */
-  sortItemsAlphabetically: (items) => {
+  sortItemsAlphabetically: async (items) => {
     let folders = items.filter((item) => item.type === "directory");
     let files = items.filter((item) => item.type !== "directory");
 
@@ -67,7 +67,7 @@ export const SortUtils = {
    *   - date {string}: A date string in ISO format (YYYY-MM-DDTHH:MM:SS.mmmZ).
    * @returns {object[]} The sorted array of items.
    */
-  sortItemsByDateNewest: (items) => {
+  sortItemsByDateNewest: async (items) => {
     return items.sort((a, b) => new Date(b.date) - new Date(a.date));
   },
 
@@ -77,7 +77,7 @@ export const SortUtils = {
    *   - date {string}: A date string in ISO format (YYYY-MM-DDTHH:MM:SS.mmmZ).
    * @returns {object[]} The sorted array of items.
    */
-  sortItemsByDateOldest: (items) => {
+  sortItemsByDateOldest: async (items) => {
     return items.sort((a, b) => new Date(a.date) - new Date(b.date));
   },
 
@@ -87,7 +87,7 @@ export const SortUtils = {
    *   - type {string}: The type of item (either "directory" or "file").
    * @returns {object[]} The sorted array of items.
    */
-  sortItemsByType: (items) => {
+  sortItemsByType: async (items) => {
     return items.sort((a, b) => {
       if (a.type === "directory" && b.type !== "directory") return -1;
       if (a.type !== "directory" && b.type === "directory") return 1;
@@ -101,7 +101,7 @@ export const SortUtils = {
    *   - size {number}: The size of the item in bytes.
    * @returns {object[]} The sorted array of items.
    */
-  sortItemsBySizeLargest: (items) => {
+  sortItemsBySizeLargest: async (items) => {
     return items.sort((a, b) => b.size - a.size);
   },
 
@@ -111,7 +111,7 @@ export const SortUtils = {
    *   - size {number}: The size of the item in bytes.
    * @returns {object[]} The sorted array of items.
    */
-  sortItemsBySizeSmallest: (items) => {
+  sortItemsBySizeSmallest: async (items) => {
     return items.sort((a, b) => a.size - b.size);
   },
 
@@ -134,7 +134,7 @@ export const SortUtils = {
    *   - `SharedEnums.SORT_MODE.SIZE_SMALLEST`: Sort by size (smallest first).
    * @returns {object[]} The sorted array of items.
    */
-  sortItems: (items, sortMode) => {
+  sortItems: async (items, sortMode) => {
     switch (sortMode) {
       case SharedEnums.SORT_MODE.ALPHA:
         return SortUtils.sortItemsAlphabetically(items);

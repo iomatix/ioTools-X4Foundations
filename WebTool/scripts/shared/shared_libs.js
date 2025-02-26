@@ -9,7 +9,7 @@ import MiscUtils from "./misc_utils.js";
 import StatusManager from "./status_manager.js";
 import FilePathUtils from "./file_path_utils.js";
 
-const SharedLibs = {
+export const SharedLibs = {
   SharedEnums,
   ApiClient,
   ConsoleUtils,

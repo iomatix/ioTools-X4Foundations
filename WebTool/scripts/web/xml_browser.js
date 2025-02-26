@@ -1,9 +1,9 @@
 "use strict";
 
-import ConsoleStyles from "../shared/console_utils.js";
 import {
   SharedLibs,
 } from "../shared/shared_libs.js"
+const console = SharedLibs.ConsoleUtils;
 const apiClient = SharedLibs.ApiClient;
 const sharedEnums = SharedLibs.SharedEnums;
 const filePathUtils = SharedLibs.FilePathUtils;
@@ -36,23 +36,23 @@ function updateRawBrowsingLink(selector) {
  *   - `SharedEnums.SORT_MODE.ALPHA_WITH_PARENT`: Sort alphabetically with special characters first and `../` on top.
  *   - `SharedEnums.SORT_MODE.DEFAULT`: No sorting, display items in the order they are given.
  */
-function displayItems(items, selector, sortMode) {
-  const itemListDiv = apiClient.getElement(selector);
+async function displayItems(items, selector, sortMode) {
+  const itemListDiv = await apiClient.getElement(selector);
   itemListDiv.innerHTML = "";
 
-  ConsoleStyles.logDebug(`Displaying ${items.length} items`);
+  console.logDebug(`Displaying ${items.length} items`);
   if (items.length === 0) {
     itemListDiv.innerHTML = "No items found.";
     return;
   }
 
   // Apply sorting of items
-  items = sortUtils.sortItems(items, sortMode);
+  items = await sortUtils.sortItems(items, sortMode);
 
   // Rendering logic
   let divFolders = [];
   let divFiles = [];
-  items.forEach((item) => {
+  items.forEach((item) =>  {
     const divFolder = apiClient.createElement("div", {
       class: "item folder-item",
     });
@@ -119,5 +119,5 @@ document.addEventListener("DOMContentLoaded", () => {
   updateRawBrowsingLink("#rawBrowsingLink");
   const currentFolder = queryTools.getParam("folder") || ".";
   apiClient.fetchResourceList("/api", { folder: currentFolder, sortMode: sharedEnums.SORT_MODE.ALPHA_WITH_PARENT }, {}, displayItems);
-  ConsoleStyles.logDebug(`Current folder: ${currentFolder}`);
+  console.logDebug(`Current folder: ${currentFolder}`);
 });

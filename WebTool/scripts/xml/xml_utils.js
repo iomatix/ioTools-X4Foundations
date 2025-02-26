@@ -1,7 +1,7 @@
 "use strict";
 
-import ConsoleStyles from "../shared/console_scripts.js";
 import { SharedLibs } from "../shared/shared_libs.js";
+const console = SharedLibs.ConsoleUtils;
 const apiClient = SharedLibs.ApiClient;
 const sharedEnums = SharedLibs.SharedEnums;
 const filePathUtils = SharedLibs.FilePathUtils;
@@ -33,14 +33,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* Print the property tree */
   const printPropertyTree = (tree) => {
-    ConsoleStyles.logInfo("📦 Property Tree Structure:");
+    console.logInfo("📦 Property Tree Structure:");
 
     const printNode = (node, name, depth = 0, isLast = true) => {
       const indent = "  ".repeat(depth);
       const branch = depth === 0 ? "" : isLast ? "└─ " : "├─ ";
-      const styledName = ConsoleStyles.applyStyle(name, "bold");
+      const styledName = console.applyStyle(name, "bold");
 
-      ConsoleStyles.log(`${indent}${branch}${styledName}`);
+      console.log(`${indent}${branch}${styledName}`);
 
       const children = Object.entries(node.children);
       children.forEach(([childName, childNode], index) => {
@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Process the XML to extract unique property names
   const processXMLData = (xml, statusSelector = null) => {
-    ConsoleStyles.logInfo("Processing XML data...");
+    console.logInfo("Processing XML data...");
     if (statusSelector)
       statusManager.set(statusSelector, `Processing XML data...`);
     try {
@@ -103,10 +103,10 @@ document.addEventListener("DOMContentLoaded", () => {
       for (let i = 0; i < nodes.snapshotLength; i++) {
         properties.push(nodes.snapshotItem(i).value);
       }
-      ConsoleStyles.logSuccess(`Extracted ${properties.length} properties.`);
+      console.logSuccess(`Extracted ${properties.length} properties.`);
       return buildPropertyTree(properties);
     } catch (error) {
-      ConsoleStyles.logError(`Error processing XML: ${error.message}`);
+      console.logError(`Error processing XML: ${error.message}`);
       return buildPropertyTree([]);
     } finally {
       if (statusSelector) statusManager.clear(statusSelector);
@@ -126,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize jQuery UI autocomplete if available
   const initAutoComplete = (statusSelector = null) => {
-    ConsoleStyles.logInfo("Initializing autocomplete...");
+    console.logInfo("Initializing autocomplete...");
     if (statusSelector)
       statusManager.set(statusSelector, `Initializing autocomplete...`);
     const $ = window.$ || document.$;
@@ -157,12 +157,12 @@ document.addEventListener("DOMContentLoaded", () => {
           },
         });
       } catch (error) {
-        ConsoleStyles.logError(`Error initializing autocomplete: ${error}`);
+        console.logError(`Error initializing autocomplete: ${error}`);
       } finally {
         if (statusSelector) statusManager.clear(statusSelector);
       }
     } else {
-      ConsoleStyles.logWarning(
+      console.logWarning(
         "jQuery UI autocomplete not found. Skipping initialization."
       );
     }
@@ -235,12 +235,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Perform the XSLT transformation based on user settings
   const transformXML = async (statusSelector = null) => {
-    ConsoleStyles.logInfo("Starting XML transformation...");
+    console.logInfo("Starting XML transformation...");
     if (statusSelector)
       statusManager.set(statusSelector, "Transforming XML...");
     try {
       if (!xmlDoc || !xslDoc) {
-        ConsoleStyles.logError("XML/XSL documents are not loaded.");
+        console.logError("XML/XSL documents are not loaded.");
         return;
       }
 
@@ -267,9 +267,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const fragment = processor.transformToFragment(xmlDoc, document);
       divXMLDisplay.replaceChildren(fragment);
-      ConsoleStyles.logSuccess("XML transformation completed.");
+      console.logSuccess("XML transformation completed.");
     } catch (error) {
-      ConsoleStyles.logError(`Transformation error: ${error.message}`);
+      console.logError(`Transformation error: ${error.message}`);
     } finally {
       if (statusSelector) statusManager.clear(statusSelector);
     }
@@ -286,7 +286,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }, 300);
     } catch (error) {
-      ConsoleStyles.logError(`Debounced update error: ${error.message}`);
+      console.logError(`Debounced update error: ${error.message}`);
     } finally {
       printPropertyTree();
     }
@@ -294,7 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize the viewer by loading XML files and setting up autocomplete and event listeners
   const init = async (statusSelector) => {
-    ConsoleStyles.logInfo("Initializing documentation viewer...");
+    console.logInfo("Initializing documentation viewer...");
     if (statusSelector)
       statusManager.set(statusSelector, "Initializing documentation viewer...");
     try {
@@ -324,9 +324,9 @@ document.addEventListener("DOMContentLoaded", () => {
       initAutoComplete();
       expressionInput.focus();
       debouncedUpdate();
-      ConsoleStyles.logSuccess("Documentation viewer initialized.");
+      console.logSuccess("Documentation viewer initialized.");
     } catch (error) {
-      ConsoleStyles.logError(`Initialization error: ${error.message}`);
+      console.logError(`Initialization error: ${error.message}`);
       alert(
         "Failed to initialize documentation viewer. Please report this issue."
       );

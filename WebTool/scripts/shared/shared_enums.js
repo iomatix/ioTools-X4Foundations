@@ -1,7 +1,8 @@
 /**
  * Useful enums library for sort options
  */
-export const SORT_MODE = {
+export const SharedEnums = {
+  SORT_MODE: {
   DEFAULT: "default", // No sorting
   ALPHA: "alpha", // Alphabetical sorting
   ALPHA_WITH_PARENT: "alpha_with_parent", // Alphabetical with `../` on top
@@ -10,6 +11,7 @@ export const SORT_MODE = {
   TYPE: "type", // Sort by item type (folders first)
   SIZE_LARGEST: "size_largest", // Sort by size (largest first)
   SIZE_SMALLEST: "size_smallest", // Sort by size (smallest first)
+},
 };
 
-export default SORT_MODE;
+export default SharedEnums;

@@ -78,7 +78,7 @@ export const ApiClient = {
    *
    * @throws Will throw an error if the fetch fails or the response is not ok.
    */
-  fetchXML: async (endpoint, params, options = {}) => {
+  fetchXML: async (endpoint, params = {}, options = {}) => {
     const { statusSelector = ".default-fetch-status", xsltEndpoint } = options;
 
     ConsoleUtils.logDebug(`Fetching from path: ${endpoint}...`);
