@@ -25,7 +25,7 @@ XRCatTool is a tool specifically designed to unpack catalogs from X4 Foundations
 - **xrcattool_unpack_xyz_dlc:**
   Unpacks catalogs from DLCs of X4 Foundations (e.g., Boron, Pirate, Split, Terran, Timelines). This script also consolidates all extracted data into a single folder.
 
-- **New** **Ultimate Unpacking Solution** - the script `_xrcattool_unpack_custom.bat` supports unpacking `.cat` files with greater flexibility and user control. It provides features like **Automatic File Discovery, Automatic File Discovery, Preserved Directory Structure, Relative Paths, Advanced Usage, and a User-Friendly Guide** on how to use it.
+- **New** **Ultimate Unpacking Solution** - the script `_xrcattool_unpack_custom.bat` supports unpacking `.cat` files with greater flexibility and user control. It provides features like **Automatic File Discovery, Preserved Directory Structure, Relative Paths, Advanced Usage, and a User-Friendly Guide** on how to use it.
 
 ### WebTool - Simple WebApp for Modding Essentials
 

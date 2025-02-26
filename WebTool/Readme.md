@@ -4,7 +4,8 @@ This repository contains a simple WebApp tool designed initially for browsing do
 
 ## How to Use
 
-> **Warning:**
+> [!tip]
+>
 > Make sure that [Python](https://www.python.org/downloads/) is installed on your machine. The webserver runs on Python.
 
 1. **Setup:**
@@ -12,7 +13,7 @@ This repository contains a simple WebApp tool designed initially for browsing do
 
    If you are using my XRCatTool scripts to unpack game data, you can copy all contents from the WebTool folder into the "_unpacked" directory created by the `xrcattool_unpack_01_09.bat` script.
 
-> **Notable:**
+> [!important]
 > The newest update of the XRCatTool introduced a smarter way to unpack bulk of cat files with `_xrcattool_unpack_custom.bat` script file which calls included python script.
 
 2. **Running the WebApp:**
@@ -27,6 +28,8 @@ This repository contains a simple WebApp tool designed initially for browsing do
 
 #### 2025-02
 
+> [!note]
+>
 > Latest [**Stable** Release available is 1.0.1](https://github.com/iomatix/ioTools-X4Foundations/releases/tag/1.0.1)
 >
 > 1.2.1 is WIP
