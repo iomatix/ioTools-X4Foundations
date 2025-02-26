@@ -1,6 +1,6 @@
 "use strict";
 
-import ConsoleStyles from "./console_scripts.js";
+import ConsoleStyles from "../shared/console_scripts.js";
 import {
   ApiClient,
   SharedEnums,
