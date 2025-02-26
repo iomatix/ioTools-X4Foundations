@@ -7,7 +7,7 @@ import {
   FilePathUtils,
   QueryTools,
   SortingUtils,
-} from "./shared_lib.js";
+} from "../shared/shared_lib.js";
 
 /**
  * Updates the href attribute of the given link element to point to the
