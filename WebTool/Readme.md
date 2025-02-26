@@ -4,7 +4,8 @@ This repository contains a simple WebApp tool designed initially for browsing do
 
 ## How to Use
 
-> **Warning:**
+> [!Warning:**]
+>
 > Make sure that [Python](https://www.python.org/downloads/) is installed on your machine. The webserver runs on Python.
 
 1. **Setup:**
@@ -27,6 +28,7 @@ This repository contains a simple WebApp tool designed initially for browsing do
 
 #### 2025-02
 
+> 
 > Latest Release available is 1.0.1
 >
 > 1.2.1 is WIP
