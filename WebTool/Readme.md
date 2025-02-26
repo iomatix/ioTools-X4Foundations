@@ -14,7 +14,7 @@ This repository contains a simple WebApp tool designed initially for browsing do
    If you are using my XRCatTool scripts to unpack game data, you can copy all contents from the WebTool folder into the "_unpacked" directory created by the `xrcattool_unpack_01_09.bat` script.
 
 > [!tip]
-> The newest update of the XRCatTool introduced a smarter way to unpack bulk of cat files with `_xrcattool_unpack_custom.bat` script file which calls included python script.
+> The newest update of the [XRCatTool](https://github.com/iomatix/ioTools-X4Foundations/tree/main/XRCatTool) introduced a smarter way to unpack bulk of cat files with `_xrcattool_unpack_custom.bat` script file which calls included python script.
 
 2. **Running the WebApp:**
    - Execute `_run_web.bat` and provide the desired port number (default is 8080).
