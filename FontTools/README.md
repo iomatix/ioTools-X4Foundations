@@ -16,7 +16,7 @@ FontTools relies on several third-party software packages, each with its own lic
 
 > [!note]
 >
-> These dependencies are not distributed under the FontTools license. Each uses its respective third-party license available on their official websites.
+> Those dependencies are not distributed under the FontTools license. Each uses its respective third-party license available on their official websites.
 
 ## Latin Characters Support
 
