@@ -38,6 +38,7 @@ This repository contains a simple WebApp tool designed initially for browsing do
 >
 
 - [1.2.X] scriptproperties - Improvements for autocompletion hints.
+- [1.2.X] scriptproperties - scriptproperties page uses a new Enhanced Viewer features.
 - [1.2.2] Second part of refactoring.
 - [1.2.0] First part of major refactoring of the codebase.
 - [1.1.3] scriptproperties - Updated the expression tooltips to work in the scripting logic: BaseKeyword.prop1.prop2.prop3 etc.

@@ -431,5 +431,58 @@ export const ApiClient = {
 
     return el;
   },
+  /**
+   * Shows an element.
+   *
+   * @param {string} selector - The CSS selector of the element to show.
+   * @param {Object} [options={}] - Optional parameters to apply to the element.
+   * @returns {Promise<HTMLElement>} The shown element.
+   */
+  showElement: async (selector, options = {}) => {
+    const el = await ApiClient.getElement(selector, options);
+    if (!el) {
+      ConsoleUtils.logError(`Element with id ${selector} not found !`);
+    } else {
+    el.style.display = "block";
+    }
+    return el;
+  },
+
+  /**
+   * Hides an element.
+   *
+   * @param {string} selector - The CSS selector of the element to hide.
+   * @param {Object} [options={}] - Optional parameters to apply to the element.
+   * @returns {Promise<HTMLElement>} The hidden element.
+   */
+  hideElement: async (selector, options = {}) => {
+    const el = await ApiClient.getElement(selector, options);
+    if (!el) {
+      ConsoleUtils.logError(`Element with id ${selector} not found !`);
+    } else {
+      el.style.display = "none";
+    }
+    return el;
+  },
+  /**
+   * Toggles the visibility of an element.
+   *
+   * @param {string} selector - The CSS selector of the element to toggle.
+   * @param {Object} [options={}] - Optional parameters to apply to the element.
+   * @returns {Promise<HTMLElement>} The toggled element.
+   */
+  toggleVisibility: async (selector, options = {}) => {
+    const el = await ApiClient.getElement(selector, options);
+    if (!el) {
+      throw Error(`Element with id ${selector} not found !`);
+    } 
+    if (el.style.display === "none") {
+      await ApiClient.showElement(selector, options);
+    } else {
+      await ApiClient.hideElement(selector, options);
+    }
+
+    return el;
+  },
 };
 export default ApiClient;

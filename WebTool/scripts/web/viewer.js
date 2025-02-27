@@ -1,5 +1,6 @@
 "use strict";
 
+import ApiClient from "../shared/api_client.js";
 import FilePathUtils from "../shared/file_path_utils.js";
 import { SharedLibs } from "../shared/shared_libs.js";
 import { XmlUtils } from "../xml/xml_utils.js";
@@ -44,7 +45,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const transformBtn = await apiClient.getElement("#transformBtn");
     const treeViewBtn = await apiClient.getElement("#treeViewBtn");
-    const filePickerContainer = await apiClient.getElement("#filePickerContainer");
+    const filePickerContainer = await apiClient.getElement(
+      "#filePickerContainer"
+    );
 
     // By default, let's just show the raw XML:
     XmlUtils.displayRawContent(file, viewerContent);
@@ -76,9 +79,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     treeViewBtn.addEventListener("click", async () => {
       if (!isTreeView) {
         await XmlUtils.displayAsTree(file, viewerContent);
+        ApiClient.hideElement("#transformBtn");
         treeViewBtn.textContent = "Close Tree View";
       } else {
         // revert to last state
+        ApiClient.showElement("#transformBtn");
         if (isTransformed) {
           await XmlUtils.autoTransformXML(file);
           transformBtn.textContent = "Revert to Raw XML";
