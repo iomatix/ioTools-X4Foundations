@@ -1,75 +1,81 @@
 "use strict";
 
+import ApiClient from "../shared/api_client.js";
+import ConsoleUtils from "../shared/console_utils.js";
 import { SharedLibs } from "../shared/shared_libs.js";
-const console = SharedLibs.ConsoleUtils;
+
+const consoleUtils = SharedLibs.ConsoleUtils;
 const apiClient = SharedLibs.ApiClient;
-const sharedEnums = SharedLibs.SharedEnums;
-const filePathUtils = SharedLibs.FilePathUtils;
-const queryTools = SharedLibs.QueryTools;
-const sortUtils = SharedLibs.SortUtils;
 const statusManager = SharedLibs.StatusManager;
 
-document.addEventListener("DOMContentLoaded", () => {
-  // Cache DOM elements for later use
-  const expressionInput = apiClient.getElement("#expression");
-  const divXMLDisplay = apiClient.getElement("#divXMLDisplay");
-  const showMdCheckbox = apiClient.getElement("#show_md");
-  const showAiCheckbox = apiClient.getElement("#show_ai");
-  const sortCheckbox = apiClient.getElement("#sort");
-  const statusIndicator = apiClient.getElement("#statusIndicator");
-  // Use jQuery for hintStatus updates
-  const $hintStatus = $("#hintStatus");
+/**
+ * DocumentationViewer handles XSLT transformation of an XML file,
+ * supports filtering (via an expression), sorting, and keyword lookups.
+ */
+class DocumentationViewer {
+  /**
+   * @param {Object} config - Configuration with DOM elements and file paths.
+   * @param {HTMLElement} config.expressionInput - Filter expression input.
+   * @param {HTMLElement} config.divXMLDisplay - Container where transformed XML is shown.
+   * @param {HTMLElement} config.showMdCheckbox - Checkbox for MD-specific keywords.
+   * @param {HTMLElement} config.showAiCheckbox - Checkbox for AI-specific keywords.
+   * @param {HTMLElement} config.sortCheckbox - Checkbox to enable sorting.
+   * @param {HTMLElement} config.statusIndicator - Status message element.
+   * @param {jQuery} [config.hintStatus] - jQuery element for hint status (optional).
+   * @param {string} [config.xmlFile] - XML file path (default: "scriptproperties.xml").
+   * @param {string} [config.xslFile] - XSL file path (default: "scriptproperties.xsl").
+   */
+  constructor(config) {
+    this.expressionInput = config.expressionInput;
+    this.divXMLDisplay = config.divXMLDisplay;
+    this.showMdCheckbox = config.showMdCheckbox;
+    this.showAiCheckbox = config.showAiCheckbox;
+    this.sortCheckbox = config.sortCheckbox;
+    this.statusIndicator = config.statusIndicator;
+    this.hintStatus = config.hintStatus || null;
 
-  // Module-level variables
-  let xmlDoc = null;
-  let xslDoc = null;
-  let updateTimer = null;
-  let currentRequestGeneration = 0;
-  let statusCount = 0;
-  let propertyTree = { children: {} };
-  let baseKeywords = [];
-  let globalKeywords = [];
-  let allPropertyParts = [];
+    // File path configuration.
+    this.xmlFile = config.xmlFile || "scriptproperties.xml";
+    this.xslFile = config.xslFile || "scriptproperties.xsl";
 
-  /* Print the property tree */
-  const printPropertyTree = (tree) => {
-    console.logInfo("📦 Property Tree Structure:");
+    // Internal state.
+    this.xmlDoc = null;
+    this.xslDoc = null;
+    this.updateTimer = null;
+    this.currentRequestGeneration = 0;
+    this.propertyTree = { children: {} };
+    this.baseKeywords = [];
+    this.globalKeywords = [];
+    this.allPropertyParts = [];
+  }
 
+  printPropertyTree(tree) {
+    consoleUtils.logInfo("📦 Property Tree Structure:");
     const printNode = (node, name, depth = 0, isLast = true) => {
       const indent = "  ".repeat(depth);
       const branch = depth === 0 ? "" : isLast ? "└─ " : "├─ ";
-      const styledName = console.applyStyle(name, "bold");
-
-      console.log(`${indent}${branch}${styledName}`);
-
-      const children = Object.entries(node.children);
-      children.forEach(([childName, childNode], index) => {
-        const isLastChild = index === children.length - 1;
-        printNode(childNode, childName, depth + 1, isLastChild);
-      });
+      const styledName = consoleUtils.applyStyle(name, "bold");
+      consoleUtils.log(`${indent}${branch}${styledName}`);
+      Object.entries(node.children).forEach(
+        ([childName, childNode], index, arr) => {
+          printNode(childNode, childName, depth + 1, index === arr.length - 1);
+        }
+      );
     };
-
-    // Start with root node's children
-    const rootChildren = Object.entries(tree.children);
-    rootChildren.forEach(([name, node], index) => {
-      const isLast = index === rootChildren.length - 1;
-      printNode(node, name, 0, isLast);
+    Object.entries(tree.children).forEach(([name, node], index, arr) => {
+      printNode(node, name, 0, index === arr.length - 1);
     });
-  };
+  }
 
-  /* Build the property tree */
-  const buildPropertyTree = (propertyNames) => {
+  buildPropertyTree(propertyNames) {
     const root = { children: {} };
     const baseKeywordsSet = new Set();
     const partsSet = new Set();
-
     for (const name of propertyNames) {
       const parts = name.split(".");
       if (parts.length === 0) continue;
-      const baseKeyword = parts[0];
-      baseKeywordsSet.add(baseKeyword);
+      baseKeywordsSet.add(parts[0]);
       parts.forEach((part) => partsSet.add(part));
-
       let currentNode = root;
       for (const part of parts) {
         if (!currentNode.children[part]) {
@@ -78,19 +84,17 @@ document.addEventListener("DOMContentLoaded", () => {
         currentNode = currentNode.children[part];
       }
     }
-
     return {
       tree: root,
       baseKeywords: Array.from(baseKeywordsSet),
       allPropertyParts: Array.from(partsSet),
     };
-  };
+  }
 
-  // Process the XML to extract unique property names
-  const processXMLData = (xml, statusSelector = null) => {
-    console.logInfo("Processing XML data...");
+  processXMLData(xml, statusSelector = null) {
+    consoleUtils.logInfo("Processing XML data...");
     if (statusSelector)
-      statusManager.set(statusSelector, `Processing XML data...`);
+      statusManager.set(statusSelector, "Processing XML data...");
     try {
       const nodes = xml.evaluate(
         "//property/@name",
@@ -103,18 +107,17 @@ document.addEventListener("DOMContentLoaded", () => {
       for (let i = 0; i < nodes.snapshotLength; i++) {
         properties.push(nodes.snapshotItem(i).value);
       }
-      console.logSuccess(`Extracted ${properties.length} properties.`);
-      return buildPropertyTree(properties);
+      consoleUtils.logSuccess(`Extracted ${properties.length} properties.`);
+      return this.buildPropertyTree(properties);
     } catch (error) {
-      console.logError(`Error processing XML: ${error.message}`);
-      return buildPropertyTree([]);
+      consoleUtils.logError(`Error processing XML: ${error.message}`);
+      return this.buildPropertyTree([]);
     } finally {
       if (statusSelector) statusManager.clear(statusSelector);
     }
-  };
+  }
 
-  // Extract keywords from XML (<keyword> elements)
-  const processKeywordData = (xml) => {
+  processKeywordData(xml) {
     const keywordNodes = xml.getElementsByTagName("keyword");
     let keywords = [];
     for (let i = 0; i < keywordNodes.length; i++) {
@@ -122,55 +125,51 @@ document.addEventListener("DOMContentLoaded", () => {
       if (name) keywords.push(name);
     }
     return keywords;
-  };
+  }
 
-  // Initialize jQuery UI autocomplete if available
-  const initAutoComplete = (statusSelector = null) => {
-    console.logInfo("Initializing autocomplete...");
+  initAutoComplete(statusSelector = null) {
+    consoleUtils.logInfo("Initializing autocomplete...");
     if (statusSelector)
-      statusManager.set(statusSelector, `Initializing autocomplete...`);
-    const $ = window.$ || document.$;
+      statusManager.set(statusSelector, "Initializing autocomplete...");
+    const $ = window.$;
     if ($ && $.fn.autocomplete) {
       try {
-        $("#expression").autocomplete({
+        $(this.expressionInput).autocomplete({
           source: (request, response) => {
             const term = request.term.trim();
             if (term.indexOf(".") !== -1) {
-              handlePropertyLookup(term, response);
+              this.handlePropertyLookup(term, response);
             } else {
-              handleKeywordLookup(term, response);
+              this.handleKeywordLookup(term, response);
             }
           },
           minLength: 0,
           delay: 300,
-          select: function (event, ui) {
-            $(this).val(ui.item.value);
-            debouncedUpdate();
+          select: (event, ui) => {
+            $(this.expressionInput).val(ui.item.value);
+            this.debouncedUpdate();
             return false;
           },
-          // Using jQuery to update hint status
-          search: function () {
-            $hintStatus.text("Loading hints...");
+          search: () => {
+            if (this.hintStatus) this.hintStatus.text("Loading hints...");
           },
-          response: function () {
-            $hintStatus.text("");
+          response: () => {
+            if (this.hintStatus) this.hintStatus.text("");
           },
         });
       } catch (error) {
-        console.logError(`Error initializing autocomplete: ${error}`);
+        consoleUtils.logError(`Error initializing autocomplete: ${error}`);
       } finally {
         if (statusSelector) statusManager.clear(statusSelector);
       }
     } else {
-      console.logWarning(
+      consoleUtils.logWarning(
         "jQuery UI autocomplete not found. Skipping initialization."
       );
     }
-  };
+  }
 
-  // Recursively search the property tree for matching paths.
-  // Returns suggestions with a dot prefix.
-  const searchPaths = (node, parts, prefix) => {
+  searchPaths(node, parts, prefix) {
     if (parts.length === 0) {
       return Object.keys(node.children).length > 0 ? [prefix + "."] : [prefix];
     }
@@ -181,166 +180,354 @@ document.addEventListener("DOMContentLoaded", () => {
         const child = node.children[key];
         if (parts.length === 1) {
           let suggestion = prefix + key;
-          if (Object.keys(child.children).length > 0) {
-            suggestion += ".";
-          }
+          if (Object.keys(child.children).length > 0) suggestion += ".";
           suggestions.push(suggestion);
         } else {
           suggestions = suggestions.concat(
-            searchPaths(child, parts.slice(1), prefix + key + ".")
+            this.searchPaths(child, parts.slice(1), prefix + key + ".")
           );
         }
       }
     }
     return suggestions;
-  };
+  }
 
-  // Handles property lookup (for terms like ".autos.act" or "Player.ac")
-  // When a dot is present, we try the property tree first.
-  // If no property-tree match exists for extra segments, we fallback to global keywords.
-  const handlePropertyLookup = (term, response) => {
+  handlePropertyLookup(term, response) {
     const normalized = term.startsWith(".") ? term.slice(1) : term;
     const parts = normalized.split(".").filter(Boolean);
-
     if (parts.length === 0) {
-      response(globalKeywords);
+      response(this.globalKeywords);
       return;
     }
-
     let suggestions = [];
-    if (propertyTree.children[parts[0]]) {
-      suggestions = searchPaths(propertyTree, parts, ".");
+    if (this.propertyTree.children[parts[0]]) {
+      suggestions = this.searchPaths(this.propertyTree, parts, ".");
     }
     if (suggestions.length === 0 && parts.length > 1) {
-      suggestions = globalKeywords.filter(
+      suggestions = this.globalKeywords.filter(
         (k) => k.toLowerCase() === parts[0].toLowerCase()
       );
     }
     if (suggestions.length === 0) {
-      suggestions = globalKeywords.filter((k) =>
+      suggestions = this.globalKeywords.filter((k) =>
         k.toLowerCase().startsWith(parts[0].toLowerCase())
       );
     }
     response(suggestions);
-  };
+  }
 
-  // Handle base keyword lookup (without a dot)
-  const handleKeywordLookup = (term, response) => {
+  handleKeywordLookup(term, response) {
     const query = term.toLowerCase();
-    const suggestions = globalKeywords.filter((k) =>
+    const suggestions = this.globalKeywords.filter((k) =>
       k.toLowerCase().startsWith(query)
     );
     response(suggestions);
-  };
+  }
 
-  // Perform the XSLT transformation based on user settings
-  const transformXML = async (statusSelector = null) => {
-    console.logInfo("Starting XML transformation...");
+  async transformXML(statusSelector = null) {
+    consoleUtils.logInfo("Starting XML transformation...");
     if (statusSelector)
       statusManager.set(statusSelector, "Transforming XML...");
     try {
-      if (!xmlDoc || !xslDoc) {
-        console.logError("XML/XSL documents are not loaded.");
+      if (!this.xmlDoc || !this.xslDoc) {
+        consoleUtils.logError("XML/XSL documents are not loaded.");
         return;
       }
-
       const processor = new XSLTProcessor();
-      processor.importStylesheet(xslDoc);
-
-      const expression = encodeURIComponent(expressionInput.value.trim());
+      processor.importStylesheet(this.xslDoc);
+      const expression = encodeURIComponent(this.expressionInput.value.trim());
       processor.setParameter(null, "expression", expression);
-
       const scriptType =
-        showMdCheckbox.checked && showAiCheckbox.checked
+        this.showMdCheckbox.checked && this.showAiCheckbox.checked
           ? "any"
-          : showMdCheckbox.checked
+          : this.showMdCheckbox.checked
           ? "md"
-          : showAiCheckbox.checked
+          : this.showAiCheckbox.checked
           ? "ai"
           : "";
       processor.setParameter(null, "scripttype", scriptType);
       processor.setParameter(
         null,
         "sort",
-        sortCheckbox.checked ? "true" : "false"
+        this.sortCheckbox.checked ? "true" : "false"
       );
-
-      const fragment = processor.transformToFragment(xmlDoc, document);
-      divXMLDisplay.replaceChildren(fragment);
-      console.logSuccess("XML transformation completed.");
+      const fragment = processor.transformToFragment(this.xmlDoc, document);
+      this.divXMLDisplay.replaceChildren(fragment);
+      consoleUtils.logSuccess("XML transformation completed.");
     } catch (error) {
-      console.logError(`Transformation error: ${error.message}`);
+      consoleUtils.logError(`Transformation error: ${error.message}`);
     } finally {
       if (statusSelector) statusManager.clear(statusSelector);
     }
-  };
+  }
 
-  // Debounce updates to avoid excessive processing
-  const debouncedUpdate = () => {
+  debouncedUpdate() {
     try {
-      const generation = ++currentRequestGeneration;
-      if (updateTimer) clearTimeout(updateTimer);
-      updateTimer = setTimeout(async () => {
-        if (generation === currentRequestGeneration) {
-          await transformXML();
+      const generation = ++this.currentRequestGeneration;
+      if (this.updateTimer) clearTimeout(this.updateTimer);
+      this.updateTimer = setTimeout(async () => {
+        if (generation === this.currentRequestGeneration) {
+          await this.transformXML();
         }
       }, 300);
     } catch (error) {
-      console.logError(`Debounced update error: ${error.message}`);
+      consoleUtils.logError(`Debounced update error: ${error.message}`);
     } finally {
-      printPropertyTree();
+      this.printPropertyTree(this.propertyTree);
     }
-  };
+  }
 
-  // Initialize the viewer by loading XML files and setting up autocomplete and event listeners
-  const init = async (statusSelector) => {
-    console.logInfo("Initializing documentation viewer...");
+  async init(statusSelector = this.statusIndicator) {
+    consoleUtils.logInfo("Initializing documentation viewer...");
     if (statusSelector)
       statusManager.set(statusSelector, "Initializing documentation viewer...");
     try {
-      [xmlDoc, xslDoc] = await Promise.all([
-        apiClient.fetchXML("scriptproperties.xml"),
-        apiClient.fetchXML("scriptproperties.xsl"),
+      [this.xmlDoc, this.xslDoc] = await Promise.all([
+        apiClient.fetchXML(this.xmlFile),
+        apiClient.fetchXML(this.xslFile),
       ]);
-
-      if (!xmlDoc || !xslDoc)
+      if (!this.xmlDoc || !this.xslDoc) {
         throw new Error("Failed to load required XML files.");
-
+      }
       const {
         tree,
         baseKeywords: bk,
         allPropertyParts: ap,
-      } = processXMLData(xmlDoc);
-      propertyTree = tree;
-      baseKeywords = bk.sort();
-      allPropertyParts = ap;
-
-      // Extract keywords from XML and combine with baseKeywords.
-      const extractedKeywords = processKeywordData(xmlDoc);
-      globalKeywords = Array.from(
-        new Set([...baseKeywords, ...extractedKeywords])
+      } = this.processXMLData(this.xmlDoc);
+      this.propertyTree = tree;
+      this.baseKeywords = bk.sort();
+      this.allPropertyParts = ap;
+      const extractedKeywords = this.processKeywordData(this.xmlDoc);
+      this.globalKeywords = Array.from(
+        new Set([...this.baseKeywords, ...extractedKeywords])
       ).sort();
-
-      initAutoComplete();
-      expressionInput.focus();
-      debouncedUpdate();
-      console.logSuccess("Documentation viewer initialized.");
+      this.initAutoComplete();
+      this.expressionInput.focus();
+      this.debouncedUpdate();
+      consoleUtils.logSuccess("Documentation viewer initialized.");
     } catch (error) {
-      console.logError(`Initialization error: ${error.message}`);
+      consoleUtils.logError(`Initialization error: ${error.message}`);
       alert(
         "Failed to initialize documentation viewer. Please report this issue."
       );
     } finally {
       if (statusSelector) statusManager.clear(statusSelector);
     }
-  };
+  }
+}
 
-  // Attach event listeners to handle user input changes
-  expressionInput.addEventListener("input", debouncedUpdate);
-  sortCheckbox.addEventListener("change", debouncedUpdate);
-  showMdCheckbox.addEventListener("change", debouncedUpdate);
-  showAiCheckbox.addEventListener("change", debouncedUpdate);
+/* Additional utility functions */
 
-  // Start the initialization
-  init();
-});
+// Updates the UI element that shows the current XSL file name.
+function updateXslFileName(activeXslFile) {
+  const xslFileNameEl = document.getElementById("xslFileName");
+  if (xslFileNameEl) {
+    xslFileNameEl.textContent = activeXslFile
+      ? activeXslFile.name || activeXslFile
+      : "No file chosen";
+  }
+}
+
+// Create a DOM tree view (using nested UL/LI elements) from an XML node.
+function createTreeDOM(node) {
+  if (!node || node.nodeType !== Node.ELEMENT_NODE) return null;
+  const li = document.createElement("li");
+  const span = document.createElement("span");
+  span.classList.add("tree-node");
+  const attributesList = [];
+  for (const attr of node.attributes) {
+    let attrText =
+      attr.name === "name"
+        ? `🔹${attr.name}: ${attr.value}`
+        : `${attr.name}: ${attr.value}`;
+    attributesList.push(attrText);
+  }
+  const attrDisplay = attributesList.length
+    ? ` <span class="tree-attributes">(${attributesList.join(", ")})</span>`
+    : "";
+  const textContent = node.textContent.trim();
+  const textDisplay =
+    textContent && node.children.length === 0
+      ? `: <span class="tree-value">${textContent}</span>`
+      : "";
+  span.innerHTML = `${node.nodeName}${attrDisplay}${textDisplay}`;
+  span.setAttribute(
+    "data-tooltip",
+    `Element: ${node.nodeName}\nAttributes: ${attributesList.join(", ")}`
+  );
+  li.appendChild(span);
+  if (node.children.length > 0) {
+    const ul = document.createElement("ul");
+    for (let child of node.children) {
+      const childTree = createTreeDOM(child);
+      if (childTree) ul.appendChild(childTree);
+    }
+    li.appendChild(ul);
+  } else {
+    span.classList.add("tree-node-no-children");
+  }
+  return li;
+}
+
+// Displays the XML as a collapsible tree view.
+async function displayAsTree(file, container) {
+  try {
+    const response = await fetch(file);
+    if (!response.ok) {
+      container.textContent = "Error loading file.";
+      return;
+    }
+    const text = await response.text();
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(text, "application/xml");
+    const treeRoot = document.createElement("ul");
+    treeRoot.classList.add("tree");
+    const treeDOM = createTreeDOM(xmlDoc.documentElement);
+    if (treeDOM) treeRoot.appendChild(treeDOM);
+    container.innerHTML = "";
+    container.appendChild(treeRoot);
+    // Attach collapse/expand events.
+    container.querySelectorAll(".tree-node").forEach((node) => {
+      node.addEventListener("click", function (e) {
+        e.stopPropagation();
+        const ul = this.parentElement.querySelector("ul");
+        if (ul) ul.classList.toggle("collapsed");
+      });
+    });
+  } catch (err) {
+    container.textContent = "Error displaying tree: " + err;
+  }
+}
+
+// Displays the raw XML file content (with HTML escaping).
+async function displayRawContent(file, container) {
+  try {
+    const response = await fetch(file);
+    if (!response.ok) {
+      container.textContent = "Error loading file.";
+      return;
+    }
+    const text = await response.text();
+    container.innerHTML = `<pre>${escapeHtml(text)}</pre>`;
+  } catch (err) {
+    container.textContent = "Error: " + err;
+  }
+}
+
+// Escapes HTML special characters.
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+// Attempt to automatically transform XML using candidate XSL files.
+async function autoTransformXML(xmlFile) {
+  const baseName = xmlFile.replace(/\.xml$/i, "");
+  const candidates = [`${baseName}.xsl`, `${baseName}.xslt`];
+  for (const candidate of candidates) {
+    try {
+      const response = await fetch(candidate);
+      if (!response.ok) {
+        ConsoleUtils.logDebug(
+          `Error fetching candidate XSL file: ${candidate} - ${response.status}`
+        );
+        continue;
+      }
+      const xslText = await response.text();
+      const xmlResponse = await fetch(xmlFile);
+      if (!xmlResponse.ok) {
+        ConsoleUtils.logError(
+          `Error while loading XML file: ${xmlFile} - ${xmlResponse.status}`
+        );
+        return false;
+      }
+      const xmlText = await xmlResponse.text();
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlText, "application/xml");
+      const xslDoc = parser.parseFromString(xslText, "application/xml");
+      if (window.XSLTProcessor) {
+        const xsltProcessor = new XSLTProcessor();
+        xsltProcessor.importStylesheet(xslDoc);
+        const resultDocument = xsltProcessor.transformToFragment(
+          xmlDoc,
+          document
+        );
+        const viewerContent = await ApiClient.getElement("#viewerContent");
+        if (viewerContent) {
+          viewerContent.innerHTML = "";
+          viewerContent.appendChild(resultDocument);
+        } else {
+          ConsoleUtils.logDebug("Viewer content element not found");
+          return false;
+        }
+        // Update activeXslFile.
+        const candidateResponse = await fetch(candidate);
+        const candidateBlob = await candidateResponse.blob();
+        const candidateName = candidate.split("/").pop();
+        window.activeXslFile = new File([candidateBlob], candidateName, {
+          type: candidateBlob.type,
+        });
+        updateXslFileName(window.activeXslFile);
+        return true;
+      } else {
+        ConsoleUtils.logError("XSLTProcessor not supported.");
+        return false;
+      }
+    } catch (err) {
+      ConsoleUtils.logError(
+        "Error fetching candidate XSL file:",
+        candidate,
+        err
+      );
+    }
+  }
+  ConsoleUtils.logInfo("No automatic XSL file transformation applied.");
+  return false;
+}
+
+// Reads a File object as text.
+function readFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsText(file);
+  });
+}
+
+// For XLS/XLSX support: display spreadsheet using SheetJS.
+async function displaySpreadsheet(file, container) {
+  try {
+    const XLSXModule = await import(
+      "https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"
+    );
+    const XLSX = XLSXModule.default || XLSXModule;
+    const response = await fetch(file);
+    if (!response.ok) {
+      container.textContent = "Error loading spreadsheet file.";
+      return;
+    }
+    const arrayBuffer = await response.arrayBuffer();
+    const workbook = XLSX.read(arrayBuffer, { type: "array" });
+    const firstSheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[firstSheetName];
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    container.innerHTML = `<pre>${JSON.stringify(jsonData, null, 2)}</pre>`;
+  } catch (err) {
+    container.textContent = "Error displaying spreadsheet: " + err;
+  }
+}
+
+export const XmlUtils = {
+  DocumentationViewer,
+  updateXslFileName,
+  createTreeDOM,
+  displayAsTree,
+  displayRawContent,
+  escapeHtml,
+  autoTransformXML,
+  readFileAsText,
+  displaySpreadsheet,
+};

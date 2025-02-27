@@ -37,7 +37,8 @@ This repository contains a simple WebApp tool designed initially for browsing do
 > Latest [Preview Release](https://github.com/iomatix/ioTools-X4Foundations/releases/tag/1.2.0-preview)
 >
 
-- [1.2.1] scriptproperties - Improvements for autocompletion hints.
+- [1.2.X] scriptproperties - Improvements for autocompletion hints.
+- [1.2.2] Second part of refactoring.
 - [1.2.0] First part of major refactoring of the codebase.
 - [1.1.3] scriptproperties - Updated the expression tooltips to work in the scripting logic: BaseKeyword.prop1.prop2.prop3 etc.
 - [1.1.3] WebApp - New internal file viewer has been implemented to enhance xmlbrowser functionality. It handles XSL/XLST files for styling and also allows to explore the tree of files freely.

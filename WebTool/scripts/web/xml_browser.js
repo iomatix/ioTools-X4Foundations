@@ -1,8 +1,8 @@
 "use strict";
 
-import {
-  SharedLibs,
-} from "../shared/shared_libs.js"
+import ApiClient from "../shared/api_client.js";
+import QueryTools from "../shared/query_tools.js";
+import { SharedLibs } from "../shared/shared_libs.js";
 const console = SharedLibs.ConsoleUtils;
 const apiClient = SharedLibs.ApiClient;
 const sharedEnums = SharedLibs.SharedEnums;
@@ -52,7 +52,7 @@ async function displayItems(items, selector, sortMode) {
   // Rendering logic
   let divFolders = [];
   let divFiles = [];
-  items.forEach((item) =>  {
+  items.forEach((item) => {
     const divFolder = apiClient.createElement("div", {
       class: "item folder-item",
     });
@@ -63,8 +63,9 @@ async function displayItems(items, selector, sortMode) {
     if (item.type === "directory") {
       /* For directories, create a link to navigate deeper into the folder structure. */
       const folderPath = filePathUtils.normalize(item.path);
+      const folderUrl =  QueryTools.buildUrl("xmlbrowser.html", {folder: folderPath});
       const link = apiClient.createElement("a", {
-        href: `xmlbrowser.html?folder=${encodeURIComponent(folderPath)}`,
+        href: folderUrl,
         class: "raw-file-link",
         textContent: item.name + "/",
       });
@@ -94,8 +95,9 @@ async function displayItems(items, selector, sortMode) {
 
       // 3. External App launch link (appended last)
       const fileParam = filePathUtils.normalize(item.path);
+      const extUrl = QueryTools.buildUrl("/launch", {file: fileParam});
       const extLink = apiClient.createElement("a", {
-        href: `/launch?file=${encodeURIComponent(fileParam)}`,
+        href: extUrl,
         target: "_blank",
         textContent: "Open in External Application",
         class: "btn btn-secondary btn-sm ms-2 external-link",
@@ -118,6 +120,17 @@ async function displayItems(items, selector, sortMode) {
 document.addEventListener("DOMContentLoaded", () => {
   updateRawBrowsingLink("#rawBrowsingLink");
   const currentFolder = queryTools.getParam("folder") || ".";
-  apiClient.fetchResourceList("/api", { folder: currentFolder, sortMode: sharedEnums.SORT_MODE.ALPHA_WITH_PARENT }, {}, displayItems);
+  ApiClient.getElement("#dirInfo", {
+    textContent: (currentFolder && currentFolder !== '.') ? `${currentFolder}` : '',
+  });
+  apiClient.fetchResourceList(
+    "/api",
+    {
+      folder: currentFolder,
+      sortMode: sharedEnums.SORT_MODE.ALPHA_WITH_PARENT,
+    },
+    {},
+    displayItems
+  );
   console.logDebug(`Current folder: ${currentFolder}`);
 });

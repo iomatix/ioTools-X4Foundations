@@ -71,15 +71,15 @@ export const ApiClient = {
    * @param {Object} [params={}] - Optional query parameters to include in the request.
    * @param {Object} [options={}] - Optional configuration options for the request.
    * @param {string} [options.statusSelector=".default-fetch-status"] - Selector for the status element to update.
-   * @param {string} [options.xsltEndpoint] - The URL path for the XSLT stylesheet used for transforming the XML.
+   * @param {string} [options.styleEndpoint] - The URL path for the XSLT stylesheet used for transforming the XML.
    *
    * @returns {Promise<Document>} A promise that resolves to the fetched XML document,
    * or the transformed XML document if an XSLT endpoint is provided.
    *
    * @throws Will throw an error if the fetch fails or the response is not ok.
    */
-  fetchXML: async (endpoint, params = {}, options = {}) => {
-    const { statusSelector = ".default-fetch-status", xsltEndpoint } = options;
+  fetchXML: async (endpoint, options = {}) => {
+    const { styleEndpoint, statusSelector = ".default-fetch-status" } = options;
 
     ConsoleUtils.logDebug(`Fetching from path: ${endpoint}...`);
     if (statusSelector)
@@ -95,21 +95,23 @@ export const ApiClient = {
 
       const xmlDoc = new DOMParser().parseFromString(xmlText, "text/xml");
 
-      if (xsltEndpoint) {
-        const xsltResponse = await fetch(xsltEndpoint);
-        if (!xsltResponse.ok) throw new Error(`HTTP ${xsltResponse.status}`);
-        const xsltText = await xsltResponse.text();
-        const xsltDoc = new DOMParser().parseFromString(
-          xsltText,
-          "application/xml"
-        );
-
-        const xsltProcessor = new XSLTProcessor();
-        xsltProcessor.importStylesheet(xsltDoc);
-
-        const resultDocument = xsltProcessor.transformToDocument(xmlDoc);
-        ConsoleUtils.logDebug(`XML transformed successfully using XSLT.`);
-        return resultDocument;
+      if (styleEndpoint) {
+        if (window.XSLTProcessor) {
+          const xsltResponse = await fetch(styleEndpoint);
+          if (!xsltResponse.ok) throw new Error(`HTTP ${xsltResponse.status}`);
+          const xsltText = await xsltResponse.text();
+          const xsltDoc = new DOMParser().parseFromString(
+            xsltText,
+            "application/xml"
+          );
+          const xsltProcessor = new XSLTProcessor();
+          if (xsltDoc) xsltProcessor.importStylesheet(xsltDoc);
+          const resultDocument = xsltProcessor.transformToDocument(xmlDoc);
+          ConsoleUtils.logDebug(`XML transformed successfully using XSLT.`);
+          return resultDocument;
+        } else {
+          throw new Error("XSLT Processing is not supported in this browser.");
+        }
       } else {
         return xmlDoc;
       }

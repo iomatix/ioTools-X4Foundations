@@ -38,6 +38,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
     def validate_path(self, path_param, base_dir=None):
         """Validate and normalize path to prevent directory traversal."""
         try:
+            decoded = urllib.parse.unquote(urllib.parse.unquote(path_param))
             if base_dir is None:
                 base_dir = os.getcwd()
             
