@@ -1,10 +1,7 @@
 "use strict";
 
-
 /**
- * Description placeholder
- *
- * @type {{ getParam: (name: string, decode?: boolean) => string; setParam: (name: string, value: string, encode?: boolean) => void; buildQuery: (params: any) => any; buildUrl: (baseUrl: string, params: any) => string; decodeUrl: (url: string) => string; getAllParams: () => any; fetchWithParams: (endpoint: string, params: any...}
+ * A collection of utility functions for manipulating and interacting with URL query parameters and HTML content.
  */
 export const QueryTools = {
   /**
@@ -82,6 +79,19 @@ export const QueryTools = {
     const response = await fetch(`${endpoint}?${query}`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return response.json(); // Assuming the response is JSON
+  },
+
+  /**
+   * Escapes HTML special characters in a given text string.
+   *
+   * @param {string} text - The text string to be escaped.
+   * @returns {string} - The escaped text string with HTML special characters replaced by their corresponding entities.
+   */
+  escapeHtml: (text) => {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
   },
 };
 

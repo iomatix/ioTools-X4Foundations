@@ -15,12 +15,13 @@ const sortUtils = SharedLibs.SortUtils;
  * currently selected folder, or the root folder if none is selected.
  *
  * @param {string} selector - A CSS selector for the link element to update.
- * @returns {void}
+ * @param {string} folderPath - The path to the current folder.
+ * @returns {Promise<void>} A promise that resolves when the href is updated.
  */
-function updateRawBrowsingLink(selector) {
-  const folder = queryTools.getParam("folder") || ".";
-  const link = apiClient.getElement(selector);
-  link.href = `${folder}`;
+async function updateRawBrowsingLink(selector, folderPath) {
+  if (folderPath == "." || "") ApiClient.hideElement(selector);
+  const link = await apiClient.getElement(selector);
+  link.href = folderPath;
 }
 
 /**
@@ -63,7 +64,9 @@ async function displayItems(items, selector, sortMode) {
     if (item.type === "directory") {
       /* For directories, create a link to navigate deeper into the folder structure. */
       const folderPath = filePathUtils.normalize(item.path);
-      const folderUrl =  QueryTools.buildUrl("xmlbrowser.html", {folder: folderPath});
+      const folderUrl = QueryTools.buildUrl("xmlbrowser.html", {
+        folder: folderPath,
+      });
       const link = apiClient.createElement("a", {
         href: folderUrl,
         class: "raw-file-link",
@@ -95,7 +98,7 @@ async function displayItems(items, selector, sortMode) {
 
       // 3. External App launch link (appended last)
       const fileParam = filePathUtils.normalize(item.path);
-      const extUrl = QueryTools.buildUrl("/launch", {file: fileParam});
+      const extUrl = QueryTools.buildUrl("/launch", { file: fileParam });
       const extLink = apiClient.createElement("a", {
         href: extUrl,
         target: "_blank",
@@ -117,11 +120,11 @@ async function displayItems(items, selector, sortMode) {
 }
 
 /* Initialize the page */
-document.addEventListener("DOMContentLoaded", () => {
-  updateRawBrowsingLink("#rawBrowsingLink");
+document.addEventListener("DOMContentLoaded", async () => {
   const currentFolder = queryTools.getParam("folder") || ".";
   ApiClient.getElement("#dirInfo", {
-    textContent: (currentFolder && currentFolder !== '.') ? `${currentFolder}` : '',
+    textContent:
+      currentFolder && currentFolder !== "." ? `${currentFolder}` : "",
   });
   apiClient.fetchResourceList(
     "/api",
@@ -132,5 +135,6 @@ document.addEventListener("DOMContentLoaded", () => {
     {},
     displayItems
   );
+  updateRawBrowsingLink("#rawBrowsingLink", currentFolder);
   console.logDebug(`Current folder: ${currentFolder}`);
 });

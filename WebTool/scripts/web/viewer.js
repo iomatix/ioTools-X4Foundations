@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     transformBtn.addEventListener("click", async () => {
       if (!isTransformed) {
         // Attempt an auto transform
-        const success = await XmlUtils.autoTransformXML(file);
+        const success = XmlUtils.autoTransformXML(file);
         if (success) {
           transformBtn.textContent = "Revert to Raw XML";
           isTransformed = true;
@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       } else {
         // revert to raw
-        await XmlUtils.displayRawContent(file, viewerContent);
+        XmlUtils.displayRawContent(file, viewerContent);
         transformBtn.textContent = "Transform XML";
         isTransformed = false;
       }
@@ -78,17 +78,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Tree view toggles a collapsible tree
     treeViewBtn.addEventListener("click", async () => {
       if (!isTreeView) {
-        await XmlUtils.displayAsTree(file, viewerContent);
+        XmlUtils.displayAsTree(file, viewerContent);
         ApiClient.hideElement("#transformBtn");
         treeViewBtn.textContent = "Close Tree View";
       } else {
         // revert to last state
         ApiClient.showElement("#transformBtn");
         if (isTransformed) {
-          await XmlUtils.autoTransformXML(file);
+          XmlUtils.autoTransformXML(file);
           transformBtn.textContent = "Revert to Raw XML";
         } else {
-          await XmlUtils.displayRawContent(file, viewerContent);
+          XmlUtils.displayRawContent(file, viewerContent);
           transformBtn.textContent = "Transform XML";
         }
         treeViewBtn.textContent = "Tree View";
@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // By default, show raw content
     await XmlUtils.displayRawContent(file, viewerContent);
   } else if (type === "xsd" || type === "xsl") {
-    // We can just show raw content
+    // Show raw content
     viewerOptions.innerHTML = `<p class="h3 mt-2 mb-5">Viewing file: ${file}</p>`;
     await XmlUtils.displayRawContent(file, viewerContent);
   } else {
@@ -173,7 +173,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     consoleUtils.logWarning(`Unsupported type: ${type}`);
   }
 
-  // If you want tooltips for .tree-node:
+  // Tooltips for .tree-node:
   const tooltip = document.createElement("div");
   tooltip.classList.add("tree-tooltip");
   document.body.appendChild(tooltip);

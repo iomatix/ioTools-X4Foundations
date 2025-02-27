@@ -39,6 +39,7 @@ export const StatusManager = {
       el.style.display = "none";
     });
   },
+  
   /**
    * Sets the status message from a URL query parameter.
    *
@@ -46,7 +47,6 @@ export const StatusManager = {
    * @param {string} selector - A CSS selector for the elements to update with the message.
    * @returns {void}
    */
-
   setFromQueryParam: (paramName, selector) => {
     const message = QueryTools.getParam(paramName);
     if (message) {
