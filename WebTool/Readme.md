@@ -37,7 +37,7 @@ This repository contains a simple WebApp tool designed initially for browsing do
 > Latest [Preview Release](https://github.com/iomatix/ioTools-X4Foundations/releases/tag/1.2.0-preview)
 >
 
-- [1.2.X] TODO: Autocomplete -> scriptproperties - Improvements for autocompletion hints. TODO: Shortcut link from main menu TODO -> release the 1.2.5 preview build. 
+- [1.2.X] TODO: Autocomplete -> scriptproperties - Improvements for autocompletion hints. TODO: Investigate why Tree Mode stopped work for rest of the XML files. TODO: Shortcut link from main menu TODO -> release the 1.2.5 preview build. 
 - [1.2.5] Robust working 1.2.5 pre-release build. **Note: scriptproperties preview is available from XML Browser in this build. Link from main menu is not connected yet to the build.**
 - [1.2.5] Added basic support for viewing and filtering XLS/XLSX sheets also with regex.
 - [1.2.5] XMLTrees - Added filtering option through expression input for any XML file.
