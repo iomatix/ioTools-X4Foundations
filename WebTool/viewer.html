@@ -13,30 +13,48 @@
 </head>
 
 <body>
-  <div class="container p-2 menu-container">
+  <div class="container p-2 menu-container expandable">
     <h1>File Viewer</h1>
-    <a class="menu-button" href="index.html">Go to Home Page</a>
+    <button type="button" id="goToHome" class="menu-button" data-href="index.html">Go to Home Page</button>
   </div>
 
   <!-- Options for the viewer (we can dynamically add or remove UI elements) -->
-  <div class="container p-2 menu-container">
-    <div id="viewerOptions" class="container viewerOptions form-container">
-      <!-- We'll fill this in dynamically in viewer.js based on file type -->
+  <div class="container p-2 menu-container expandable">
+    <div class="mb-3">
+      <label for="expression" class="label">Filter Expression:</label>
+      <input id="expression" class="form-control expression-input" autocomplete="off" />
     </div>
-    <div id="fetchStatus" class="container default-fetch-status"></div>
+    <div id="viewerOptions" class="container viewerOptions form-container expandable">
+    </div>
+    <div class="form-check">
+      <input type="checkbox" id="showMd" class="form-check-input">
+      <label for="showMd" class="form-check-label">Show MD</label>
+    </div>
+    <div class="form-check">
+      <input type="checkbox" id="showAi" class="form-check-input">
+      <label for="showAi" class="form-check-label">Show AI</label>
+    </div>
+    <div class="form-check">
+      <input type="checkbox" id="sort" class="form-check-input">
+      <label for="sort" class="form-check-label">Sort Results</label>
+    </div>
+    <!-- We'll fill this in dynamically in viewer.js based on file type -->
+  </div>
+  <div id="fetchStatus" class="container default-fetch-status expandable"></div>
   </div>
 
-  <div class="container card-container">
-    <div id="viewerContent" class="container p-2 viewer-content">
+  <div class="container card-container expandable">
+    <div id="viewerContent" class="container p-2 viewer-content expandable">
       <!-- File content will be rendered here -->
     </div>
-    <div id="sheetJSView" style="display: none;"></div>
+
+    <ul id="sheetTabsJSView" class="sheet-tabs expandable" style="display: none;"></ul>
+    <div id="sheetJSView" class="sheet-view expandable" style="display: none;"></div>
   </div>
 
   <!-- JavaScript libs -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-  <script lang="javascript" src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <!-- 2) Load xml_utils (the module you showed that does transformations). -->
   <script type="module" src="scripts/xml/xml_utils.js"></script>
   <!-- 3) Load the actual viewer script that wires everything up. -->

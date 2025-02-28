@@ -9,7 +9,7 @@ class ConsoleStyles {
   static get header() {
     return "font-weight: bold; font-size: 1.2em; color: #9c27b0;";
   }
-  
+
   static get okBlue() {
     return "color: #2196f3;";
   }
@@ -56,7 +56,7 @@ export const ConsoleUtils = {
    * @param {string} message - The message to log
    */
   _log: (consoleMethod, style, message) => {
-    if (typeof console[consoleMethod] === 'function') {
+    if (typeof console[consoleMethod] === "function") {
       console[consoleMethod](`%c${message}`, style);
     }
   },
@@ -66,56 +66,62 @@ export const ConsoleUtils = {
    *
    * @param {string} message - The message to log
    */
-  logHeader: (message) => ConsoleUtils._log('log', ConsoleStyles.header, message),
+  logHeader: (message) =>
+    ConsoleUtils._log("log", ConsoleStyles.header, message),
 
   /**
    * Logs a message with an informational style
    *
    * @param {string} message - The message to log
    */
-  logInfo: (message) => ConsoleUtils._log('log', ConsoleStyles.okBlue, message),
+  logInfo: (message) => ConsoleUtils._log("log", ConsoleStyles.okBlue, message),
 
   /**
    * Logs a message with a success style
    *
    * @param {string} message - The message to log
    */
-  logSuccess: (message) => ConsoleUtils._log('log', ConsoleStyles.okGreen, message),
+  logSuccess: (message) =>
+    ConsoleUtils._log("log", ConsoleStyles.okGreen, message),
 
   /**
    * Logs a message with a warning style
    *
    * @param {string} message - The message to log
    */
-  logWarning: (message) => ConsoleUtils._log('warn', ConsoleStyles.warning, message),
+  logWarning: (message) =>
+    ConsoleUtils._log("warn", ConsoleStyles.warning, message),
 
   /**
    * Logs a message with an error style
    *
    * @param {string} message - The message to log
    */
-  logError: (message) => ConsoleUtils._log('error', ConsoleStyles.fail, message),
+  logError: (message) =>
+    ConsoleUtils._log("error", ConsoleStyles.fail, message),
 
   /**
    * Logs a message with a debug style
    *
    * @param {string} message - The message to log
    */
-  logDebug: (message) => ConsoleUtils._log('debug', ConsoleStyles.okCyan, message),
+  logDebug: (message) =>
+    ConsoleUtils._log("debug", ConsoleStyles.okCyan, message),
 
   /**
    * Logs a message with a bold style
    *
    * @param {string} message - The message to log
    */
-  logBold: (message) => ConsoleUtils._log('log', ConsoleStyles.bold, message),
+  logBold: (message) => ConsoleUtils._log("log", ConsoleStyles.bold, message),
 
   /**
    * Logs a message with an underline style
    *
    * @param {string} message - The message to log
    */
-  logUnderline: (message) => ConsoleUtils._log('log', ConsoleStyles.underline, message),
+  logUnderline: (message) =>
+    ConsoleUtils._log("log", ConsoleStyles.underline, message),
 };
 
 export default ConsoleUtils;

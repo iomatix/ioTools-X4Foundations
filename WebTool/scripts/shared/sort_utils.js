@@ -24,7 +24,9 @@ export const SortUtils = {
     if (isASpecial && !isBSpecial) return -1;
     if (!isASpecial && isBSpecial) return 1;
 
-    return await a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+    return await a.name.localeCompare(b.name, undefined, {
+      sensitivity: "base",
+    });
   },
 
   /**
@@ -40,7 +42,7 @@ export const SortUtils = {
     let otherItems = items.filter((item) => item.name !== parentName);
 
     otherItems.sort(SortUtils.sortItemsAlpha);
-    return  [...parentDir, ...otherItems];
+    return [...parentDir, ...otherItems];
   },
 
   /**

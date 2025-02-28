@@ -32,17 +32,44 @@ This repository contains a simple WebApp tool designed initially for browsing do
 >
 > Latest [**Stable** Release available is 1.0.1](https://github.com/iomatix/ioTools-X4Foundations/releases/tag/1.0.1)
 >
-> 1.2.1 is WIP
+> 1.2.5 is WIP
 >
 > Latest [Preview Release](https://github.com/iomatix/ioTools-X4Foundations/releases/tag/1.2.0-preview)
 >
 
-- [1.2.X] scriptproperties - Improvements for autocompletion hints.
-- [1.2.X] scriptproperties - scriptproperties page uses a new Enhanced Viewer features.
+- [1.2.X] TODO: Autocomplete -> scriptproperties - Improvements for autocompletion hints. TODO: Shortcut link from main menu TODO -> release the 1.2.5 preview build. 
+- [1.2.5] Robust working 1.2.5 pre-release build. **Note: scriptproperties preview is available from XML Browser in this build. Link from main menu is not connected yet to the build.**
+- [1.2.5] Added basic support for viewing and filtering XLS/XLSX sheets also with regex.
+- [1.2.5] XMLTrees - Added filtering option through expression input for any XML file.
+- [1.2.5] **Clearer Filtering Results:**
+    - **Before:** Typing an expression like `player` or `pla` might result in no output or confusing null displays if no exact matches were found, leaving users unsure why nothing appeared.
+    - **After:** Now, when you type an expression (e.g., `player`, `Player.blueprints`, or `pla`), the viewer shows either:
+      - A neatly formatted table of matching keywords, datatypes (filter for them using `$` prefix in query), and their properties (e.g., "Base keywords with matching properties" for Player).
+      - A clear, user-friendly message like "No matching base keyword for 'player'" or "No matching property 'blueprints' found" if no results match, so you know exactly what’s happening.
+- [1.2.5] **Better Handling of Complex Queries:**
+    - **Before:** Dot-notation expressions (e.g., `Player.blueprints.product`) might not work consistently or fail silently, making it hard to explore nested properties.
+    - **After:** You can now drill down into properties more easily with dot notation (e.g., `Player.blueprints` shows properties under Player, and `Player.blueprints.product` digs deeper). If a part of the expression doesn’t match, you’ll see a specific error message (e.g., "Base 'Player' not recognized" or "No matching property 'product' found"), helping you refine your search.
+- [1.2.5] **Improved Feedback for Empty or Invalid Inputs:**
+    - **Before:** If you entered an invalid or empty expression, the viewer might show null or no content, leaving you confused.
+    - **After:** You’ll now see helpful messages like "No matching properties or keywords found for 'pla'" or "Base 'xyz' not recognized," making it easier to understand why results aren’t appearing and what to try next.
+- [1.2.5] **Easier Navigation and Readability:**
+    - **Before:** The output might look cluttered or hard to navigate, especially for large datasets or complex hierarchies.
+    - **After:** The transformed output is organized into clear sections with headings (e.g., "Base Keywords," "Data Types," "Properties Matching"), tables for properties, and clickable links for datatypes, improving readability and navigation within the document.
+- [1.2.5] **Consistent Sorting and Filtering Options:**
+    - **Before:** Sorting might not always apply correctly, or filtering by script type (MD-specific or AI-specific) could be inconsistent.
+    - **After:** When you check "Sort Results," properties within keywords and datatypes are sorted alphabetically, and filtering by "Show MD-Specific" or "Show AI Content" works reliably to show only relevant script-specific properties, enhancing usability for X4: Foundations users.
+- [1.2.5] **Faster and More Reliable Performance:**
+    - **Before:** For large XML files or complex expressions, filtering and transformation might be slow or fail silently.
+    - **After:** The improved XSL and JavaScript logic are more efficient, reducing delays and ensuring consistent behavior across all XML files, including `scriptproperties.xml`. You’ll notice quicker responses when typing or clicking buttons.
+- [1.2.5] **Intuitive Error Messages:**
+    - **Before:** Errors might be cryptic or absent, leaving you guessing about issues like missing files or malformed expressions.
+    - **After:** You’ll see detailed, friendly error messages (e.g., "No valid XSL/XSLT found for auto-transformation" or "Data type '$xyz' not recognized") in the console or UI, guiding you to resolve issues or adjust your input.
+- [1.2.4] scriptproperties - scriptproperties page uses a new Enhanced Viewer features.
+- [1.2.3] The Enhanced Viewer has been refactored. Transforming XML and exploring the Tree View is now much smoother. However, it may not be perfect yet, depending on the machine specs.
 - [1.2.2] Second part of refactoring.
 - [1.2.0] First part of major refactoring of the codebase.
 - [1.1.3] scriptproperties - Updated the expression tooltips to work in the scripting logic: BaseKeyword.prop1.prop2.prop3 etc.
-- [1.1.3] WebApp - New internal file viewer has been implemented to enhance xmlbrowser functionality. It handles XSL/XLST files for styling and also allows to explore the tree of files freely.
+- [1.1.3] WebApp - New internal file viewer has been implemented to enhance xmlbrowser functionality. It handles XSL/XSLT files for styling and also allows to explore the tree of files freely.
 - [1.1.1] WebApp - Improved Path Validating, Error Handling, Performance Optimization, Security, Code Organization, Validation and Outputs Handling at python's backend.
 - [1.1.0] xmlbrowser - Removed `Raw Browsing` button from the root folder.
 - [1.1.0] scriptproperties - Replaced synchronous XMLHttpRequests with asynchronous to prevent freezes of UI.

@@ -10,10 +10,8 @@ body {
 }
 
 #statusIndicator {
-	background-color: #2130368e;
 	color: rgb(105, 184, 253);
 	padding: 10px;
-	border: 1px solid #ccc;
 	top: 10px;
 	right: 10px;
 	z-index: 1000;
@@ -86,4 +84,17 @@ a.datatype {
 
 .pseudodatatype {
 	color: rgb(208, 37, 97);
+}
+
+.base {
+  display: block !important; /* Ensure tables are visible */
+  border: 1px solid #ccc; /* Optional: Add styling for visibility */
+}
+
+h1 {
+  display: block !important; /* Ensure headings are visible */
+}
+
+.base {
+  background-color: yellow !important; /* Highlight tables for debugging */
 }

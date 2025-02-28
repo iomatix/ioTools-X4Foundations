@@ -55,7 +55,7 @@ export const QueryTools = {
    * @returns {string} The decoded URL.
    */
   decodeUrl: (url) => {
-    return decodeURIComponent(url);
+    return url ? decodeURIComponent(url) : "";
   },
   /**
    * Retrieves all query parameters from the URL as an object.
@@ -63,7 +63,7 @@ export const QueryTools = {
    * @returns {Object} An object containing key-value pairs of query parameters.
    */
   getAllParams: () => {
-    Object.fromEntries(new URLSearchParams(window.location.search));
+    return Object.fromEntries(new URLSearchParams(window.location.search));
   },
 
   /**

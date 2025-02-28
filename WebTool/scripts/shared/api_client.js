@@ -21,7 +21,6 @@ export const ApiClient = {
    * file.
    */
   openFileInBrowser: async (filePath, fileExtension) => {
-    // Build a URL with query parameters for file and type
     const viewerUrl = QueryTools.buildUrl("viewer.html", {
       file: encodeURIComponent(filePath),
       type: encodeURIComponent(fileExtension),
@@ -33,16 +32,18 @@ export const ApiClient = {
    * Fetches a resource from the given endpoint and returns the JSON response.
    *
    * @param {string} endpoint The URL of the resource to fetch.
-   * @param {Object} [params] Optional query parameters to include in the request.
+   * @param {Object} params An object containing query parameters and additional settings.
    * @param {Object} [options] Optional configuration options for the request.
    * @param {string} [options.statusSelector] The selector for the element
    *   where the status of the request will be displayed.
    *
    * @returns {Promise<Object>} The JSON response from the server.
    */
-  fetchResource: async (endpoint, params, options = {}) => {
+  fetchResource: async (endpoint, params = {}, options = {}) => {
+    if (typeof params !== "object" || params === null) {
+      throw new Error("params must be an object.");
+    }
     const { statusSelector = ".default-fetch-status" } = options;
-
     ConsoleUtils.logDebug(`Fetching resource from endpoint: ${endpoint}...`);
     if (statusSelector)
       StatusManager.set(
@@ -50,11 +51,11 @@ export const ApiClient = {
         `Fetching from endpoint: ${endpoint}...`
       );
     try {
-      const query = QueryTools.buildQuery(params);
-      ConsoleUtils.logDebug(`Query: ${query} for endpoint: ${endpoint}`);
-      const response = await fetch(`${endpoint}?${query}`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return response.json();
+      const data = await QueryTools.fetchWithParams(endpoint, params);
+      ConsoleUtils.logDebug(
+        `Query: ${QueryTools.buildQuery(params)} for endpoint: ${endpoint}`
+      );
+      return data;
     } catch (error) {
       ConsoleUtils.logError(`Failed to load ${endpoint}: ${error.message}`);
       throw error;
@@ -78,8 +79,14 @@ export const ApiClient = {
    *
    * @throws Will throw an error if the fetch fails or the response is not ok.
    */
-  fetchXML: async (endpoint, options = {}) => {
+  fetchXML: async (endpoint, params = {}, options = {}) => {
     const { styleEndpoint, statusSelector = ".default-fetch-status" } = options;
+    if (typeof params !== "object" || params === null) {
+      throw new Error("params must be an object.");
+    }
+    const query = QueryTools.buildQuery(params);
+    const fullEndpoint = query ? `${endpoint}?${query}` : endpoint;
+    ConsoleUtils.logDebug(`Fetching from path: ${fullEndpoint}...`);
 
     ConsoleUtils.logDebug(`Fetching from path: ${endpoint}...`);
     if (statusSelector)
@@ -88,24 +95,34 @@ export const ApiClient = {
         `Fetching XML from path: ${endpoint}...`
       );
     try {
-      const response = await fetch(endpoint);
+      const response = await fetch(fullEndpoint);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const xmlText = await response.text();
       ConsoleUtils.logDebug(`XML from ${endpoint} loaded successfully.`);
 
+      // Parser Error Checking
       const xmlDoc = new DOMParser().parseFromString(xmlText, "text/xml");
+      const parserError = xmlDoc.getElementsByTagName("parsererror");
+      if (parserError.length > 0) {
+        throw new Error(`XML parsing error: ${parserError[0].textContent}`);
+      }
 
       if (styleEndpoint) {
         if (window.XSLTProcessor) {
-          const xsltResponse = await fetch(styleEndpoint);
-          if (!xsltResponse.ok) throw new Error(`HTTP ${xsltResponse.status}`);
-          const xsltText = await xsltResponse.text();
-          const xsltDoc = new DOMParser().parseFromString(
-            xsltText,
-            "application/xml"
-          );
+          let xsltDoc = styleEndpoint;
+          if (!(styleEndpoint instanceof Document)) {
+            // Handle URL case
+            const xsltResponse = await fetch(styleEndpoint);
+            if (!xsltResponse.ok)
+              throw new Error(`HTTP ${xsltResponse.status}`);
+            const xsltText = await xsltResponse.text();
+            xsltDoc = new DOMParser().parseFromString(
+              xsltText,
+              "application/xml"
+            );
+          }
           const xsltProcessor = new XSLTProcessor();
-          if (xsltDoc) xsltProcessor.importStylesheet(xsltDoc);
+          xsltProcessor.importStylesheet(xsltDoc);
           const resultDocument = xsltProcessor.transformToDocument(xmlDoc);
           ConsoleUtils.logDebug(`XML transformed successfully using XSLT.`);
           return resultDocument;
@@ -143,11 +160,15 @@ export const ApiClient = {
     options = {},
     displayCallback
   ) => {
+    if (typeof displayCallback !== "function") {
+      throw new Error("displayCallback must be a function.");
+    }
     const {
       sortMode = SharedEnums.SORT_MODE.ALPHA_WITH_PARENT,
       infoObjSelector = "#dirInfo",
       fileItemsSelector = "#fileItems",
       statusSelector = ".default-fetch-status",
+      folderParam = "folder",
     } = options;
 
     if (statusSelector)
@@ -156,14 +177,15 @@ export const ApiClient = {
         `Fetching items from endpoint: ${endpoint}...`
       );
     try {
-      const folderParam = QueryTools.getParam("folder");
+      const folderValue = QueryTools.getParam(folderParam);
       const folderDisplay =
-        !folderParam || folderParam === "." ? "root" : folderParam;
+        !folderValue || folderValue === "." ? "root" : folderValue;
       ApiClient.getElement(
         infoObjSelector
       ).textContent = `Current Directory: ${folderDisplay}`;
 
       const data = await ApiClient.fetchResource(endpoint, params, options);
+
       return displayCallback(data, fileItemsSelector, sortMode);
     } catch (error) {
       console.error(`Error loading items: ${error}`);
@@ -209,7 +231,13 @@ export const ApiClient = {
       if (key === "class") {
         el.className = value;
       } else if (key === "children") {
-        value.forEach((child) => el.appendChild(child));
+        value.forEach((child) => {
+          if (typeof child === "string" || typeof child === "number") {
+            el.appendChild(document.createTextNode(child));
+          } else if (child instanceof Node) {
+            el.appendChild(child);
+          }
+        });
       } else if (key.startsWith("data-")) {
         el.setAttribute(key, value);
       } else if (key === "style") {
@@ -273,7 +301,7 @@ export const ApiClient = {
    */
   createMenuContainer: (
     classNames = "container p-2 menu-container",
-    styles = [],
+    styles = {},
     children = []
   ) => {
     return ApiClient.createElement("div", {
@@ -303,119 +331,66 @@ export const ApiClient = {
     });
   },
 
-  createPrimaryButton: (text, onClick) => {
-    const btn = ApiClient.createElement("button", {
-      class: "btn btn-primary btn-sm ms-2",
+  /**
+   * @private
+   * Creates a button element with consistent styling and event handling
+   */
+  _createButtonElement(btnClass, text, onClick) {
+    const btn = this.createElement("button", {
+      class: `btn ${btnClass} btn-sm ms-2`,
       textContent: text,
     });
-    btn.addEventListener("click", onClick);
-    return btn;
-  },
-  createSecondaryButton: (text, onClick) => {
-    const btn = ApiClient.createElement("button", {
-      class: "btn btn-secondary btn-sm ms-2",
-      textContent: text,
-    });
-    btn.addEventListener("click", onClick);
+    if (onClick) btn.addEventListener("click", onClick);
     return btn;
   },
 
-  createDangerButton: (text, onClick) => {
-    const btn = ApiClient.createElement("button", {
-      class: "btn btn-danger btn-sm ms-2",
-      textContent: text,
-    });
-    btn.addEventListener("click", onClick);
-    return btn;
+  // Method to create a primary button
+  createPrimaryButton(text, onClick) {
+    return this._createButtonElement("btn-primary", text, onClick);
   },
 
-  createSuccessButton: (text, onClick) => {
-    const btn = ApiClient.createElement("button", {
-      class: "btn btn-success btn-sm ms-2",
-      textContent: text,
-    });
-    btn.addEventListener("click", onClick);
-    return btn;
+  // Method to create a secondary button
+  createSecondaryButton(text, onClick) {
+    return this._createButtonElement("btn-secondary", text, onClick);
   },
 
-  createWarningButton: (text, onClick) => {
-    const btn = ApiClient.createElement("button", {
-      class: "btn btn-warning btn-sm ms-2",
-      textContent: text,
-    });
-    btn.addEventListener("click", onClick);
-    return btn;
+  // Method to create a danger button
+  createDangerButton(text, onClick) {
+    return this._createButtonElement("btn-danger", text, onClick);
   },
 
-  createInfoButton: (text, onClick) => {
-    const btn = ApiClient.createElement("button", {
-      class: "btn btn-info btn-sm ms-2",
-      textContent: text,
-    });
-    btn.addEventListener("click", onClick);
-    return btn;
+  // Method to create a success button
+  createSuccessButton(text, onClick) {
+    return this._createButtonElement("btn-success", text, onClick);
   },
 
-  createExternalLink: (text, url) =>
-    ApiClient.createElement("a", {
+  // Method to create a warning button
+  createWarningButton(text, onClick) {
+    return this._createButtonElement("btn-warning", text, onClick);
+  },
+
+  // Method to create an info button
+  createInfoButton(text, onClick) {
+    return this._createButtonElement("btn-info", text, onClick);
+  },
+
+  // Method to create an external link
+  createExternalLink(text, url) {
+    return this.createElement("a", {
       class: "btn btn-secondary btn-sm ms-2 external-link",
       href: url,
       textContent: text,
       target: "_blank",
-    }),
-
+    });
+  },
   /**
-   * Finds and returns an element based on a given selector and options.
+   * Applies options to the given element.
    *
-   * @param {string} selector - A CSS selector to query the DOM for.
-   * @param {Object} [options={}] - An object containing additional options to style or configure the element.
-   * @param {Element} [options.context=document] - The context element to search within.
-   * @param {Element[]} [options.children] - An array of child elements to append to the found element.
-   * @param {Object} [options.data-*] - An object containing data attributes to set on the element.
-   * @param {Object} [options.style] - An object containing CSS styles to apply to the element.
-   * @param {function} [options.on*] - A function to add as an event listener for the given event name.
-   * @param {Object} [options.*] - Any other key-value pairs will be set directly on the element.
-   * @returns {Element} The found element.
-   *
-   * Example usage:
-   * ```js
-   * // Find a button with the ID 'submit-btn' and add an onClick handler and some styles
-   * const submitButton = await getElement('#submit-btn', {
-   *   style: {
-   *     backgroundColor: '#4CAF50',
-   *     color: 'white',
-   *     padding: '10px 20px'
-   *   },
-   *   onClick: (event) => {
-   *     alert('Submit button clicked!');
-   *   }
-   * });
-   *
-   * // Append a new child element to the found button
-   * const span = document.createElement('span');
-   * span.textContent = ' Click Me';
-   * await getElement('#submit-btn', { children: [span] });
-   * ```
+   * @param {HTMLElement} el - The element to apply options to.
+   * @param {Object} options - The options to apply to the element.
    */
-  getElement: async (selector, options = {}) => {
-    let el;
-
-    if (options.context) {
-      el = options.context.querySelector(selector);
-    } else {
-      el = document.querySelector(selector);
-    }
-
-    // Check if element exists
+  applyOptionsToElement: (el, options) => {
     Object.entries(options).forEach(([key, value]) => {
-      if (
-        !el ||
-        (!Object.prototype.toString.call(el) === "[Element]" &&
-          key.startsWith("data-"))
-      ) {
-        throw new Error(`Missing element: ${selector}`);
-      }
-
       if (key === "children") {
         value.forEach((child) => el.appendChild(child));
       } else if (key.startsWith("data-")) {
@@ -424,65 +399,137 @@ export const ApiClient = {
         Object.assign(el.style, value);
       } else if (key.startsWith("on") && typeof value === "function") {
         el.addEventListener(key.slice(2).toLowerCase(), value);
-      } else {
-        el[key] = value;
+      } else if (["id", "className", "textContent"].includes(key)) {
+        el[key] = value; // Only allow specific safe properties
       }
     });
-
-    return el;
   },
+
   /**
-   * Shows an element.
+   * Gets the element(s) matching the selector.
    *
-   * @param {string} selector - The CSS selector of the element to show.
-   * @param {Object} [options={}] - Optional parameters to apply to the element.
-   * @returns {Promise<HTMLElement>} The shown element.
+   * @param {string} selector - The CSS selector of the element(s) to get.
+   * @param {Object} [options={}] - Optional parameters to apply to the element(s).
+   * @param {HTMLElement} [options.context] - Optional context element to search within.
+   * @returns {HTMLElement|NodeList} The found element(s) or throws an error if none found.
+   */
+  getElement: (selector, options = {}) => {
+    if (typeof selector !== "string") {
+      console.error("Invalid selector type:", selector);
+      throw new Error(
+        `Selector must be a string, got ${typeof selector} (${selector})`
+      );
+    }
+    let elements;
+    if (options.context && options.context instanceof HTMLElement) {
+      elements = options.context.querySelectorAll(selector);
+    } else {
+      elements = document.querySelectorAll(selector);
+    }
+    if (elements.length === 0) {
+      throw new Error(`Missing element(s): ${selector}`);
+    }
+    elements.forEach((el) => ApiClient.applyOptionsToElement(el, options));
+    return elements.length === 1 ? elements[0] : elements;
+  },
+
+  /**
+   * Shows element(s) by setting display to "block".
+   * @param {string} selector - The CSS selector of the element(s) to show.
+   * @param {Object} [options={}] - Optional parameters to apply to the element(s).
+   * @returns {Promise<HTMLElement|NodeList>} The shown element(s).
    */
   showElement: async (selector, options = {}) => {
-    const el = await ApiClient.getElement(selector, options);
-    if (!el) {
-      ConsoleUtils.logError(`Element with id ${selector} not found !`);
-    } else {
-    el.style.display = "block";
-    }
-    return el;
+    const elements = ApiClient.getElement(selector, options);
+    const elementArray =
+      elements instanceof NodeList ? Array.from(elements) : [elements];
+    elementArray.forEach((el) => (el.style.display = "block"));
+    return elements; // Return original format
   },
 
   /**
-   * Hides an element.
-   *
-   * @param {string} selector - The CSS selector of the element to hide.
-   * @param {Object} [options={}] - Optional parameters to apply to the element.
-   * @returns {Promise<HTMLElement>} The hidden element.
+   * Hides element(s) by setting display to "none".
+   * @param {string} selector - The CSS selector of the element(s) to hide.
+   * @param {Object} [options={}] - Optional parameters to apply to the element(s).
+   * @returns {Promise<HTMLElement|NodeList>} The hidden element(s).
    */
   hideElement: async (selector, options = {}) => {
-    const el = await ApiClient.getElement(selector, options);
-    if (!el) {
-      ConsoleUtils.logError(`Element with id ${selector} not found !`);
-    } else {
-      el.style.display = "none";
-    }
-    return el;
+    const elements = ApiClient.getElement(selector, options);
+    const elementArray =
+      elements instanceof NodeList ? Array.from(elements) : [elements];
+    elementArray.forEach((el) => (el.style.display = "none"));
+    return elements;
   },
+
   /**
-   * Toggles the visibility of an element.
-   *
-   * @param {string} selector - The CSS selector of the element to toggle.
-   * @param {Object} [options={}] - Optional parameters to apply to the element.
-   * @returns {Promise<HTMLElement>} The toggled element.
+   * Toggles the visibility of element(s).
+   * @param {string} selector - The CSS selector of the element(s) to toggle.
+   * @param {Object} [options={}] - Optional parameters to apply to the element(s).
+   * @returns {Promise<HTMLElement|NodeList>} The toggled element(s).
    */
   toggleVisibility: async (selector, options = {}) => {
-    const el = await ApiClient.getElement(selector, options);
-    if (!el) {
-      throw Error(`Element with id ${selector} not found !`);
-    } 
-    if (el.style.display === "none") {
-      await ApiClient.showElement(selector, options);
-    } else {
-      await ApiClient.hideElement(selector, options);
-    }
+    const elements = ApiClient.getElement(selector, options);
+    const elementArray =
+      elements instanceof NodeList ? Array.from(elements) : [elements];
+    elementArray.forEach((el) => {
+      el.style.display = el.style.display === "none" ? "block" : "none";
+    });
+    return elements;
+  },
 
-    return el;
+  /**
+   * Toggles the max-width of element(s) between a specified value and their default state.
+   * @param {string} selector - CSS selector of target element(s)
+   * @param {Object} [options={}] - Configuration options
+   * @param {string} [options.maxWidth="100%"] - Maximum width when expanded
+   * @returns {HTMLElement|NodeList} The modified element(s)
+   */
+  toggleMaxWidth: (selector, options = { maxWidth: "100%" }) => {
+    const elements = ApiClient.getElement(selector); // Throws if no elements found
+
+    // Normalize elements to an array for consistent handling
+    const elementArray =
+      elements instanceof NodeList ? Array.from(elements) : [elements];
+
+    elementArray.forEach((element) => {
+      const currentWidth = element.style.maxWidth;
+      const targetWidth = options.maxWidth || "100%"; // Use provided value or default
+
+      // Toggle: if current maxWidth matches target, reset it; otherwise, apply target
+      element.style.maxWidth = currentWidth === targetWidth ? "" : targetWidth;
+
+      // Apply additional options, ensuring maxWidth isn't overridden
+      const optionsWithoutMaxWidth = { ...options };
+      delete optionsWithoutMaxWidth.maxWidth;
+      ApiClient.applyOptionsToElement(element, optionsWithoutMaxWidth);
+    });
+
+    // Return original elements in the same format as received
+    return elements;
+  },
+
+  /**
+   * Applies scrollable styles to a container.
+   *
+   * This function modifies the container's CSS styles to allow both horizontal and vertical scrolling
+   * when the content overflows. It sets a maximum height to the container and prevents text wrapping
+   * for wide content such as spreadsheets.
+   *
+   * @param {HTMLElement} container - The container element to apply the scrollable styles to.
+   *
+   * Example usage:
+   * ```javascript
+   * const containerElement = document.querySelector('.scrollable-container');
+   * ApiClient.makeScrollable(containerElement);
+   * ```
+   */
+  makeScrollable: (container) => {
+    Object.assign(container.style, {
+      overflowX: "auto", // Horizontal scroll when content overflows
+      overflowY: "auto", // Vertical scroll when content overflows
+      maxHeight: "80vh", // Limit height to trigger vertical scroll if needed
+      whiteSpace: "nowrap", // Prevent wrapping for wide content (e.g., spreadsheets)
+    });
   },
 };
 export default ApiClient;

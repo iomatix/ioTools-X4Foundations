@@ -46,23 +46,27 @@
     position: fixed;
     background-color: rgba(15, 9, 31, 0.746);
     color: gold;
-    padding: 8px 12px; /* Increased padding for better spacing */
-    border-radius: 6px; /* Slightly rounded corners */
+    padding: 8px 12px;
+    /* Increased padding for better spacing */
+    border-radius: 6px;
+    /* Slightly rounded corners */
     font-size: 14px;
     display: none;
-    white-space: pre-wrap; /* Ensures long text wraps */
+    white-space: pre-wrap;
+    /* Ensures long text wraps */
     z-index: 9999;
     pointer-events: none;
-    max-width: 300px; /* Adjusted max width to allow more content */
-    word-wrap: break-word; /* Ensures text breaks properly */
-    box-sizing: border-box; /* Ensures padding is considered in width */
-  }
-
+    max-width: 300px;
+    /* Adjusted max width to allow more content */
+    word-wrap: break-word;
+    /* Ensures text breaks properly */
+    box-sizing: border-box;
+    /* Ensures padding is considered in width */
+}
 
 .tree-node:hover {
     cursor: pointer;
 }
-  
 
 .viewer-content {
     padding: 6px;
@@ -70,4 +74,90 @@
     border-style: solid;
     border-width: 2px;
     border-color: #423c1e79;
+}
+
+.highlight {
+    background-color: rgb(226, 212, 121);
+    color: rgba(15, 11, 21, 0.93);
+}
+
+#statusIndicator {
+    color: rgb(105, 184, 253);
+    padding: 10px;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+}
+
+table.properties {
+    width: 95%;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    margin-left: auto;
+    margin-right: auto;
+    border-style: solid;
+    border-width: 1px;
+    background-color: #2e2e48;
+    text-align: left;
+    font-size: 9pt;
+    flex: 1 1 auto;
+    /* Allow table to grow and shrink */
+}
+
+td.property {
+    background-color: #36373e;
+}
+
+.propertyname {
+    color: rgb(200, 173, 64);
+}
+
+.comment {
+    font-style: italic;
+    font-weight: normal;
+}
+
+a.datatype {
+    color: rgb(81, 158, 225);
+}
+
+.importfailure {
+    color: rgb(208, 37, 37);
+}
+
+.scriptspecific {
+    color: rgb(208, 37, 97);
+}
+
+.pseudodatatype {
+    color: rgb(208, 37, 97);
+}
+
+.expression-input {
+    width: fit-content;
+}
+
+.base {
+    display: block;
+    /* Ensure tables are visible */
+    border: 1px solid #ccc;
+    /* Optional: Add styling for visibility */
+}
+
+.base td {
+    padding: 10px;
+    /* Ensure content isn’t hidden */
+    visibility: visible;
+    /* Override any hidden styles */
+}
+
+/* General */
+body {
+    font-size: 12pt;
+    font-weight: normal;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    margin: 0;
 }

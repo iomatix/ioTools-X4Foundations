@@ -18,14 +18,13 @@
 <body>
   <div class="container p-2 menu-container">
     <h1>X4 Catalog Explorer - XML/XSL/XSD</h1>
-    <a class="menu-button" href="index.html">Go to Home Page</a>
-    <a href="#" id="rawBrowsingLink" class="menu-button raw-browsing-button">Raw Browsing</a>
+    <button type="button" id="goToHome" class="menu-button" data-href="index.html">Go to Home Page</button>
+    <button type="button" id="rawBrowsingLink" class="menu-button raw-browsing-button" data-href="#">Raw Browsing</button>
     <div id="dirInfo" class="folder-info"></div>
   </div>
   <div class="container mt-10 p-2 card-container">
     <div id="fetchStatus" class="container default-fetch-status"></div>
     <div id="fileItems" class="item-list file-list">
-      Loading items...
     </div>
   </div>
 

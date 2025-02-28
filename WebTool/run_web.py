@@ -32,7 +32,7 @@ def get_local_ip():
 
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
     external_xml_editor = None
-    SAFE_EXTENSIONS = ('.xml', '.xsl', '.xsd')
+    SAFE_EXTENSIONS = ('.xml', '.xsl', '.xsd', '.xls', '.xlsx')
     bcolors = bcolors  # Reference to the color class
 
     def validate_path(self, path_param, base_dir=None):

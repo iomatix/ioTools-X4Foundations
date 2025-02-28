@@ -19,9 +19,13 @@ const sortUtils = SharedLibs.SortUtils;
  * @returns {Promise<void>} A promise that resolves when the href is updated.
  */
 async function updateRawBrowsingLink(selector, folderPath) {
-  if (folderPath == "." || "") ApiClient.hideElement(selector);
-  const link = await apiClient.getElement(selector);
-  link.href = folderPath;
+  if (folderPath === "." || folderPath === "") {
+    ApiClient.hideElement(selector);
+  } else {
+    const link = await apiClient.getElement(selector);
+    link.dataset.href = folderPath; // Update data-href instead of href
+    ApiClient.showElement(selector);
+  }
 }
 
 /**
@@ -38,8 +42,9 @@ async function updateRawBrowsingLink(selector, folderPath) {
  *   - `SharedEnums.SORT_MODE.DEFAULT`: No sorting, display items in the order they are given.
  */
 async function displayItems(items, selector, sortMode) {
-  const itemListDiv = await apiClient.getElement(selector);
-  itemListDiv.innerHTML = "";
+  const itemListDiv = await apiClient.getElement(selector, {
+    innerHTML: "",
+  });
 
   console.logDebug(`Displaying ${items.length} items`);
   if (items.length === 0) {
@@ -135,6 +140,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     {},
     displayItems
   );
-  updateRawBrowsingLink("#rawBrowsingLink", currentFolder);
+  await updateRawBrowsingLink("#rawBrowsingLink", currentFolder);
   console.logDebug(`Current folder: ${currentFolder}`);
+
+  // Add click handlers for navigation buttons
+  const goToHomeBtn = await apiClient.getElement("#goToHome");
+  const rawBrowsingBtn = await apiClient.getElement("#rawBrowsingLink");
+
+  goToHomeBtn.addEventListener("click", () => {
+    window.location.href = goToHomeBtn.dataset.href;
+  });
+  rawBrowsingBtn.addEventListener("click", () => {
+    window.location.href = rawBrowsingBtn.dataset.href;
+  });
 });

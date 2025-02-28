@@ -1,6 +1,6 @@
 "use strict";
 
-import ApiClient from "./api_client.js"
+import ApiClient from "./api_client.js";
 import ConsoleUtils from "./console_utils.js";
 import SharedEnums from "./shared_enums.js";
 import QueryTools from "./query_tools.js";
