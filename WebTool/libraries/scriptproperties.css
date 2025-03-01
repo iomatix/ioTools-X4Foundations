@@ -1,0 +1,367 @@
+/* Custom styles */
+body {
+	background-color: #000;
+	/* Dark background color */
+	color: #fff;
+	/* Light font color */
+	font-family: "Audiowide", sans-serif;
+	/* Modern sci-fi font */
+}
+
+h1 {
+	font-size: 16pt;
+	font-weight: bold;
+	text-align: left;
+	margin: 6px;
+}
+
+h2 {
+	font-size: 13pt;
+	font-weight: bold;
+	text-align: left;
+	margin: 6px;
+}
+
+h3 {
+	font-size: 11pt;
+	font-weight: bold;
+	text-align: left;
+	margin: 6px;
+}
+
+p {
+	text-align: left;
+	margin: 10px;
+}
+
+/* Flexbox container for the main content */
+.container {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	margin: 0 auto;
+	padding: 10px;
+}
+
+/* Flexbox container for the table */
+.table-container {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	justify-content: center;
+	align-items: center;
+	padding: 5px;
+}
+
+
+table.base {
+	width: 95%;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 4px;
+	margin-bottom: 4px;
+	border-style: solid;
+	border-width: 2px;
+	background-color: #2b2b3f;
+	text-align: left;
+	font-size: 11pt;
+	padding: 8px;
+}
+
+td {
+	padding: 4px;
+	vertical-align: top;
+}
+
+tr {
+	margin: 3px;
+}
+
+/* Apply background color to even rows */
+tr:nth-child(even) {
+	background-color: #343452;
+}
+
+/* Apply background color to odd rows */
+tr:nth-child(odd) {
+	background-color: #26263e;
+}
+
+/* Remove default icon from jQuery UI or Bootstrap */
+.ui-icon {
+	background-image: none !important;
+}
+
+/* Autocomplete dropdown styling */
+.ui-autocomplete {
+	background-color: #2e2e48;
+	color: white;
+	border: 1px solid #555;
+	max-height: 200px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	z-index: 1000;
+	width: max-content !important;
+	/* Adjust width to the longest item */
+	min-width: 250px;
+	max-width: 600px;
+	/* Default wider width */
+	white-space: nowrap;
+	border-radius: 5px;
+	padding: 3px 0;
+	/* Reduced top/bottom padding */
+}
+
+/* Adjust max width for smaller screens */
+@media (max-width: 768px) {
+	.ui-autocomplete {
+		max-width: 320px;
+		/* Reduce max width on smaller screens */
+		min-width: 230px;
+		/* Ensure minimum width */
+	}
+}
+
+/* Remove bullets or dots before items */
+.ui-menu {
+	width: auto !important;
+	min-width: 250px;
+	max-width: 600px;
+	padding: 0;
+	margin: 0;
+	list-style: none !important;
+	/* Ensures no bullet points */
+}
+
+/* Autocomplete item styling */
+.ui-menu-item {
+	padding: 4px 10px;
+	/* Reduce inner spacing */
+	cursor: pointer;
+	white-space: nowrap;
+	font-size: 14px;
+	margin: 0;
+	/* Remove unnecessary margins */
+}
+
+/* Hover effect for items */
+.ui-menu-item-wrapper {
+	padding: 4px 8px;
+	cursor: pointer;
+	display: block;
+}
+
+.ui-menu-item-wrapper:hover {
+	background-color: #444;
+	border-radius: 3px;
+}
+
+/* Modern scrollbar styling */
+.ui-autocomplete::-webkit-scrollbar {
+	width: 6px;
+	/* Thinner scrollbar */
+}
+
+.ui-autocomplete::-webkit-scrollbar-track {
+	background: #2e2e48;
+	border-radius: 5px;
+}
+
+.ui-autocomplete::-webkit-scrollbar-thumb {
+	background: #555;
+	border-radius: 5px;
+}
+
+.ui-autocomplete::-webkit-scrollbar-thumb:hover {
+	background: #777;
+}
+
+
+.form-container {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	justify-content: left;
+}
+
+form.label {
+	font-size: larger;
+	font-weight: bold;
+}
+
+form.base {
+	width: 95%;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 4px;
+	margin-bottom: 4px;
+	background-color: #2b2b3f23;
+	text-align: left;
+	font-size: smaller;
+	padding: 8px;
+}
+
+.card-container {
+	display: flex;
+	justify-content: center;
+	box-sizing: content-box;
+	flex-direction: column;
+	max-width: 60%;
+	margin: 0 auto;
+	margin-top: 5px;
+	padding: 10px;
+	background-color: #111;
+	border-radius: 10px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Adjust max-width for smaller screens */
+@media (max-width: 1600px) {
+	.card-container {
+		max-width: 100%;
+	}
+}
+
+.menu-container {
+	display: flex;
+	justify-content: center;
+	box-sizing: content-box;
+	flex-direction: column;
+	max-width: 65%;
+	margin: 0 auto;
+	margin-top: 5px;
+	padding: 15px;
+	background-color: #111;
+	border-radius: 10px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	align-items: center;
+}
+
+/* Adjust max-width for smaller screens */
+@media (max-width: 1600px) {
+	.menu-container {
+		max-width: 100%;
+	}
+}
+
+.menu-button {
+	display: block;
+	box-sizing: content-box;
+	width: 90%;
+	margin: 5px;
+	padding: 12px;
+	text-align: center;
+	background-color: #17a2b8;
+	/* Dark button background color */
+	color: #fff;
+	/* Light button font color */
+	border: none;
+	border-radius: 5px;
+	transition: background-color 0.3s ease;
+	text-decoration: none;
+	/* Remove underline */
+}
+
+.menu-button.menu-button-small {
+	width: 65%;
+	padding: 3px;
+}
+
+.menu-button:hover {
+	background-color: #70e2e4;
+	color: #1884c8;
+}
+
+.status-indicator {
+	display: none;
+	margin-bottom: 10px;
+	color: #007bff;
+}
+
+
+.expandable {
+	width: 100%;
+	/* Default width before toggle */
+	box-sizing: border-box;
+	/* Ensure padding doesn’t break layout */
+}
+
+#viewerContent,
+#sheetJSView {
+	padding: 10px;
+	/* adds breathing room */
+}
+
+/* Style scrollbars for better UX */
+::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #888;
+	border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #555;
+}
+
+/* Script Properties Styles */
+#statusIndicator {
+	color: rgb(105, 184, 253);
+	padding: 10px;
+	top: 10px;
+	right: 10px;
+	z-index: 1000;
+}
+
+.importfailure,
+.scriptspecific,
+.pseudodatatype {
+	color: rgb(208, 37, 97);
+}
+
+table.properties {
+	width: 95%;
+	margin-top: 2px;
+	margin-bottom: 2px;
+	margin-left: auto;
+	margin-right: auto;
+	border-width: 1px;
+	background-color: #2e2e48;
+	text-align: left;
+	font-size: 9pt;
+	flex: 1 1 auto;
+	/* Allow table to grow and shrink */
+}
+
+td.property {
+	background-color: #36373e;
+}
+
+.propertyname {
+	color: rgb(200, 173, 64);
+}
+
+.comment {
+	font-style: italic;
+	font-weight: normal;
+	color: rgb(190, 200, 208);
+}
+
+a.datatype {
+	color: rgb(81, 158, 225);
+}
+
+.importfailure {
+	color: rgb(208, 37, 37);
+}
+
+.keyword-header[data-tooltip]:hover,
+.datatype-header[data-tooltip]:hover,
+.property[data-tooltip]:hover {
+	cursor: help;
+	/* Indicate clickable/tooltipable element */
+}

@@ -1,163 +1,384 @@
+/* Container for Viewer Content (e.g., Base Keywords or Tree) */
+#viewerContent,
+.divXMLDisplay {
+  padding: 10px;
+  /* Adds breathing room */
+  background-color: #2b2b3f;
+  /* Dark background matching theme */
+  border: 2px solid #423c1e79;
+  /* Subtle border for contrast */
+  border-radius: 5px;
+  box-sizing: border-box;
+  /* Include padding in height/width */
+}
+
+/* Modern scrollbar styling for all scrollable elements (Firefox and WebKit) */
+#viewerContent::-webkit-scrollbar,
+.divXMLDisplay::-webkit-scrollbar {
+  width: 8px;
+  /* Thinner scrollbar */
+  height: 8px;
+}
+
+#viewerContent::-webkit-scrollbar-track,
+.divXMLDisplay::-webkit-scrollbar-track {
+  background: #2e2e48;
+  /* Dark track color matching theme */
+  border-radius: 5px;
+}
+
+#viewerContent::-webkit-scrollbar-thumb,
+.divXMLDisplay::-webkit-scrollbar-thumb {
+  background: #555;
+  /* Dark thumb color */
+  border-radius: 5px;
+}
+
+#viewerContent::-webkit-scrollbar-thumb:hover,
+.divXMLDisplay::-webkit-scrollbar-thumb:hover {
+  background: #777;
+  /* Slightly lighter thumb on hover */
+}
+
+#viewerContent,
+.divXMLDisplay {
+  scrollbar-width: thin;
+  /* Firefox */
+  scrollbar-color: #555 #2e2e48;
+  /* Firefox: thumb and track colors */
+}
+
+/* Tree Structure Styling (for Base Keywords or XML Tree) */
 .tree {
-    list-style-type: none;
-    padding-left: 20px;
+  list-style: none;
+  padding-left: 15px;
+  /* Reduced padding for tighter layout */
+}
+
+.tree li {
+  margin-bottom: 8px;
+  /* Increased spacing for readability */
 }
 
 .tree-node {
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.tree-node::before {
-    content: "▶";
-    margin-right: 4px;
-    color: #007bff;
-}
-
-.tree-node.tree-node-no-children::before {
-    content: "◯";
-}
-
-.tree ul {
-    padding-left: 15px;
-}
-
-.tree ul.collapsed {
-    display: none;
-}
-
-.tree-leaf {
-    color: #555;
-    font-style: italic;
-}
-
-.tree-attributes {
-    color: rgba(193, 193, 193, 0.794);
-    font-size: 0.75em;
-}
-
-.tree-value {
-    color: darkblue;
-    font-weight: bold;
-}
-
-/* Tree Tooltip Styling */
-.tree-tooltip {
-    position: fixed;
-    background-color: rgba(15, 9, 31, 0.746);
-    color: gold;
-    padding: 8px 12px;
-    /* Increased padding for better spacing */
-    border-radius: 6px;
-    /* Slightly rounded corners */
-    font-size: 14px;
-    display: none;
-    white-space: pre-wrap;
-    /* Ensures long text wraps */
-    z-index: 9999;
-    pointer-events: none;
-    max-width: 300px;
-    /* Adjusted max width to allow more content */
-    word-wrap: break-word;
-    /* Ensures text breaks properly */
-    box-sizing: border-box;
-    /* Ensures padding is considered in width */
+  cursor: pointer;
+  padding: 4px 8px;
+  /* Slightly larger padding for better touch support */
+  background-color: #2e2e48;
+  /* Dark background for nodes */
+  border: 1px solid #423c1e79;
+  /* Subtle border matching container */
+  border-radius: 4px;
+  /* Rounded corners for modern look */
+  display: inline-block;
+  color: #fff;
+  /* White text for dark background */
+  transition: background-color 0.2s ease;
+  /* Smooth hover transition */
 }
 
 .tree-node:hover {
-    cursor: pointer;
+  background-color: #444;
+  /* Darker shade on hover for contrast */
+  cursor: pointer;
 }
 
-.viewer-content {
-    padding: 6px;
-    background-color: rgba(48, 36, 66, 0.272);
-    border-style: solid;
-    border-width: 2px;
-    border-color: #423c1e79;
+.tree-icon {
+  margin-right: 8px;
+  /* Increased spacing for icon */
+  font-size: 0.9em;
+  /* Slightly larger icon for visibility */
+  color: rgb(81, 158, 225);
+  /* Blue color for sci-fi feel, matching theme */
 }
 
-.highlight {
-    background-color: rgb(226, 212, 121);
-    color: rgba(15, 11, 21, 0.93);
+.tree-node-no-children .tree-icon {
+  display: none;
 }
 
-#statusIndicator {
-    color: rgb(105, 184, 253);
-    padding: 10px;
-    top: 10px;
-    right: 10px;
-    z-index: 1000;
+.tree ul {
+  display: block;
 }
 
-table.properties {
-    width: 95%;
-    margin-top: 1px;
-    margin-bottom: 1px;
-    margin-left: auto;
-    margin-right: auto;
-    border-style: solid;
-    border-width: 1px;
-    background-color: #2e2e48;
-    text-align: left;
-    font-size: 9pt;
-    flex: 1 1 auto;
-    /* Allow table to grow and shrink */
+.tree ul.collapsed {
+  display: none;
 }
 
-td.property {
-    background-color: #36373e;
+.tree-attributes {
+  color: gold;
+  /* Gold for attributes, matching tooltip text */
+  font-size: 0.9em;
 }
 
-.propertyname {
-    color: rgb(200, 173, 64);
+.tree-value {
+  color: rgb(200, 173, 64);
+  /* Goldish for values, consistent with theme */
+  font-style: normal;
+  /* Removed italic for modern look */
 }
 
-.comment {
-    font-style: italic;
-    font-weight: normal;
+/* Tree Tooltip Styling (for Hover Hints) */
+.tree-tooltip {
+  position: fixed;
+  background-color: rgba(15, 9, 31, 0.746);
+  /* Dark semi-transparent background */
+  color: gold;
+  /* Gold text for contrast and theme consistency */
+  padding: 8px 12px;
+  border: 1px solid #555;
+  /* Darker border for theme */
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  /* Darker shadow for depth */
+  font-size: 0.9em;
+  display: none;
+  white-space: pre-wrap;
+  /* Ensures long text wraps */
+  z-index: 9999;
+  pointer-events: none;
+  max-width: 300px;
+  /* Adjusted max width to allow more content */
+  word-wrap: break-word;
+  /* Ensures text breaks properly */
+  box-sizing: border-box;
+  /* Ensures padding is considered in width */
 }
 
-a.datatype {
-    color: rgb(81, 158, 225);
+/* Base Table Styling */
+table.base {
+  width: 95%;
+  /* Ensure table takes up most of the container */
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  border: 2px solid #423c1e79;
+  /* Dark border matching theme */
+  background-color: #2b2b3f;
+  /* Dark background matching theme */
+  text-align: left;
+  font-size: 11pt;
+  padding: 8px;
+  border-radius: 5px;
+  /* Rounded corners for modern look */
+  box-sizing: border-box;
+  /* Include padding in width/height */
 }
 
-.importfailure {
-    color: rgb(208, 37, 37);
+table.base th {
+  background-color: #343452;
+  /* Slightly lighter dark background for headers */
+  padding: 8px;
+  text-align: left;
+  border-bottom: 2px solid #423c1e79;
+  /* Darker border for separation */
+  color: #fff;
+  /* White text for readability */
 }
 
-.scriptspecific {
-    color: rgb(208, 37, 97);
+table.base td {
+  padding: 8px;
+  border-bottom: 1px solid #423c1e79;
+  /* Subtle border for rows */
+  vertical-align: top;
+  /* Align content to the top */
+  color: #fff;
+  /* White text for readability */
 }
 
-.pseudodatatype {
-    color: rgb(208, 37, 97);
+table.base tbody {
+  display: block;
+  /* Allow tbody to scroll */
+  max-height: 400px;
+  /* Limit height (adjust as needed) */
+  overflow: auto;
+  /* Add scrollbars when content overflows */
+  width: 100%;
+  /* Ensure tbody matches table width */
+  scrollbar-width: thin;
+  /* Firefox */
+  scrollbar-color: #555 #2e2e48;
+  /* Firefox: thumb and track colors */
 }
 
-.expression-input {
-    width: fit-content;
+table.base tr {
+  display: table;
+  /* Maintain table-row behavior */
+  width: 100%;
+  /* Ensure full width */
 }
 
-.base {
-    display: block;
-    /* Ensure tables are visible */
-    border: 1px solid #ccc;
-    /* Optional: Add styling for visibility */
+/* WebKit scrollbar styles for tbody */
+table.base tbody::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-.base td {
-    padding: 10px;
-    /* Ensure content isn’t hidden */
-    visibility: visible;
-    /* Override any hidden styles */
+table.base tbody::-webkit-scrollbar-track {
+  background: #2e2e48;
+  /* Dark track color */
+  border-radius: 5px;
 }
 
-/* General */
-body {
-    font-size: 12pt;
-    font-weight: normal;
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    margin: 0;
+table.base tbody::-webkit-scrollbar-thumb {
+  background: #555;
+  /* Dark thumb color */
+  border-radius: 5px;
+}
+
+table.base tbody::-webkit-scrollbar-thumb:hover {
+  background: #777;
+  /* Slightly lighter thumb on hover */
+}
+
+@media (max-width: 768px) {
+  table.base tbody {
+    max-height: 300px;
+    /* Reduce height on smaller screens */
+  }
+}
+
+h1 {
+  font-size: 16pt;
+  font-weight: bold;
+  text-align: left;
+  margin: 6px;
+  color: #fff;
+  /* Ensure headers match dark theme */
+}
+
+h2 {
+  font-size: 13pt;
+  font-weight: bold;
+  text-align: left;
+  margin: 6px;
+  color: #fff;
+}
+
+h3 {
+  font-size: 11pt;
+  font-weight: bold;
+  text-align: left;
+  margin: 6px;
+  color: #fff;
+}
+
+p {
+  text-align: left;
+  margin: 10px;
+  color: #fff;
+  /* Ensure paragraphs match dark theme */
+}
+
+.container,
+.table-container,
+.card-container,
+.menu-container {
+  background-color: #111;
+  /* Darker background for containers */
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  /* Darker shadow for depth */
+  color: #fff;
+  /* White text for readability */
+}
+
+.menu-button {
+  background-color: #17a2b8;
+  /* Dark button background */
+  color: #fff;
+  /* White text for buttons */
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+}
+
+.menu-button:hover {
+  background-color: #70e2e4;
+  /* Lighter blue for hover */
+  color: #1884c8;
+  /* Darker text for contrast */
+}
+
+.status-indicator {
+  color: rgb(105, 184, 253);
+  /* Blue status indicator matching theme */
+  padding: 10px;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+}
+
+/* Autocomplete Styling (Ensure Consistency with Dark Theme) */
+.ui-autocomplete {
+  background-color: #2e2e48;
+  /* Dark background */
+  color: #fff;
+  /* White text */
+  border: 1px solid #555;
+  /* Dark border */
+  max-height: 200px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 1000;
+  width: max-content !important;
+  min-width: 250px;
+  max-width: 600px;
+  border-radius: 5px;
+  padding: 3px 0;
+}
+
+.ui-menu {
+  width: auto !important;
+  min-width: 250px;
+  max-width: 600px;
+  padding: 0;
+  margin: 0;
+  list-style: none !important;
+}
+
+.ui-menu-item {
+  padding: 4px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
+  margin: 0;
+}
+
+.ui-menu-item-wrapper {
+  padding: 4px 8px;
+  cursor: pointer;
+  display: block;
+}
+
+.ui-menu-item-wrapper:hover {
+  background-color: #444;
+  /* Darker hover for autocomplete */
+  border-radius: 3px;
+}
+
+.ui-autocomplete::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ui-autocomplete::-webkit-scrollbar-track {
+  background: #2e2e48;
+  border-radius: 5px;
+}
+
+.ui-autocomplete::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 5px;
+}
+
+.ui-autocomplete::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+@media (max-width: 768px) {
+  .ui-autocomplete {
+    max-width: 320px;
+    min-width: 230px;
+  }
 }

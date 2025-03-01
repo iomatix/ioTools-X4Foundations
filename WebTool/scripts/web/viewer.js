@@ -35,7 +35,8 @@ function makeScrollable(container) {
   Object.assign(container.style, {
     overflowX: "auto",
     overflowY: "auto",
-    maxHeight: "80vh",
+    maxHeight: "95vh",
+    maxWidth: "95vh",
     whiteSpace: "nowrap",
   });
 }
@@ -138,33 +139,34 @@ const fileHandlers = {
     let isTransformed = false;
     let isTreeView = false;
 
-    transformBtn.addEventListener("click", async () => {
-      if (!isTransformed) {
-        const originalContent = elements.viewerContent.innerHTML;
-        try {
-          const success = await XmlUtils.autoTransformXML(file);
-          if (success) {
-            transformBtn.textContent = "Revert to Raw XML";
-            isTransformed = true;
-            isTreeView = false;
-            if (viewer) viewer.debouncedUpdate();
-          } else {
-            consoleUtils.logWarning(
-              "No .xsl/.xslt found automatically. Restoring raw view."
-            );
-            elements.viewerContent.innerHTML = originalContent;
-          }
-        } catch (err) {
-          consoleUtils.logError(`Failed to transform XML: ${err.message}`);
-          elements.viewerContent.innerHTML = originalContent;
-        }
+// In viewer.js, within the xml handler
+transformBtn.addEventListener("click", async () => {
+  if (!isTransformed) {
+    const originalContent = elements.viewerContent.innerHTML;
+    try {
+      const success = await XmlUtils.autoTransformXML(file);
+      if (success) {
+        transformBtn.textContent = "Revert to Raw XML";
+        isTransformed = true;
+        isTreeView = false; // Ensure tree view is reset
+        if (viewer) viewer.debouncedUpdate(); // Update viewer if initialized
       } else {
-        await XmlUtils.displayRawContent(file, elements.viewerContent);
-        transformBtn.textContent = "Transform XML";
-        isTransformed = false;
-        if (viewer) viewer.debouncedUpdate();
+        consoleUtils.logWarning(
+          "No .xsl/.xslt found automatically. Restoring raw view."
+        );
+        elements.viewerContent.innerHTML = originalContent;
       }
-    });
+    } catch (err) {
+      consoleUtils.logError(`Failed to transform XML: ${err.message}`);
+      elements.viewerContent.innerHTML = originalContent;
+    }
+  } else {
+    await XmlUtils.displayRawContent(file, elements.viewerContent);
+    transformBtn.textContent = "Transform XML";
+    isTransformed = false;
+    // Do not call debouncedUpdate here to prevent automatic re-transformation
+  }
+});
 
     treeViewBtn.addEventListener("click", async () => {
       const expr = expressionInput ? expressionInput.value.trim() : "";

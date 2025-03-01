@@ -1,13 +1,21 @@
 "use strict";
 
 import { SharedLibs } from "../shared/shared_libs.js";
+import { GenericXMLFilteringStrategy } from "./generic_xml_filtering_strategy.js";
+import { ScriptPropertiesStrategy } from "./script_properties_strategy.js";
+import {
+  handlePropertyLookup,
+  handleKeywordLookup,
+} from "./xml_autocomplete_utils.js";
+import {
+  nodeMatchesExpression,
+  hasMatchingDescendant,
+} from "./xml_filter_utils.js";
 
 const consoleUtils = SharedLibs.ConsoleUtils;
 const apiClient = SharedLibs.ApiClient;
 const queryTools = SharedLibs.QueryTools;
 const statusManager = SharedLibs.StatusManager;
-
-const DEBUG_PRINT_PROPERTY_TREE = false;
 
 // Utility to execute async tasks with status updates
 function withStatus(statusSelector, message, asyncFunc) {
@@ -17,53 +25,9 @@ function withStatus(statusSelector, message, asyncFunc) {
   });
 }
 
-// Print property tree (unchanged)
-function printPropertyTree(tree) {
-  consoleUtils.logInfo("📦 Property Tree Structure:");
-  function printNode(node, name, depth = 0, isLast = true) {
-    const indent = "  ".repeat(depth);
-    const branch = depth === 0 ? "" : isLast ? "└─ " : "├─ ";
-    consoleUtils.log(
-      `${indent}${branch}${consoleUtils.applyStyle(name, "bold")}`
-    );
-    const childrenEntries = Object.entries(node.children);
-    childrenEntries.forEach(([childName, childNode], index) =>
-      printNode(
-        childNode,
-        childName,
-        depth + 1,
-        index === childrenEntries.length - 1
-      )
-    );
-  }
-  Object.entries(tree.children).forEach(([name, node], index, arr) =>
-    printNode(node, name, 0, index === arr.length - 1)
-  );
-}
-
-// Lazy-loading worker for large XML files (unchanged)
-const xmlWorkerScript = `
-self.onmessage = async (e) => {
-  const { fileUrl, chunkSize } = e.data;
-  const response = await fetch(fileUrl);
-  const text = await response.text();
-  const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(text, "application/xml");
-
-  const nodes = xmlDoc.evaluate("//property", xmlDoc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-  const total = nodes.snapshotLength;
-  const properties = [];
-  for (let i = 0; i < total; i += chunkSize) {
-    const chunk = [];
-    for (let j = i; j < Math.min(i + chunkSize, total); j++) {
-      chunk.push(nodes.snapshotItem(j).outerHTML);
-    }
-    self.postMessage({ type: "chunk", data: chunk, index: i });
-  }
-  self.postMessage({ type: "done" });
-};
-`;
-
+/**
+ * Class to manage XML documentation viewing with filtering, tree display, and autocomplete.
+ */
 class DocumentationViewer {
   constructor(config) {
     this.expressionInput = config.expressionInput;
@@ -84,8 +48,13 @@ class DocumentationViewer {
     this.baseKeywords = [];
     this.globalKeywords = [];
     this.allPropertyParts = [];
-    this.lazyLoadedChunks = [];
-    this.cachedFilter = null; // Step 5: Initialize cache
+    this.filteringStrategy = this.getFilteringStrategy(); // Ensure initialization
+  }
+
+  getFilteringStrategy() {
+    return this.xmlFile.includes("scriptproperties.xml")
+      ? new ScriptPropertiesStrategy()
+      : new GenericXMLFilteringStrategy();
   }
 
   async processXMLData(fileUrl, statusSelector = null) {
@@ -93,13 +62,11 @@ class DocumentationViewer {
     if (statusSelector)
       statusManager.set(statusSelector, "Processing XML chunks...");
 
-    // Construct absolute URL using QueryTools
     const absoluteUrl =
       queryTools.decodeUrl(window.location.origin) +
       "/" +
       fileUrl.replace(/^\/+/, "");
 
-    // Fetch and parse XML in the main thread
     const response = await fetch(absoluteUrl);
     if (!response.ok) {
       consoleUtils.logError(
@@ -117,67 +84,16 @@ class DocumentationViewer {
       return this.buildPropertyTree([]);
     }
 
-    // Extract properties in the worker
-    const workerScript = `
-  self.onmessage = (e) => {
-    const { xmlText, chunkSize } = e.data;
-    console.log("Worker received XML text of length:", xmlText.length);
-    const properties = [];
-    const total = xmlText.length;
-    for (let i = 0; i < total; i += chunkSize) {
-      const chunk = xmlText.slice(i, Math.min(i + chunkSize, total));
-      self.postMessage({ type: "chunk", data: chunk, index: i });
-    }
-    self.postMessage({ type: "done" });
-  };
-  `;
-
-    return new Promise((resolve) => {
-      const workerBlob = new Blob([workerScript], {
-        type: "application/javascript",
-      });
-      const worker = new Worker(URL.createObjectURL(workerBlob));
-      const chunkSize = 100; // Adjust as needed
-      this.lazyLoadedChunks = [];
-
-      worker.onmessage = (e) => {
-        if (e.data.type === "chunk") {
-          this.lazyLoadedChunks.push(e.data.data);
-          consoleUtils.logDebug(
-            `Received chunk ${e.data.index / chunkSize + 1}`
-          );
-        } else if (e.data.type === "done") {
-          const allProperties = this.lazyLoadedChunks.flatMap((chunk) =>
-            Array.from(
-              new DOMParser()
-                .parseFromString(chunk.join(""), "application/xml")
-                .getElementsByTagName("property")
-            ).map((prop) => prop.getAttribute("name"))
-          );
-          const { tree, baseKeywords, allPropertyParts } =
-            this.buildPropertyTree(allProperties);
-          this.propertyTree = tree;
-          this.baseKeywords = baseKeywords.sort();
-          this.allPropertyParts = allPropertyParts;
-          if (statusSelector) statusManager.clear(statusSelector);
-          resolve(tree);
-          worker.terminate();
-        }
-      };
-
-      worker.onerror = (err) => {
-        consoleUtils.logError(`Worker error: ${err.message}`);
-        if (statusSelector) statusManager.clear(statusSelector);
-        resolve(this.buildPropertyTree([]));
-        worker.terminate();
-      };
-
-      consoleUtils.logDebug(`Worker processing XML from: ${absoluteUrl}`);
-      const properties = Array.from(
-        xmlDoc.getElementsByTagName("property")
-      ).map((prop) => prop.outerHTML);
-      worker.postMessage({ xmlText: properties, chunkSize });
-    });
+    const properties = Array.from(xmlDoc.getElementsByTagName("property")).map(
+      (prop) => prop.getAttribute("name")
+    );
+    const { tree, baseKeywords, allPropertyParts } =
+      this.buildPropertyTree(properties);
+    this.propertyTree = tree;
+    this.baseKeywords = baseKeywords.sort();
+    this.allPropertyParts = allPropertyParts;
+    if (statusSelector) statusManager.clear(statusSelector);
+    return tree;
   }
 
   processKeywordData(xml) {
@@ -215,7 +131,6 @@ class DocumentationViewer {
     };
   }
 
-  // Enhanced autocomplete with filtering
   initAutoComplete(statusSelector = null) {
     consoleUtils.logInfo("Initializing autocomplete...");
     if (statusSelector)
@@ -227,9 +142,15 @@ class DocumentationViewer {
         source: (request, response) => {
           const term = request.term.trim().toLowerCase();
           if (term.includes(".")) {
-            this.handlePropertyLookup(term, response);
+            const suggestions = handlePropertyLookup(
+              term,
+              this.propertyTree,
+              this.globalKeywords
+            );
+            response(suggestions);
           } else {
-            this.handleKeywordLookup(term, response);
+            const suggestions = handleKeywordLookup(term, this.globalKeywords);
+            response(suggestions);
           }
         },
         minLength: 0,
@@ -250,117 +171,58 @@ class DocumentationViewer {
     if (statusSelector) statusManager.clear(statusSelector);
   }
 
-  handlePropertyLookup(term, response) {
-    const parts = term.split(".").filter(Boolean);
-    let suggestions =
-      parts.length > 0 && this.propertyTree.children[parts[0]]
-        ? this.searchPaths(this.propertyTree, parts, "")
-        : this.globalKeywords.filter((k) =>
-            k.toLowerCase().startsWith(parts[0])
-          );
-    response(suggestions);
-  }
-
-  handleKeywordLookup(term, response) {
-    response(
-      this.globalKeywords.filter((k) => k.toLowerCase().startsWith(term))
+  getTransformationParameters() {
+    const decodedExpression = queryTools.decodeUrl(
+      this.expressionInput.value.trim()
     );
-  }
-
-  searchPaths(node, parts, prefix) {
-    if (!parts.length) {
-      return Object.keys(node.children).length > 0 ? [prefix + "."] : [prefix];
-    }
-
-    const segment = parts[0].toLowerCase();
-    let suggestions = [];
-    for (const key in node.children) {
-      if (key.toLowerCase().startsWith(segment)) {
-        const child = node.children[key];
-        suggestions = suggestions.concat(
-          parts.length === 1 && Object.keys(child.children).length > 0
-            ? [prefix + key + "."]
-            : this.searchPaths(child, parts.slice(1), prefix + key + ".")
-        );
-      }
-    }
-    return suggestions;
-  }
-
- getTransformationParameters() {
-  // Decode the expression to handle URL-encoded characters (e.g., %24 -> $)
-  const decodedExpression = queryTools.decodeUrl(this.expressionInput.value.trim());
-  const expression = encodeURIComponent(decodedExpression); // Encode for XSL parameter, but already decoded for internal use
-  const scriptType =
-    this.showMdCheckbox.checked && this.showAiCheckbox.checked
-      ? "any"
-      : this.showMdCheckbox.checked
-      ? "md"
-      : this.showAiCheckbox.checked
-      ? "ai"
-      : "";
-  const sort = this.sortCheckbox.checked ? "true" : "false";
-  return { expression, scriptType, sort };
-}
-
-  // Sorting Optimization & Caching
-  async filterXMLContent(xmlDoc, expression, sortEnabled = false) {
-    if (
-      this.cachedFilter?.expression === expression &&
-      this.cachedFilter?.sortEnabled === sortEnabled
-    ) {
-      consoleUtils.logDebug("Using cached filter result");
-      return this.cachedFilter.result;
-    }
-
-    const properties = xmlDoc.querySelectorAll("property");
-    const filtered = Array.from(properties).filter((prop) => {
-      const name = prop.getAttribute("name") || "";
-      if (!expression) return true;
-      try {
-        const regex = new RegExp(expression, "i");
-        return regex.test(name) || regex.test(prop.textContent);
-      } catch {
-        return (
-          name.includes(expression) || prop.textContent.includes(expression)
-        );
-      }
-    });
-
-    if (sortEnabled) {
-      filtered.sort((a, b) => {
-        const nameA = a.getAttribute("name") || "";
-        const nameB = b.getAttribute("name") || "";
-        return nameA.localeCompare(nameB);
-      });
-    }
-
-    const resultDoc = document.implementation.createDocument("", "root", null);
-    filtered.forEach((prop) =>
-      resultDoc.documentElement.appendChild(prop.cloneNode(true))
-    );
-
-    this.cachedFilter = { expression, sortEnabled, result: resultDoc };
-    consoleUtils.logDebug("Cached new filter result");
-
-    return resultDoc;
+    const expression = encodeURIComponent(decodedExpression);
+    const scriptType =
+      this.showMdCheckbox.checked && this.showAiCheckbox.checked
+        ? "any"
+        : this.showMdCheckbox.checked
+        ? "md"
+        : this.showAiCheckbox.checked
+        ? "ai"
+        : "";
+    const sort = this.sortCheckbox.checked ? "true" : "false";
+    return { expression, scriptType, sort };
   }
 
   async transformXML(statusSelector = null) {
-  if (!this.xmlDoc) return;
+    if (!this.xmlDoc) return;
 
-  await withStatus(statusSelector, "Transforming XML...", async () => {
-    const { expression: encodedExpression, scriptType, sort } = this.getTransformationParameters();
-    // Use the decoded expression for both filtering and XSL parameters (avoid encoding for XSL)
-    const decodedExpression = queryTools.decodeUrl(this.expressionInput.value.trim());
+    await withStatus(statusSelector, "Transforming XML...", async () => {
+      const {
+        expression: encodedExpression,
+        scriptType,
+        sort,
+      } = this.getTransformationParameters();
+      const decodedExpression = queryTools.decodeUrl(
+        this.expressionInput.value.trim()
+      );
 
-    let resultDoc;
+      let filteredDoc;
+      try {
+        filteredDoc = await this.filteringStrategy.process(
+          this.xmlDoc,
+          decodedExpression,
+          scriptType
+        );
+        consoleUtils.logInfo("Filtered Doc:", filteredDoc);
+      } catch (error) {
+        consoleUtils.logError(`Filtering failed: ${error.message}`);
+        filteredDoc = document.implementation.createDocument("", "root", null);
+      }
 
-    if (this.xmlFile.includes("scriptproperties.xml")) {
-      const filteredDoc = await filterScriptProperties(this.xmlDoc, decodedExpression);
-      consoleUtils.logDebug(`Filtered document for ${decodedExpression} has ${filteredDoc.documentElement.childNodes.length} nodes`);
-      if (!filteredDoc.documentElement.childNodes.length) {
-        consoleUtils.logWarning(`No results found for expression: ${decodedExpression}`);
+      let resultDoc;
+      if (
+        !filteredDoc ||
+        !filteredDoc.documentElement ||
+        !filteredDoc.documentElement.childNodes.length
+      ) {
+        consoleUtils.logWarning(
+          `No results found for expression: ${decodedExpression}`
+        );
         resultDoc = document.createDocumentFragment();
         const noResults = apiClient.createElement("p", {
           class: "alert alert-info",
@@ -370,14 +232,22 @@ class DocumentationViewer {
       } else if (this.xslDoc) {
         const processor = new XSLTProcessor();
         processor.importStylesheet(this.xslDoc);
-        // Use decoded expression for XSL parameter to match datatype filtering
         processor.setParameter(null, "expression", decodedExpression);
         processor.setParameter(null, "scripttype", scriptType);
         processor.setParameter(null, "sort", sort);
         resultDoc = processor.transformToFragment(filteredDoc, document);
-        consoleUtils.logDebug("XSL transformation result:", resultDoc);
-        if (!resultDoc.children.length) {
-          consoleUtils.logWarning(`XSL transformation resulted in empty output for ${decodedExpression}`);
+        consoleUtils.logInfo("XSL Transformation Result Structure:", {
+          nodeType: resultDoc?.nodeType,
+          children: resultDoc?.children?.length || 0,
+          textContent:
+            resultDoc?.textContent?.substring(0, 100) || "No content",
+        });
+
+        // Check if resultDoc is valid before proceeding
+        if (!resultDoc || !resultDoc.children || !resultDoc.children.length) {
+          consoleUtils.logWarning(
+            `XSL transformation resulted in empty or invalid output for ${decodedExpression}`
+          );
           resultDoc = document.createDocumentFragment();
           const noResults = apiClient.createElement("p", {
             class: "alert alert-info",
@@ -387,50 +257,21 @@ class DocumentationViewer {
         }
       } else {
         resultDoc = document.createDocumentFragment();
-        Array.from(filteredDoc.documentElement.childNodes).forEach((node) =>
-          resultDoc.appendChild(document.importNode(node, true))
-        );
-      }
-    } else {
-      // Handle other XML files similarly
-      const filteredDoc = await filterXMLTree(this.xmlDoc, decodedExpression);
-      if (!filteredDoc.documentElement.childNodes.length) {
-        consoleUtils.logWarning(`No results found for expression: ${decodedExpression}`);
-        resultDoc = document.createDocumentFragment();
-        const noResults = apiClient.createElement("p", {
-          class: "alert alert-info",
-          textContent: `No matching elements found for "${decodedExpression}".`,
+        Array.from(filteredDoc.documentElement.childNodes).forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            resultDoc.appendChild(document.importNode(node, true));
+          }
         });
-        resultDoc.appendChild(noResults);
-      } else if (this.xslDoc) {
-        const processor = new XSLTProcessor();
-        processor.importStylesheet(this.xslDoc);
-        processor.setParameter(null, "expression", decodedExpression); // Use decoded for XSL
-        processor.setParameter(null, "scripttype", scriptType);
-        processor.setParameter(null, "sort", sort);
-        resultDoc = processor.transformToFragment(filteredDoc, document);
-        consoleUtils.logDebug("XSL transformation result:", resultDoc);
-        if (!resultDoc.children.length) {
-          consoleUtils.logWarning(`XSL transformation resulted in empty output for ${decodedExpression}`);
-          resultDoc = document.createDocumentFragment();
-          const noResults = apiClient.createElement("p", {
-            class: "alert alert-info",
-            textContent: `No matching elements found for "${decodedExpression}".`,
-          });
-          resultDoc.appendChild(noResults);
-        }
-      } else {
-        resultDoc = document.createDocumentFragment();
-        Array.from(filteredDoc.documentElement.childNodes).forEach((node) =>
-          resultDoc.appendChild(document.importNode(node, true))
-        );
       }
-    }
 
-    this.divXMLDisplay.replaceChildren(resultDoc || document.createDocumentFragment());
-    consoleUtils.logSuccess("XML transformation completed.");
-  });
-}
+      this.divXMLDisplay.replaceChildren(
+        resultDoc || document.createDocumentFragment()
+      );
+
+      consoleUtils.logSuccess("XML transformation completed.");
+      addTooltipsToXSLOutput(this.divXMLDisplay);
+    });
+  }
 
   debouncedUpdate() {
     console.log("debouncedUpdate triggered");
@@ -441,7 +282,12 @@ class DocumentationViewer {
         const expression = this.expressionInput.value.trim();
         console.log("Updating with expression:", expression);
         if (document.querySelector(".tree")) {
-          await displayAsTree(this.xmlDoc, this.divXMLDisplay, expression);
+          await displayAsTree(
+            this.xmlDoc,
+            this.divXMLDisplay,
+            expression,
+            this.filteringStrategy || this.getFilteringStrategy()
+          );
         } else {
           await this.transformXML();
         }
@@ -456,14 +302,15 @@ class DocumentationViewer {
       async () => {
         const [xmlDoc, xslDoc] = await Promise.all([
           apiClient.fetchXML(this.xmlFile),
-          apiClient.fetchXML(this.xslFile).catch(() => null), // Allow XSL to be optional
+          apiClient.fetchXML(this.xslFile).catch(() => null),
         ]);
         if (!xmlDoc) throw new Error("Failed to load XML file.");
 
         this.xmlDoc = xmlDoc;
         this.xslDoc = xslDoc;
+        consoleUtils.logInfo(`XSL Doc loaded: ${!!xslDoc}`); // Debug XSL loading
 
-        await this.processXMLData(this.xmlFile);
+        await this.processXMLData(this.xmlFile, statusSelector);
         this.globalKeywords = Array.from(
           new Set([
             ...this.baseKeywords,
@@ -471,7 +318,7 @@ class DocumentationViewer {
           ])
         ).sort();
 
-        this.initAutoComplete();
+        this.initAutoComplete(statusSelector);
         this.expressionInput.focus();
         this.debouncedUpdate();
         consoleUtils.logSuccess("Documentation viewer initialized.");
@@ -480,177 +327,16 @@ class DocumentationViewer {
   }
 }
 
-// ... inside xml_utils.js, after the DocumentationViewer class ...
-
-// Generic XML filtering function
-async function filterXMLTree(xmlDoc, expression) {
-  const filteredDoc = document.implementation.createDocument("", "root", null);
-  const root = filteredDoc.documentElement;
-
-  function filterNode(node) {
-    const matches = nodeMatchesExpression(node, expression);
-    const hasMatchingDescendant = hasMatchingDescendant(node, expression);
-    if (matches || hasMatchingDescendant) {
-      const clone = filteredDoc.importNode(node, false);
-      Array.from(node.childNodes).forEach((child) => {
-        const childClone = filterNode(child);
-        if (childClone) clone.appendChild(childClone);
-      });
-      return clone;
-    }
-    return null;
-  }
-
-  const filteredRoot = filterNode(xmlDoc.documentElement);
-  if (filteredRoot) root.appendChild(filteredRoot);
-  return filteredDoc;
-}
-
-async function filterScriptProperties(xmlDoc, expression) {
-  // The expression is now decoded in getTransformationParameters, so use it directly
-  consoleUtils.logDebug(
-    `Filtering scriptproperties with expression: ${expression}`
-  );
-
-  const filteredDoc = document.implementation.createDocument(
-    "",
-    "scriptproperties",
-    null
-  );
-  const root = filteredDoc.documentElement;
-
-  const parts = expression.split(".").filter(Boolean);
-  const isPropertySearch = expression.startsWith(".");
-  const isDatatypeSearch = expression.startsWith("$");
-
-  if (!expression || !parts.length) {
-    // No filter, include all keywords and datatypes
-    const allKeywords = Array.from(xmlDoc.getElementsByTagName("keyword"));
-    const allDatatypes = Array.from(xmlDoc.getElementsByTagName("datatype"));
-    consoleUtils.logDebug(
-      `No filter applied, found ${allKeywords.length} keywords and ${allDatatypes.length} datatypes`
-    );
-    allKeywords.forEach((node) =>
-      root.appendChild(filteredDoc.importNode(node, true))
-    );
-    allDatatypes.forEach((node) =>
-      root.appendChild(filteredDoc.importNode(node, true))
-    );
-  } else if (isPropertySearch) {
-    // .prop searches all properties (e.g., ".pla" for properties with "pla")
-    const propRegex = new RegExp(parts[0], "i");
-    consoleUtils.logDebug(`Property search for: ${parts[0]}`);
-    const allNodes = Array.from(xmlDoc.getElementsByTagName("keyword")).concat(
-      Array.from(xmlDoc.getElementsByTagName("datatype"))
-    );
-    allNodes.forEach((node) => {
-      const properties = Array.from(node.getElementsByTagName("property"));
-      const matchingProps = properties.filter((prop) =>
-        propRegex.test(prop.getAttribute("name") || "")
-      );
-      if (matchingProps.length) {
-        consoleUtils.logDebug(
-          `Found ${matchingProps.length} matching properties in node ${node.nodeName}`
-        );
-        const clone = filteredDoc.importNode(node, false);
-        matchingProps.forEach((prop) =>
-          clone.appendChild(filteredDoc.importNode(prop, true))
-        );
-        root.appendChild(clone);
-      }
-    });
-  } else {
-    // Keyword or datatype search (handle $ prefix for datatypes)
-    const baseTerm = isDatatypeSearch ? parts[0].substring(1) : parts[0]; // Remove $ for datatype matching
-    const baseRegex = new RegExp(baseTerm, "i");
-    consoleUtils.logDebug(
-      `Search for: ${baseTerm} (isDatatypeSearch: ${isDatatypeSearch})`
-    );
-
-    let matchingNodes = [];
-    if (isDatatypeSearch) {
-      // Filter datatypes (e.g., $PlayerShip)
-      matchingNodes = Array.from(
-        xmlDoc.getElementsByTagName("datatype")
-      ).filter((node) => {
-        const name = node.getAttribute("name") || "";
-        return (
-          baseRegex.test(name) &&
-          !(
-            node.getAttribute("pseudo") === "true" ||
-            node.getAttribute("pseudo") === "1"
-          )
-        );
-      });
-      consoleUtils.logDebug(
-        `Found ${matchingNodes.length} matching datatypes for ${baseTerm}`
-      );
-    } else {
-      // Filter keywords (e.g., Player)
-      matchingNodes = Array.from(xmlDoc.getElementsByTagName("keyword")).filter(
-        (node) => {
-          const name = node.getAttribute("name") || "";
-          return (
-            baseRegex.test(name) &&
-            (!node.getAttribute("script") ||
-              node.getAttribute("script") === "any" ||
-              $scripttype === "any" ||
-              node.getAttribute("script") === $scripttype)
-          );
-        }
-      );
-      consoleUtils.logDebug(
-        `Found ${matchingNodes.length} matching keywords for ${baseTerm}`
-      );
-    }
-
-    matchingNodes.forEach((node) => {
-      const clone = filteredDoc.importNode(node, false);
-      let currentNodes = Array.from(node.getElementsByTagName("property"));
-
-      if (parts.length > 1) {
-        for (let i = 1; i < parts.length; i++) {
-          const partRegex = new RegExp(parts[i], "i");
-          currentNodes = currentNodes.filter((prop) =>
-            partRegex.test(prop.getAttribute("name") || "")
-          );
-          consoleUtils.logDebug(
-            `Filtering for part ${parts[i]}, found ${currentNodes.length} nodes`
-          );
-          if (i === parts.length - 1) {
-            currentNodes.forEach((prop) =>
-              clone.appendChild(filteredDoc.importNode(prop, true))
-            );
-          }
-        }
-        if (currentNodes.length) root.appendChild(clone);
-      } else {
-        currentNodes.forEach((prop) =>
-          clone.appendChild(filteredDoc.importNode(prop, true))
-        );
-        root.appendChild(clone);
-      }
-    });
-  }
-
-  consoleUtils.logDebug(
-    `Filtered document has ${root.childNodes.length} child nodes`
-  );
-  return filteredDoc;
-}
-
-// Utility functions
-async function updateXslFileName(activeXslFile, selector = "#xslFileName") {
-  const xslFileNameEl = await apiClient.getElement(selector);
-  if (xslFileNameEl) {
-    xslFileNameEl.textContent = activeXslFile
-      ? activeXslFile.name || activeXslFile
-      : "No file chosen";
-  }
-}
-
+/**
+ * Creates a DOM tree representation of an XML node with collapsible behavior and tooltips.
+ * @param {Node} node - The XML node to render.
+ * @param {string} expression - The filter expression for matching nodes.
+ * @returns {HTMLElement|null} The DOM element for the tree node, or null if invalid.
+ * @note Styling for the tree (e.g., .tree, .tree-node) is defined in viewer.css.
+ */
 function createTreeDOM(node, expression = "") {
-  if (!node || node.nodeType !== Node.ELEMENT_NODE) return null;
+  if (!node || node.nodeType !== Node.ELEMENT_NODE || !node.children)
+    return null; // Handle null or invalid nodes
 
   const matches = nodeMatchesExpression(node, expression);
   const hasMatchingDescendantNode = hasMatchingDescendant(node, expression);
@@ -689,10 +375,16 @@ function createTreeDOM(node, expression = "") {
         ? `Attributes: ${attributesList.join(", ")}`
         : "No attributes")
   );
+
+  // Add expand/collapse icon
+  const icon = apiClient.createElement("span", { classList: "tree-icon" });
+  icon.textContent = node.children.length ? "▶" : "●";
+  span.insertBefore(icon, span.firstChild);
+
   li.appendChild(span);
 
   if (node.children.length) {
-    const ul = apiClient.createElement("ul");
+    const ul = apiClient.createElement("ul", { classList: "collapsed" });
     Array.from(node.children).forEach((child) => {
       const childTree = createTreeDOM(child, expression);
       if (childTree) ul.appendChild(childTree);
@@ -704,74 +396,127 @@ function createTreeDOM(node, expression = "") {
   return li;
 }
 
-function nodeMatchesExpression(node, expression) {
-  if (!expression) return true;
-  const parts = expression.split(".");
-  let currentNode = node;
-  for (const part of parts) {
-    try {
-      const regex = new RegExp(part, "i");
-      const name = currentNode.getAttribute("name") || currentNode.nodeName;
-      if (!regex.test(name) && !regex.test(currentNode.textContent))
-        return false;
-      currentNode = Array.from(currentNode.children).find((child) =>
-        regex.test(child.getAttribute("name") || child.nodeName)
-      );
-      if (!currentNode && part !== parts[parts.length - 1]) return false;
-    } catch {
-      return false;
-    }
-  }
-  return true;
-}
-
-function hasMatchingDescendant(node, expression) {
-  return Array.from(node.querySelectorAll("*")).some((descendant) =>
-    nodeMatchesExpression(descendant, expression)
-  );
-}
-
-async function displayAsTree(xmlDoc, container, expression = "") {
+/**
+ * Displays an XML document as a collapsible tree structure.
+ * @param {Document} xmlDoc - The XML document to display.
+ * @param {HTMLElement} container - The DOM element to render the tree in.
+ * @param {string} expression - The filter expression for matching nodes.
+ * @param {IPropertyFilteringStrategy} [strategy] - The filtering strategy to use (optional, defaults to null check).
+ */
+async function displayAsTree(
+  xmlDoc,
+  container,
+  expression = "",
+  strategy = null
+) {
   if (!xmlDoc || !xmlDoc.documentElement) {
     console.error("Invalid or undefined XML document passed to displayAsTree");
     container.innerHTML =
       "<p class='alert alert-danger'>Error: Invalid XML document.</p>";
     return;
   }
-  const filteredDoc =
-    xmlDoc.documentElement.tagName === "scriptproperties"
-      ? await filterScriptProperties(xmlDoc, expression)
-      : await filterXMLTree(xmlDoc, expression);
-  const treeRoot = apiClient.createElement("ul", { classList: "tree" });
-  const treeDOM = createTreeDOM(filteredDoc.documentElement, expression);
-  if (treeDOM) treeRoot.appendChild(treeDOM);
-  container.innerHTML = "";
-  container.appendChild(treeRoot);
-  container.querySelectorAll(".tree-node").forEach((node) =>
-    node.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const ul = node.parentElement.querySelector("ul");
-      if (ul) ul.classList.toggle("collapsed");
-    })
-  );
+
+  try {
+    // Ensure strategy is available, fall back to a default if undefined
+    const effectiveStrategy = strategy || new GenericXMLFilteringStrategy(); // Default to Generic for safety
+    const filteredDoc = await effectiveStrategy.process(xmlDoc, expression);
+    const treeRoot = apiClient.createElement("ul", { classList: "tree" });
+    const treeDOM = createTreeDOM(filteredDoc.documentElement, expression);
+    if (treeDOM) treeRoot.appendChild(treeDOM);
+    container.innerHTML = "";
+    container.appendChild(treeRoot);
+
+    // Add event listeners for tree node clicks and hover tooltips
+    container.querySelectorAll(".tree-node").forEach((node) => {
+      // Click to toggle collapse/expand
+      node.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const ul = node.parentElement.querySelector("ul");
+        if (ul) {
+          ul.classList.toggle("collapsed");
+          const icon = node.querySelector(".tree-icon");
+          if (icon)
+            icon.textContent = ul.classList.contains("collapsed") ? "▶" : "▼";
+        }
+      });
+
+      // Hover tooltip
+      node.addEventListener("mouseover", (e) => {
+        const tooltip = document.querySelector(".tree-tooltip");
+        if (tooltip && node.dataset.tooltip) {
+          tooltip.textContent = node.dataset.tooltip;
+          tooltip.style.display = "block";
+          tooltip.style.left = `${e.clientX + 10}px`;
+          tooltip.style.top = `${e.clientY + 10}px`;
+        }
+      });
+
+      node.addEventListener("mouseout", () => {
+        const tooltip = document.querySelector(".tree-tooltip");
+        if (tooltip) tooltip.style.display = "none";
+      });
+
+      node.addEventListener("mousemove", (e) => {
+        const tooltip = document.querySelector(".tree-tooltip");
+        if (tooltip) {
+          tooltip.style.left = `${Math.min(
+            e.clientX + 10,
+            window.innerWidth - tooltip.offsetWidth - 10
+          )}px`;
+          tooltip.style.top = `${Math.min(
+            e.clientY + 10,
+            window.innerHeight - tooltip.offsetHeight - 10
+          )}px`;
+        }
+      });
+    });
+
+    // Ensure the tooltip element exists in the DOM
+    let tooltip = document.querySelector(".tree-tooltip");
+    if (!tooltip) {
+      tooltip = apiClient.createElement("div", { classList: "tree-tooltip" });
+      document.body.appendChild(tooltip);
+    }
+  } catch (error) {
+    consoleUtils.logError(`Error displaying XML as tree: ${error.message}`);
+    container.innerHTML = `<p class='alert alert-danger'>Error rendering tree: ${error.message}</p>`;
+  }
 }
 
+/**
+ * Displays the raw content of a file in a container.
+ * @param {string} file - The URL of the file to display.
+ * @param {HTMLElement} container - The DOM element to display the content in.
+ */
 async function displayRawContent(file, container) {
-  const response = await fetch(file);
-  if (!response.ok) throw new Error("Failed to load file.");
-  container.innerHTML = `<pre>${queryTools.escapeHtml(
-    await response.text()
-  )}</pre>`;
+  try {
+    const response = await fetch(file);
+    if (!response.ok) throw new Error(`Failed to fetch ${file}`);
+    const text = await response.text();
+    container.innerHTML = `<pre>${queryTools.escapeHtml(text)}</pre>`;
+  } catch (error) {
+    consoleUtils.logError(`Error displaying raw content: ${error.message}`);
+    container.innerHTML = `<p class='alert alert-danger'>Failed to load file: ${error.message}</p>`;
+  }
 }
 
+/**
+ * Automatically transforms an XML file using associated XSL/XSLT files.
+ * @param {string} xmlFile - The URL of the XML file to transform.
+ * @param {string} [viewerSelector="#viewerContent"] - The selector for the viewer content element.
+ * @param {string} [xslNameSelector="#xslFileName"] - The selector for the XSL file name element.
+ * @param {string} [statusSelector="#statusIndicator"] - The selector for the status indicator element.
+ * @returns {Promise<boolean>} True if transformation succeeds, false otherwise.
+ */
 async function autoTransformXML(
   xmlFile,
   viewerSelector = "#viewerContent",
   xslNameSelector = "#xslFileName",
   statusSelector = "#statusIndicator"
 ) {
+  consoleUtils.logInfo(`Attempting to transform XML: ${xmlFile}`);
   const baseName = xmlFile.replace(/\.xml$/i, "");
-  const candidates = [`${baseName}.xsl`, `${baseName}.xslt`];
+  const candidates = [`${baseName}.xsl`]; // Removed .xslt for now since it’s not present
   let success = false;
 
   await withStatus(
@@ -780,24 +525,41 @@ async function autoTransformXML(
     async () => {
       for (const candidate of candidates) {
         try {
-          consoleUtils.logDebug(`Trying XSL/XSLT candidate: ${candidate}`);
+          consoleUtils.logInfo(`Trying XSL candidate: ${candidate}`);
           const xmlDoc = await apiClient.fetchXML(xmlFile);
           const xsltResponse = await fetch(candidate);
+          consoleUtils.logInfo(`XSLT response status: ${xsltResponse.status}`);
           if (!xsltResponse.ok) {
             throw new Error(`XSLT fetch failed: ${xsltResponse.status}`);
           }
           const xsltText = await xsltResponse.text();
+          consoleUtils.logInfo(`XSLT text length: ${xsltText.length}`);
           const xsltDoc = new DOMParser().parseFromString(
             xsltText,
             "application/xml"
           );
           if (xsltDoc.querySelector("parsererror")) {
-            throw new Error(`XSLT parse error in ${candidate}`);
+            throw new Error(`XSL parse error in ${candidate}`);
           }
 
           const xsltProcessor = new XSLTProcessor();
           xsltProcessor.importStylesheet(xsltDoc);
           const resultDoc = xsltProcessor.transformToFragment(xmlDoc, document);
+          consoleUtils.logInfo("XSL Transformation Result Structure:", {
+            nodeType: resultDoc?.nodeType,
+            children: resultDoc?.children?.length || 0,
+            textContent:
+              resultDoc?.textContent?.substring(0, 100) || "No content",
+          });
+
+          if (
+            !resultDoc ||
+            resultDoc.nodeType !== Node.DOCUMENT_FRAGMENT_NODE ||
+            !resultDoc.children ||
+            !resultDoc.children.length
+          ) {
+            throw new Error("Invalid or empty XSL transformation result");
+          }
 
           const viewerContent = await apiClient.getElement(viewerSelector);
           viewerContent.innerHTML = "";
@@ -807,12 +569,14 @@ async function autoTransformXML(
           await updateXslFileName(candidate, xslNameSelector);
           success = true;
           consoleUtils.logSuccess(`Auto-transformed with ${candidate}`);
-          break; // Exit loop on success
+
+          await new Promise((resolve) => requestAnimationFrame(resolve));
+          addTooltipsToXSLOutput(viewerContent);
+          break;
         } catch (err) {
-          consoleUtils.logDebug(
+          consoleUtils.logError(
             `Candidate ${candidate} failed: ${err.message}`
           );
-          // Continue to the next candidate unless this was the last one
         }
       }
       if (!success) {
@@ -826,6 +590,27 @@ async function autoTransformXML(
   return success;
 }
 
+/**
+ * Updates the XSL file name display.
+ * @param {string|File} activeXslFile - The active XSL file or its name.
+ * @param {string} [selector="#xslFileName"] - The selector for the XSL file name element.
+ */
+async function updateXslFileName(activeXslFile, selector = "#xslFileName") {
+  const xslFileNameEl = await apiClient.getElement(selector);
+  if (xslFileNameEl) {
+    xslFileNameEl.textContent = activeXslFile
+      ? activeXslFile.name || activeXslFile
+      : "No file chosen";
+  }
+}
+
+/**
+ * Displays a spreadsheet file in a container with tabs.
+ * @param {string} file - The URL of the spreadsheet file.
+ * @param {HTMLElement} container - The DOM element to display the spreadsheet in.
+ * @param {HTMLElement} tabsContainer - The DOM element to display the sheet tabs in.
+ * @param {HTMLInputElement} expressionInput - The input element for filtering expressions.
+ */
 async function displaySpreadsheet(
   file,
   container,
@@ -865,6 +650,13 @@ async function displaySpreadsheet(
   );
 }
 
+/**
+ * Displays a specific sheet from a workbook.
+ * @param {Object} workbook - The parsed workbook object.
+ * @param {string} sheetName - The name of the sheet to display.
+ * @param {HTMLElement} container - The DOM element to display the sheet in.
+ * @param {HTMLInputElement} expressionInput - The input element for filtering expressions.
+ */
 async function displaySheet(workbook, sheetName, container, expressionInput) {
   const XLSX = await import(
     "https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs"
@@ -897,6 +689,74 @@ async function displaySheet(workbook, sheetName, container, expressionInput) {
   }
 }
 
+/**
+ * Adds tooltip event listeners to elements in the XSL-transformed output.
+ * @param {HTMLElement} container - The container holding the transformed HTML.
+ */
+function addTooltipsToXSLOutput(container) {
+  try {
+    consoleUtils.logInfo(
+      `Adding tooltips to XSL output in container: ${
+        container.id || container.className
+      }`
+    );
+    const tooltipElements = container.querySelectorAll("[data-tooltip]");
+    consoleUtils.logInfo(
+      `Found ${tooltipElements.length} elements with data-tooltip`
+    );
+    container.addEventListener("mouseover", (e) => {
+      const target = e.target.closest("[data-tooltip]");
+      if (target) {
+        const tooltip = document.querySelector(".tree-tooltip");
+        if (tooltip && target.dataset.tooltip) {
+          tooltip.textContent = target.dataset.tooltip;
+          tooltip.style.display = "block";
+          tooltip.style.left = `${e.clientX + 10}px`;
+          tooltip.style.top = `${e.clientY + 10}px`;
+        }
+      }
+    });
+
+    container.addEventListener("mouseout", (e) => {
+      const target = e.target.closest("[data-tooltip]");
+      if (!target) {
+        const tooltip = document.querySelector(".tree-tooltip");
+        if (tooltip) tooltip.style.display = "none";
+      }
+    });
+
+    container.addEventListener("mousemove", (e) => {
+      const target = e.target.closest("[data-tooltip]");
+      if (target) {
+        const tooltip = document.querySelector(".tree-tooltip");
+        if (tooltip) {
+          tooltip.style.left = `${Math.min(
+            e.clientX + 10,
+            window.innerWidth - tooltip.offsetWidth - 10
+          )}px`;
+          tooltip.style.top = `${Math.min(
+            e.clientY + 10,
+            window.innerHeight - tooltip.offsetHeight - 10
+          )}px`;
+        }
+      }
+    });
+
+    let tooltip = document.querySelector(".tree-tooltip");
+    if (!tooltip) {
+      tooltip = apiClient.createElement("div", { classList: "tree-tooltip" });
+      document.body.appendChild(tooltip);
+    }
+  } catch (error) {
+    consoleUtils.logError(
+      `Error adding tooltips to XSL output: ${error.message}`
+    );
+  }
+}
+
+/**
+ * Exported utilities for XML handling.
+ */
 export const XmlUtils = {
   DocumentationViewer,
   updateXslFileName,

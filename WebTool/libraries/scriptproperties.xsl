@@ -11,7 +11,7 @@
     <html>
       <head>
         <title>Script Property Documentation</title>
-        <link rel="stylesheet" type="text/css" href="scriptproperties.css"/>
+        <link rel="stylesheet" type="text/css" href="scriptproperties.css" />
       </head>
       <body>
         <xsl:comment>Starting transformation with expression: <xsl:value-of select="$expression"/></xsl:comment>
@@ -20,9 +20,11 @@
           <!-- No expression: Show all keywords and datatypes -->
           <xsl:when test="not($expression)">
             <h1>Base Keywords:</h1>
-            <xsl:apply-templates select="keyword[
+            <xsl:apply-templates
+              select="keyword[
               not(@script) or @script='any' or $scripttype='any' or @script=$scripttype
-            ]" mode="list" />
+            ]"
+              mode="list" />
             <h1>Data Types:</h1>
             <xsl:apply-templates select="datatype" mode="list" />
           </xsl:when>
@@ -30,7 +32,9 @@
           <!-- Datatype prefix (e.g., $pla) without dot -->
           <xsl:when test="not(contains($expression, '.')) and starts-with($expression, '$')">
             <xsl:variable name="datatypePrefix" select="substring($expression, 2)" />
-            <xsl:variable name="datatypes" select="datatype[
+            <xsl:variable
+              name="datatypes"
+              select="datatype[
               starts-with(@name, $datatypePrefix) and not(@pseudo = 'true' or @pseudo = '1')
             ]" />
             <xsl:choose>
@@ -39,10 +43,12 @@
                 <xsl:for-each select="$datatypes">
                   <xsl:comment>Processing datatype: <xsl:value-of select="@name"/></xsl:comment>
                 </xsl:for-each>
-                <xsl:apply-templates select="$datatypes" mode="list" />
+                <xsl:apply-templates
+                  select="$datatypes" mode="list" />
               </xsl:when>
               <xsl:otherwise>
-                <h1 class="error">No matching data type for "<xsl:value-of select="$datatypePrefix"/>"</h1>
+                <h1 class="error">No matching data type for "<xsl:value-of
+                    select="$datatypePrefix" />"</h1>
               </xsl:otherwise>
             </xsl:choose>
           </xsl:when>
@@ -50,7 +56,8 @@
           <!-- Keyword prefix (e.g., Player) without dot -->
           <xsl:when test="not(contains($expression, '.'))">
             <xsl:variable name="keywordPrefix" select="$expression" />
-            <xsl:variable name="keywords" select="keyword[
+            <xsl:variable name="keywords"
+              select="keyword[
               (not(@script) or @script='any' or $scripttype='any' or @script=$scripttype)
               and starts-with(@name, $keywordPrefix)
             ]" />
@@ -60,10 +67,12 @@
                 <xsl:for-each select="$keywords">
                   <xsl:comment>Processing keyword: <xsl:value-of select="@name"/></xsl:comment>
                 </xsl:for-each>
-                <xsl:apply-templates select="$keywords" mode="list" />
+                <xsl:apply-templates
+                  select="$keywords" mode="list" />
               </xsl:when>
               <xsl:otherwise>
-                <h1 class="error">No matching base keyword for "<xsl:value-of select="$keywordPrefix"/>"</h1>
+                <h1 class="error">No matching base keyword for "<xsl:value-of
+                    select="$keywordPrefix" />"</h1>
               </xsl:otherwise>
             </xsl:choose>
           </xsl:when>
@@ -83,8 +92,10 @@
   <!-- Template to process complex expressions (dot notation) -->
   <xsl:template name="processComplexExpression">
     <xsl:param name="expression" />
-    <xsl:variable name="prefix" select="substring-before($expression, '.')" />
-    <xsl:variable name="suffix" select="substring-after($expression, '.')" />
+    <xsl:variable name="prefix"
+      select="substring-before($expression, '.')" />
+    <xsl:variable name="suffix"
+      select="substring-after($expression, '.')" />
 
     <xsl:comment>Processing complex expression: <xsl:value-of select="$expression"/></xsl:comment>
     <xsl:choose>
@@ -97,15 +108,14 @@
       </xsl:when>
       <!-- Prefix exists (e.g., "Player.blueprints" or "$PlayerShip.health") -->
       <xsl:otherwise>
-        <xsl:variable name="basenodes" select="keyword[$prefix = @name] | datatype[starts-with($prefix, '$') and substring($prefix, 2) = @name]" />
+        <xsl:variable name="basenodes"
+          select="keyword[$prefix = @name] | datatype[starts-with($prefix, '$') and substring($prefix, 2) = @name]" />
         <xsl:comment>Found <xsl:value-of select="count($basenodes)"/> base nodes for prefix: <xsl:value-of select="$prefix"/></xsl:comment>
         <xsl:choose>
           <xsl:when test="not($basenodes)">
-            <h1 class="error">
-              Base "<xsl:value-of select="$prefix"/>" not recognized.
-              <xsl:if test="starts-with($prefix, '$')">
-                Data type "<xsl:value-of select="substring($prefix, 2)"/>" not found.
-              </xsl:if>
+            <h1 class="error"> Base "<xsl:value-of
+                select="$prefix" />" not recognized. <xsl:if test="starts-with($prefix, '$')"> Data
+    type "<xsl:value-of select="substring($prefix, 2)" />" not found. </xsl:if>
             </h1>
           </xsl:when>
           <xsl:otherwise>
@@ -129,7 +139,8 @@
         <!-- No more dots, show matching base nodes -->
         <xsl:if test="$basenodes">
           <h1>Matching Nodes:</h1>
-          <xsl:apply-templates select="$basenodes" mode="list" />
+          <xsl:apply-templates
+            select="$basenodes" mode="list" />
         </xsl:if>
         <xsl:if test="not($basenodes)">
           <h1 class="error">No matching nodes found for this expression</h1>
@@ -137,27 +148,36 @@
       </xsl:when>
       <xsl:otherwise>
         <!-- Find properties matching the next part of the suffix -->
-        <xsl:variable name="nextPart" select="substring-before($suffix, '.')" />
-        <xsl:variable name="remainingSuffix" select="substring-after($suffix, '.')" />
-        <xsl:variable name="propertyMatches" select="$basenodes/property[
+        <xsl:variable name="nextPart"
+          select="substring-before($suffix, '.')" />
+        <xsl:variable name="remainingSuffix"
+          select="substring-after($suffix, '.')" />
+        <xsl:variable name="propertyMatches"
+          select="$basenodes/property[
           starts-with(@name, $nextPart)
         ]" />
         <xsl:comment>Found <xsl:value-of select="count($propertyMatches)"/> property matches for <xsl:value-of select="$nextPart"/></xsl:comment>
         <xsl:choose>
           <xsl:when test="not($propertyMatches)">
-            <h1 class="error">No matching property "<xsl:value-of select="$nextPart"/>" found</h1>
+            <h1 class="error">No matching property "<xsl:value-of
+                select="$nextPart" />" found</h1>
           </xsl:when>
           <xsl:otherwise>
             <xsl:if test="not($remainingSuffix)">
               <!-- Last part of the expression, show matching properties -->
-              <h1>Properties Matching "<xsl:value-of select="$nextPart"/>"</h1>
-              <xsl:apply-templates select="$propertyMatches/.." mode="list" />
+              <h1>Properties Matching "<xsl:value-of
+                  select="$nextPart" />"</h1>
+              <xsl:apply-templates
+                select="$propertyMatches/.." mode="list" />
             </xsl:if>
-            <xsl:if test="$remainingSuffix">
+            <xsl:if
+              test="$remainingSuffix">
               <!-- Recurse with new base nodes based on property types -->
-              <xsl:variable name="newBaseNodes" select="datatype[@name = $propertyMatches[1]/@type]" />
+              <xsl:variable
+                name="newBaseNodes" select="datatype[@name = $propertyMatches[1]/@type]" />
               <xsl:comment>New base nodes for recursion: <xsl:value-of select="count($newBaseNodes)"/></xsl:comment>
-              <xsl:call-template name="evaluateDotExpression">
+              <xsl:call-template
+                name="evaluateDotExpression">
                 <xsl:with-param name="basenodes" select="$newBaseNodes" />
                 <xsl:with-param name="suffix" select="$remainingSuffix" />
               </xsl:call-template>
@@ -175,8 +195,8 @@
         <td width="20%">
           <xsl:apply-templates select="." mode="description" />
           <xsl:if test="import and name(*[last()]) = 'import'">
-            <p class="importfailure">
-              Failed to import properties from <xsl:value-of select="import/@source" />
+            <p class="importfailure"> Failed to import properties from <xsl:value-of
+                select="import/@source" />
             </p>
           </xsl:if>
         </td>
@@ -199,21 +219,21 @@
     </table>
   </xsl:template>
 
-  <!-- Description templates for keywords and datatypes -->
+  <!-- Template for keyword description with tooltip -->
   <xsl:template match="keyword" mode="description">
-    <h2>
+    <h2 title="{@description}">
       <xsl:value-of select="@name" />
     </h2>
-    <xsl:if test="@script='md'">
+  <xsl:if test="@script='md'">
       <p class="scriptspecific">MD-specific</p>
     </xsl:if>
-    <xsl:if test="@script='ai'">
+  <xsl:if test="@script='ai'">
       <p class="scriptspecific">AI-specific</p>
     </xsl:if>
-    <p>
+  <p>
       <xsl:value-of select="@description" />
     </p>
-    <xsl:if test="@type">
+  <xsl:if test="@type">
       <p>Type: <xsl:apply-templates select="@type" mode="datatyperef" /></p>
     </xsl:if>
   </xsl:template>
@@ -227,27 +247,31 @@
     <xsl:if test="@suffix">
       <p>Default suffix: <xsl:value-of select="@suffix" /></p>
     </xsl:if>
-    <xsl:if test="@pseudo='true' or @pseudo='1'">
+    <xsl:if
+      test="@pseudo='true' or @pseudo='1'">
       <p class="pseudodatatype">Pseudo data type</p>
     </xsl:if>
     <xsl:if test="@type">
       <p>Base type: <xsl:apply-templates select="@type" mode="datatyperef" /></p>
     </xsl:if>
-    <xsl:variable name="derivedtypes" select="/*/datatype[@type = current()/@name]" />
+    <xsl:variable
+      name="derivedtypes"
+      select="/*/datatype[@type = current()/@name]" />
     <xsl:if test="$derivedtypes">
-      <p>Derived types:
-        <xsl:for-each select="$derivedtypes">
+      <p>Derived types: <xsl:for-each select="$derivedtypes">
           <xsl:if test="position() != 1">, </xsl:if>
-          <xsl:apply-templates select="@name" mode="datatyperef" />
+          <xsl:apply-templates select="@name"
+            mode="datatyperef" />
         </xsl:for-each>
       </p>
     </xsl:if>
   </xsl:template>
- 
+
+  <!-- Template for properties with tooltip -->
   <xsl:template match="property">
     <tr>
       <td width="20%" class="property">
-        <span class="propertyname">
+        <span class="propertyname" title="{@result}">
           <xsl:value-of select="@name" />
         </span>
       </td>
@@ -268,7 +292,8 @@
 
   <xsl:template match="@name|@type" mode="datatyperef">
     <xsl:choose>
-      <xsl:when test="name() = 'type' and /scriptproperties/datatype[@name = current() and (@pseudo = 'true' or @pseudo = '1')]">
+      <xsl:when
+        test="name() = 'type' and /scriptproperties/datatype[@name = current() and (@pseudo = 'true' or @pseudo = '1')]">
         <a class="pseudodatatype" href="#{.}">
           <xsl:value-of select="." />
         </a>
