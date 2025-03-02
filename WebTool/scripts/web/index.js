@@ -1,10 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const goToXMLBrowser = document.getElementById("goToXMLBrowser");
+  const goToBrowser = document.getElementById("goToBrowser");
   const goToScriptProperties = document.getElementById("goToScriptProperties");
   const goToJobEditor = document.getElementById("goToJobEditor");
 
-  goToXMLBrowser.addEventListener("click", () => {
-    window.location.href = goToXMLBrowser.dataset.href;
+  goToBrowser.addEventListener("click", () => {
+    window.location.href = goToBrowser.dataset.href;
   });
   goToScriptProperties.addEventListener("click", () => {
     window.location.href = goToScriptProperties.dataset.href;

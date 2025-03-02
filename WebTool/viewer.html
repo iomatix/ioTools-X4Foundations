@@ -6,8 +6,9 @@
   <title>File Viewer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Bootstrap CSS & jQuery UI (optional) -->
+  <!-- Bootstrap CSS & jQuery UI -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="viewer.css" />
 </head>
@@ -17,27 +18,18 @@
     <h1>File Viewer</h1>
     <button type="button" id="goToHome" class="menu-button" data-href="index.html">Go to Home Page</button>
   </div>
-
   <!-- Options for the viewer (we can dynamically add or remove UI elements) -->
   <div class="container p-2 menu-container expandable">
     <div class="container mb-3">
-      <label for="expression" class="label">Filter Expression:</label>
-      <input id="expression" class="form-control expression-input" autocomplete="off" />
+      <label for="expression-input" class="label">Filter Expression:</label>
+      <input id="expression-input" class="form-control expression-input" autocomplete="off" />
     </div>
     <div id="viewerOptions" class="container viewerOptions form-container expandable">
     </div>
-    <div class="form-check">
-      <input type="checkbox" id="showMd" class="form-check-input">
-      <label for="showMd" class="form-check-label">Show MD</label>
-    </div>
-    <div class="form-check">
-      <input type="checkbox" id="showAi" class="form-check-input">
-      <label for="showAi" class="form-check-label">Show AI</label>
-    </div>
-    <div class="form-check">
-      <input type="checkbox" id="sort" class="form-check-input">
-      <label for="sort" class="form-check-label">Sort Results</label>
-    </div>
+    <label><input type="checkbox" id="show-md"> Show MD</label>
+    <label><input type="checkbox" id="show-ai"> Show AI</label>
+    <label><input type="checkbox" id="sort-results"> Sort Results</label>
+    <div id="status-indicator"></div>
     <!-- We'll fill this in dynamically in viewer.js based on file type -->
   </div>
   <div id="fetchStatus" class="container default-fetch-status expandable"></div>
@@ -52,12 +44,28 @@
     <div id="sheetJSView" class="sheet-view expandable" style="display: none;"></div>
   </div>
 
-  <!-- JavaScript libs -->
+  <!-- JavaScript Libraries -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-  <!-- 2) Load xml_utils  -->
-  <script type="module" src="scripts/xml/xml_utils.js"></script>
-  <!-- 3) Load the actual viewer script that wires everything up. -->
+  <script type="module" src="scripts/shared/shared_libs.js"></script>
+  
+  <!-- SheetJS -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+  <!-- XML Utility Scripts (in dependency order) -->
+  <script type="module" src="scripts/xml/xml_filter_utils.js"></script>
+  <script type="module" src="scripts/xml/xml_autocomplete_utils.js"></script>
+  <script type="module" src="scripts/xml/i_property_filtering_strategy.js"></script>
+  <script type="module" src="scripts/xml/generic_filtering_strategy.js"></script>
+  <script type="module" src="scripts/xml/script_properties_strategy.js"></script>
+  <script type="module" src="scripts/xml/filter_manager.js"></script>
+  <script type="module" src="scripts/xml/xml_loader.js"></script>
+  <script type="module" src="scripts/xml/xml_transformer.js"></script>
+  <script type="module" src="scripts/xml/tree_renderer.js"></script>
+  <script type="module" src="scripts/xml/autocomplete_manager.js"></script>
+  <script type="module" src="scripts/xml/documentation_viewer.js"></script>
+
+  <!-- Viewer Script (as ES6 module) -->
   <script type="module" src="scripts/web/viewer.js"></script>
 </body>
 

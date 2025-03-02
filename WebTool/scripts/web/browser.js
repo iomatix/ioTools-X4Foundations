@@ -69,7 +69,7 @@ async function displayItems(items, selector, sortMode) {
     if (item.type === "directory") {
       /* For directories, create a link to navigate deeper into the folder structure. */
       const folderPath = filePathUtils.normalize(item.path);
-      const folderUrl = QueryTools.buildUrl("xmlbrowser.html", {
+      const folderUrl = QueryTools.buildUrl("browser.html", {
         folder: folderPath,
       });
       const link = apiClient.createElement("a", {

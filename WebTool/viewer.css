@@ -144,6 +144,16 @@
   /* Ensures padding is considered in width */
 }
 
+.highlight {
+  background-color: crimson;
+  color: black;
+}
+
+.xsl-output {
+  all: initial;
+  display: block;
+}
+
 /* Base Table Styling */
 table.base {
   width: 95%;
