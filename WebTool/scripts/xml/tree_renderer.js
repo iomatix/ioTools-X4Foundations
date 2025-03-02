@@ -84,7 +84,7 @@ export class TreeRenderer {
           : "") +
         `\n` +
         (attributesList.length
-          ? `Attributes: ${attributesList.join(", ")}`
+          ? `\nAttributes: ${attributesList.join(", ")}`
           : "No attributes")
     );
 

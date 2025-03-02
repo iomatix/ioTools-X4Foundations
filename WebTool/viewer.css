@@ -149,9 +149,104 @@
   color: black;
 }
 
+/* Scope XSL output styles */
 .xsl-output {
   all: initial;
+  /* Reset inherited styles */
   display: block;
+  background-color: #251f2ecb;
+  /* From scriptproperties.css body */
+  color: #fff;
+  /* From scriptproperties.css body */
+  font-family: "Audiowide", sans-serif;
+  /* From scriptproperties.css body */
+  padding: 10px;
+  /* Match #viewerContent padding */
+}
+
+/* Reapply scriptproperties.css styles within .xsl-output */
+.xsl-output h1 {
+  font-size: 16pt;
+  font-weight: bold;
+  text-align: left;
+  margin: 6px;
+  color: #fff;
+  /* Ensure visibility */
+}
+
+.xsl-output h2 {
+  font-size: 13pt;
+  font-weight: bold;
+  text-align: left;
+  margin: 6px;
+  color: #fff;
+}
+
+.xsl-output h3 {
+  font-size: 11pt;
+  font-weight: bold;
+  text-align: left;
+  margin: 6px;
+  color: #fff;
+}
+
+.xsl-output p {
+  text-align: left;
+  margin: 10px;
+  color: #fff;
+}
+
+.xsl-output table.base {
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  border: 2px solid #423c1e79;
+  /* Match viewer.css */
+  background-color: #2b2b3f;
+  text-align: left;
+  font-size: 11pt;
+  padding: 8px;
+  border-radius: 5px;
+}
+
+.xsl-output td {
+  padding: 4px;
+  vertical-align: top;
+  color: #fff;
+}
+
+.xsl-output tr:nth-child(even) {
+  background-color: #343452;
+}
+
+.xsl-output tr:nth-child(odd) {
+  background-color: #26263e;
+}
+
+.xsl-output .propertyname {
+  color: rgb(200, 173, 64);
+}
+
+.xsl-output .comment {
+  font-style: italic;
+  font-weight: normal;
+  color: rgb(190, 200, 208);
+}
+
+.xsl-output a.datatype {
+  color: rgb(81, 158, 225);
+}
+
+.xsl-output .importfailure,
+.xsl-output .scriptspecific,
+.xsl-output .pseudodatatype {
+  color: rgb(208, 37, 97);
+}
+
+.xsl-output td.property {
+  background-color: #36373e;
 }
 
 /* Base Table Styling */

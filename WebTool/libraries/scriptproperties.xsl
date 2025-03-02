@@ -8,116 +8,109 @@
 
   <!-- Root template -->
   <xsl:template match="/*">
-    <html>
-      <head>
-        <title>Script Property Documentation</title>
-        <link rel="stylesheet" type="text/css" href="scriptproperties.css" />
-      </head>
-      <body>
-        <xsl:comment>Starting transformation with expression: <xsl:value-of select="$expression"/></xsl:comment>
-        <xsl:choose>
-          <!-- No expression: Show all keywords and datatypes -->
-          <xsl:when test="not($expression)">
-            <h1>Base Keywords:</h1>
-            <xsl:choose>
-              <xsl:when test="$sort='true'">
-                <xsl:apply-templates
-                  select="keyword[
-                    not(@script) or @script='any' or $scripttype='any' or @script=$scripttype
-                  ]"
-                  mode="list">
-                  <xsl:sort select="@name" order="ascending" data-type="text" />
-                </xsl:apply-templates>
-              </xsl:when>
-              <xsl:otherwise>
-                <xsl:apply-templates
-                  select="keyword[
-                    not(@script) or @script='any' or $scripttype='any' or @script=$scripttype
-                  ]"
-                  mode="list" />
-              </xsl:otherwise>
-            </xsl:choose>
-            <h1>Data
-    Types:</h1>
-            <xsl:choose>
-              <xsl:when test="$sort='true'">
-                <xsl:apply-templates select="datatype" mode="list">
-                  <xsl:sort select="@name" order="ascending" data-type="text" />
-                </xsl:apply-templates>
-              </xsl:when>
-              <xsl:otherwise>
-                <xsl:apply-templates select="datatype" mode="list" />
-              </xsl:otherwise>
-            </xsl:choose>
-          </xsl:when>
+    <div class="scriptproperties-content">
+      <xsl:comment>Starting transformation with expression: <xsl:value-of select="$expression"/></xsl:comment>
+      <xsl:choose>
+        <!-- No expression: Show all keywords and datatypes -->
+        <xsl:when test="not($expression)">
+          <h1>Base Keywords:</h1>
+          <xsl:choose>
+            <xsl:when test="$sort='true'">
+              <xsl:apply-templates
+                select="keyword[
+                  not(@script) or @script='any' or $scripttype='any' or @script=$scripttype
+                ]"
+                mode="list">
+                <xsl:sort select="@name" order="ascending" data-type="text" />
+              </xsl:apply-templates>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:apply-templates
+                select="keyword[
+                  not(@script) or @script='any' or $scripttype='any' or @script=$scripttype
+                ]"
+                mode="list" />
+            </xsl:otherwise>
+          </xsl:choose>
+          <h1>Data Types:</h1>
+          <xsl:choose>
+            <xsl:when test="$sort='true'">
+              <xsl:apply-templates select="datatype" mode="list">
+                <xsl:sort select="@name" order="ascending" data-type="text" />
+              </xsl:apply-templates>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:apply-templates select="datatype" mode="list" />
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:when>
 
-          <!-- Datatype prefix (e.g., $pla) without dot -->
-          <xsl:when test="not(contains($expression, '.')) and starts-with($expression, '$')">
-            <xsl:variable name="datatypePrefix" select="substring($expression, 2)" />
-            <xsl:variable
-              name="datatypes"
-              select="datatype[
-                starts-with(@name, $datatypePrefix) and not(@pseudo = 'true' or @pseudo = '1')
-              ]" />
-            <xsl:choose>
-              <xsl:when test="$datatypes">
-                <h1>Matching Data Type(s):</h1>
-                <xsl:choose>
-                  <xsl:when test="$sort='true'">
-                    <xsl:apply-templates select="$datatypes" mode="list">
-                      <xsl:sort select="@name" order="ascending" data-type="text" />
-                    </xsl:apply-templates>
-                  </xsl:when>
-                  <xsl:otherwise>
-                    <xsl:apply-templates select="$datatypes" mode="list" />
-                  </xsl:otherwise>
-                </xsl:choose>
-              </xsl:when>
-              <xsl:otherwise>
-                <h1 class="error">No matching data type for "<xsl:value-of select="$datatypePrefix" />
+        <!-- Datatype prefix (e.g., $pla) without dot -->
+        <xsl:when test="not(contains($expression, '.')) and starts-with($expression, '$')">
+          <xsl:variable name="datatypePrefix" select="substring($expression, 2)" />
+          <xsl:variable
+            name="datatypes"
+            select="datatype[
+              starts-with(@name, $datatypePrefix) and not(@pseudo = 'true' or @pseudo = '1')
+            ]" />
+          <xsl:choose>
+            <xsl:when test="$datatypes">
+              <h1>Matching Data Type(s):</h1>
+              <xsl:choose>
+                <xsl:when test="$sort='true'">
+                  <xsl:apply-templates select="$datatypes" mode="list">
+                    <xsl:sort select="@name" order="ascending" data-type="text" />
+                  </xsl:apply-templates>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:apply-templates select="$datatypes" mode="list" />
+                </xsl:otherwise>
+              </xsl:choose>
+            </xsl:when>
+            <xsl:otherwise>
+              <h1 class="error">No matching data type for "<xsl:value-of select="$datatypePrefix" />
     "</h1>
-              </xsl:otherwise>
-            </xsl:choose>
-          </xsl:when>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:when>
 
-          <!-- Keyword prefix (e.g., Player) without dot -->
-          <xsl:when test="not(contains($expression, '.'))">
-            <xsl:variable name="keywordPrefix" select="$expression" />
-            <xsl:variable name="keywords"
-              select="keyword[
-                (not(@script) or @script='any' or $scripttype='any' or @script=$scripttype)
-                and starts-with(@name, $keywordPrefix)
-              ]" />
-            <xsl:choose>
-              <xsl:when test="$keywords">
-                <h1>Matching Base Keyword(s):</h1>
-                <xsl:choose>
-                  <xsl:when test="$sort='true'">
-                    <xsl:apply-templates select="$keywords" mode="list">
-                      <xsl:sort select="@name" order="ascending" data-type="text" />
-                    </xsl:apply-templates>
-                  </xsl:when>
-                  <xsl:otherwise>
-                    <xsl:apply-templates select="$keywords" mode="list" />
-                  </xsl:otherwise>
-                </xsl:choose>
-              </xsl:when>
-              <xsl:otherwise>
-                <h1 class="error">No matching base keyword for "<xsl:value-of
-                    select="$keywordPrefix" />"</h1>
-              </xsl:otherwise>
-            </xsl:choose>
-          </xsl:when>
+        <!-- Keyword prefix (e.g., Player) without dot -->
+        <xsl:when test="not(contains($expression, '.'))">
+          <xsl:variable name="keywordPrefix" select="$expression" />
+          <xsl:variable name="keywords"
+            select="keyword[
+              (not(@script) or @script='any' or $scripttype='any' or @script=$scripttype)
+              and starts-with(@name, $keywordPrefix)
+            ]" />
+          <xsl:choose>
+            <xsl:when test="$keywords">
+              <h1>Matching Base Keyword(s):</h1>
+              <xsl:choose>
+                <xsl:when test="$sort='true'">
+                  <xsl:apply-templates select="$keywords" mode="list">
+                    <xsl:sort select="@name" order="ascending" data-type="text" />
+                  </xsl:apply-templates>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:apply-templates select="$keywords" mode="list" />
+                </xsl:otherwise>
+              </xsl:choose>
+            </xsl:when>
+            <xsl:otherwise>
+              <h1 class="error">No matching base keyword for "<xsl:value-of select="$keywordPrefix" />
+    "</h1>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:when>
 
-          <!-- Complex expression with dots -->
-          <xsl:otherwise>
-            <xsl:call-template name="processComplexExpression">
-              <xsl:with-param name="expression" select="$expression" />
-            </xsl:call-template>
-          </xsl:otherwise>
-        </xsl:choose>
-      </body>
-    </html>
+        <!-- Complex expression with dots -->
+        <xsl:otherwise>
+          <xsl:call-template name="processComplexExpression">
+            <xsl:with-param name="expression" select="$expression" />
+          </xsl:call-template>
+        </xsl:otherwise>
+      </xsl:choose>
+    </div>
   </xsl:template>
 
   <!-- Template to process complex expressions (dot notation) -->

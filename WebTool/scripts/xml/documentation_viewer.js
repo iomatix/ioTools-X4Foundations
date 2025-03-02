@@ -48,7 +48,7 @@ export class DocumentationViewer {
       "Initializing...",
       async () => {
         try {
-          const xmlDoc = await this.loader.loadXML(this.xmlFile);
+          const xmlDoc = await this.loader.loadXML(this.xmlFile, 1024 * 1024); // 1MB chunks
           this.isScriptProperties =
             xmlDoc.documentElement.nodeName === "scriptproperties";
           await this.transformer.loadXsl();
