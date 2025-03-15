@@ -30,7 +30,7 @@ This repository contains a simple WebApp tool designed initially for browsing do
 
 > [!note]
 >
-> Latest [**Stable** Beta available is 1.2.5](https://github.com/iomatix/ioTools-X4Foundations/releases/tag/1.0.1)
+> Latest [**Stable** Beta available is 1.2.5](https://github.com/iomatix/ioTools-X4Foundations/releases)
 
 
 - [1.2.5] beta-1.2.5 released
