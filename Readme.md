@@ -51,4 +51,11 @@ Contributions and feedback are welcome to improve and expand the capabilities of
 
 Enjoy modding with ioTools - Kit!
 
+### Supporting Development
+
+My mods are **always free to use**.
+
+If you appreciate my work, you can support me by [buying me a coffee](https://buymeacoffee.com/iomatix).
+
+
 ### By downloading mods from Nexus you will support their authors.
