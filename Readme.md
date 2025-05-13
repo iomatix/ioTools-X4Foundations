@@ -47,6 +47,10 @@ Ensure you have Python 3 installed for the WebTool and follow the setup instruct
 
 ## Contributions
 
+<a href="https://github.com/iomatix/ioTools-X4Foundations/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=iomatix/ioTools-X4Foundations" />
+</a>
+
 Contributions and feedback are welcome to improve and expand the capabilities of ioTools - Kit. Feel free to fork the repository and submit pull requests with enhancements or fixes.
 
 Enjoy modding with ioTools - Kit!
