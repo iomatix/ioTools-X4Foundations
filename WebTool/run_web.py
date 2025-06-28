@@ -98,16 +98,17 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             # Scan directory with context manager
             with os.scandir(folder_path) as entries:
                 for entry in entries:
+                    rel_path = os.path.relpath(entry.path, os.getcwd()).replace('\\', '/')
                     if entry.is_dir():
                         items.append({
                             "name": entry.name,
-                            "path": f"/{os.path.relpath(entry.path, os.getcwd()).replace('\\', '/')}",
+                            "path": f"/{rel_path}",
                             "type": "directory"
                         })
                     elif entry.is_file() and entry.name.lower().endswith(self.SAFE_EXTENSIONS):
                         items.append({
                             "name": entry.name,
-                            "path": f"/{os.path.relpath(entry.path, os.getcwd()).replace('\\', '/')}",
+                            "path": f"/{rel_path}",
                             "type": "file"
                         })
 
@@ -213,7 +214,7 @@ def setup_protocols():
         setup_protocols()
     except Exception as e:
         print(f"{bcolors.FAIL}Error setting up port number: {e}{bcolors.ENDC}")
-        print(f"{bcolors.WARNING}Using default port number: {library_ioWebApp_settings["port"]}{bcolors.ENDC}")
+        print(f"{bcolors.WARNING}Using default port number: {library_ioWebApp_settings['port']}{bcolors.ENDC}")
 
 def run_webapp_server():
     global library_ioWebApp_settings # import global library
