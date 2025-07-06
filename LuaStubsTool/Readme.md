@@ -50,7 +50,10 @@ This repository contains a simple toolset for auto-generating Lua API stub files
 #### 2025-07-06
 
 > [!note]
->  
+> 
+> - 1.5.1 **Added** more `.lua` extensions to look for definitions.
+> - 1.5.1  **Changed** script checks arguments of the function and pulls them too now.
+>
 > - Initial release: supports both `function Name(...)` and `Name = function(...)` patterns.  
 > - Scans the entire `_unpacked` directory for `.lua` files.  
 > - Outputs a diagnostic-disabled header for undefined globals compatibility.
