@@ -44,8 +44,10 @@ ForEach-Object {
       $name = $m.Groups[3].Value
       $args = $m.Groups[4].Value.Trim()
     }
-    # Normalize spacing: collapse multiple spaces around commas
-    $args = ($args -split ',') | ForEach-Object { $_.Trim() } -join ', '
+    # split-then-trim pipeline must be grouped, then -join applies to its output:
+    $argsClean = ($args -split ',' | ForEach-Object { $_.Trim() }) -join ', '
+
+    
     $stubs[$name] = $args
   }
 }
@@ -68,8 +70,8 @@ foreach ($entry in $stubs.GetEnumerator() | Sort-Object Name) {
   $args = $entry.Value
   # If no args, still include empty parentheses
   if ([string]::IsNullOrWhiteSpace($args)) { $args = "" }
-  "function $name($args) end" |
-  Out-File -FilePath $OutputFile -Append -Encoding UTF8
+  "function $name($argsClean) end" |
+  Out-File -FilePath $OutputFile -Encoding UTF8 -Append
 }
 
 Write-Host "Generated stubs with parameters: $OutputFile" -ForegroundColor Green
