@@ -21,20 +21,20 @@ This repository contains a simple toolset for auto-generating Lua API stub files
      ```bat
      gen_stubs.bat
      ```
-   - This calls `generate_x4_stubs.ps1`, scans `_unpacked/**/*.lua`, and writes `scripts/x4_api_stubs.lua`.
+   - This calls `generate_x4_stubs.ps1`, scans `_unpacked/**/*.lua`, and writes `_stubs/x4_api_stubs.lua`.
 
 3. **Configure Your Linter & IDE**  
    - **luacheck**: create or update `.luacheckrc` in your project root:
      ```yaml
      std: lua51
      read_globals:
-       - _scripts_/x4_api_stubs.lua
+       - _stubs/x4_api_stubs.lua
      ```
    - **VSCode + EmmyLua**: add to your workspace `settings.json`:
      ```jsonc
      {
        "Lua.workspace.library": [
-         "${workspaceFolder}/scripts/x4_api_stubs.lua"
+         "${workspaceFolder}/_stubs/x4_api_stubs.lua"
        ]
      }
      ```

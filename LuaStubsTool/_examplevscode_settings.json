@@ -1,0 +1,7 @@
+{
+  "Lua.workspace.library": [
+    "${workspaceFolder}/_stubs/x4_api_stubs.lua"
+  ],
+  "Lua.diagnostics.globals": [
+  ]
+}
