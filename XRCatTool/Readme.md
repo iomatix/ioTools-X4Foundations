@@ -26,6 +26,7 @@ This directory contains automation scripts for unpacking game files using XRCatT
 #### 2025-09
 
 - **Notable Change**: Fixed default path search method in `_xrcattool__setpath.bat`.
+- Added `xrcattool_unpack_envoy_mini02_dlc.bat` to support envoy pack DLC.
 
 #### 2025-02
 
