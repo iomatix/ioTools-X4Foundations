@@ -23,6 +23,10 @@ This directory contains automation scripts for unpacking game files using XRCatT
 
 ### News
 
+#### 2025-09
+
+- **Notable Change**: Fixed default path search method in `_xrcattool__setpath.bat`.
+
 #### 2025-02
 
 - **Notable Change**: Renamed `xrcattool__setpath.bat` to `_xrcattool__setpath.bat`.
